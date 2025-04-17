@@ -1,4 +1,4 @@
-CREATE TABLE "user"
+CREATE TABLE "users"
 (
     "id"         UUID         PRIMARY KEY,
     "email"      VARCHAR(255) NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE "user"
     "deleted"    BOOLEAN      NULL
 );
 
-CREATE TABLE "article"
+CREATE TABLE "articles"
 (
     "id"           UUID          PRIMARY KEY,
     "source"       VARCHAR(255)  NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE "article"
     "deleted"      BOOLEAN       NULL
 );
 
-CREATE TABLE "comment"
+CREATE TABLE "comments"
 (
     "id"         UUID         PRIMARY KEY,
     "user_id"    UUID         NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE "comment"
     "deleted"    BOOLEAN      NULL
 );
 
-CREATE TABLE "notification"
+CREATE TABLE "notifications"
 (
     "id"            UUID         PRIMARY KEY,
     "user_id"       UUID         NOT NULL,
@@ -41,21 +41,21 @@ CREATE TABLE "notification"
     "confirmed"     BOOLEAN      NOT NULL
 );
 
-CREATE TABLE "interest"
+CREATE TABLE "interests"
 (
     "id"       UUID        PRIMARY KEY,
     "name"     VARCHAR(50) NOT NULL,
     "keywords" TEXT[]      NULL
 );
 
-CREATE TABLE "user_interest"
+CREATE TABLE "users_interests"
 (
     "user_id"     UUID,
     "interest_id" UUID,
     "created_at"  TIMESTAMPTZ NULL
 );
 
-CREATE TABLE "article_views"
+CREATE TABLE "articles_views"
 (
     "user_id"    UUID,
     "article_id" UUID,
@@ -70,49 +70,49 @@ CREATE TABLE "likes"
     "created_at" TIMESTAMPTZ NOT NULL
 );
 
-CREATE TABLE "articles_interest"
+CREATE TABLE "articles_interests"
 (
     "article_id"  UUID NOT NULL,
     "interest_id" UUID NOT NULL
 );
 
-ALTER TABLE "comment"
+ALTER TABLE "comments"
     ADD CONSTRAINT "FK_user_TO_comment_1"
         FOREIGN KEY ("user_id")
             REFERENCES "user" ("id")
             ON DELETE SET NULL;
 
-ALTER TABLE "comment"
+ALTER TABLE "comments"
     ADD CONSTRAINT "FK_article_TO_comment_1"
         FOREIGN KEY ("article_id")
             REFERENCES "article" ("id")
             ON DELETE CASCADE;
 
-ALTER TABLE "notification"
+ALTER TABLE "notifications"
     ADD CONSTRAINT "FK_user_TO_notification_1"
         FOREIGN KEY ("user_id")
             REFERENCES "user" ("id")
             ON DELETE CASCADE;
 
-ALTER TABLE "user_interest"
+ALTER TABLE "users_interests"
     ADD CONSTRAINT "FK_user_TO_user_interest_1"
         FOREIGN KEY ("user_id")
             REFERENCES "user" ("id")
             ON DELETE CASCADE;
 
-ALTER TABLE "user_interest"
+ALTER TABLE "users_interests"
     ADD CONSTRAINT "FK_interest_TO_user_interest_1"
         FOREIGN KEY ("interest_id")
             REFERENCES "interest" ("id")
             ON DELETE CASCADE;
 
-ALTER TABLE "article_views"
+ALTER TABLE "articles_views"
     ADD CONSTRAINT "FK_user_TO_article_views_1"
         FOREIGN KEY ("user_id")
             REFERENCES "user" ("id")
             ON DELETE CASCADE;
 
-ALTER TABLE "article_views"
+ALTER TABLE "articles_views"
     ADD CONSTRAINT "FK_article_TO_article_views_1"
         FOREIGN KEY ("article_id")
             REFERENCES "article" ("id")
@@ -130,13 +130,13 @@ ALTER TABLE "likes"
             REFERENCES "user" ("id")
             ON DELETE CASCADE;
 
-ALTER TABLE "articles_interest"
+ALTER TABLE "articles_interests"
     ADD CONSTRAINT "FK_article_TO_articles_interest_1"
         FOREIGN KEY ("article_id")
             REFERENCES "article" ("id")
             ON DELETE CASCADE;
 
-ALTER TABLE "articles_interest"
+ALTER TABLE "articles_interests"
     ADD CONSTRAINT "FK_interest_TO_articles_interest_1"
         FOREIGN KEY ("interest_id")
             REFERENCES "interest" ("id")
