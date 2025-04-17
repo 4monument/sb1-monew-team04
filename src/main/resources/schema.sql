@@ -82,65 +82,65 @@ CREATE TABLE "articles_interests"
 ALTER TABLE "comments"
     ADD CONSTRAINT "FK_user_TO_comment_1"
         FOREIGN KEY ("user_id")
-            REFERENCES "user" ("id")
+            REFERENCES "users" ("id")
             ON DELETE SET NULL;
 
 ALTER TABLE "comments"
     ADD CONSTRAINT "FK_article_TO_comment_1"
         FOREIGN KEY ("article_id")
-            REFERENCES "article" ("id")
+            REFERENCES "articles" ("id")
             ON DELETE CASCADE;
 
 ALTER TABLE "notifications"
     ADD CONSTRAINT "FK_user_TO_notification_1"
         FOREIGN KEY ("user_id")
-            REFERENCES "user" ("id")
+            REFERENCES "users" ("id")
             ON DELETE CASCADE;
 
 ALTER TABLE "users_interests"
     ADD CONSTRAINT "FK_user_TO_user_interest_1"
         FOREIGN KEY ("user_id")
-            REFERENCES "user" ("id")
+            REFERENCES "users" ("id")
             ON DELETE CASCADE;
 
 ALTER TABLE "users_interests"
     ADD CONSTRAINT "FK_interest_TO_user_interest_1"
         FOREIGN KEY ("interest_id")
-            REFERENCES "interest" ("id")
+            REFERENCES "interests" ("id")
             ON DELETE CASCADE;
 
 ALTER TABLE "articles_views"
     ADD CONSTRAINT "FK_user_TO_article_views_1"
         FOREIGN KEY ("user_id")
-            REFERENCES "user" ("id")
+            REFERENCES "users" ("id")
             ON DELETE CASCADE;
 
 ALTER TABLE "articles_views"
     ADD CONSTRAINT "FK_article_TO_article_views_1"
         FOREIGN KEY ("article_id")
-            REFERENCES "article" ("id")
+            REFERENCES "articles" ("id")
             ON DELETE CASCADE;
 
 ALTER TABLE "likes"
     ADD CONSTRAINT "FK_comment_TO_likes_1"
         FOREIGN KEY ("comment_id")
-            REFERENCES "comment" ("id")
+            REFERENCES "comments" ("id")
             ON DELETE CASCADE;
 
 ALTER TABLE "likes"
     ADD CONSTRAINT "FK_user_TO_likes_1"
         FOREIGN KEY ("user_id")
-            REFERENCES "user" ("id")
+            REFERENCES "users" ("id")
             ON DELETE CASCADE;
 
 ALTER TABLE "articles_interests"
     ADD CONSTRAINT "FK_article_TO_articles_interest_1"
         FOREIGN KEY ("article_id")
-            REFERENCES "article" ("id")
+            REFERENCES "articles" ("id")
             ON DELETE CASCADE;
 
 ALTER TABLE "articles_interests"
     ADD CONSTRAINT "FK_interest_TO_articles_interest_1"
         FOREIGN KEY ("interest_id")
-            REFERENCES "interest" ("id")
+            REFERENCES "interests" ("id")
             ON DELETE CASCADE;
