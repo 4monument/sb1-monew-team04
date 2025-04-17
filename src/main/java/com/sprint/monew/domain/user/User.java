@@ -47,4 +47,8 @@ public class User {
   public void updateNickname(String nickname) {
     this.nickname = nickname;
   }
+
+  public void markDeleted() {
+    this.deleted = true;
+  }
 }
