@@ -68,4 +68,8 @@ public class Comment {
     }
     this.content = content;
   }
+
+  public void logicallyDelete() {
+    this.deleted = true;
+  }
 }
