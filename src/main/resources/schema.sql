@@ -52,14 +52,16 @@ CREATE TABLE "users_interests"
 (
     "user_id"     UUID,
     "interest_id" UUID,
-    "created_at"  TIMESTAMPTZ NULL
+    "created_at"  TIMESTAMPTZ NULL,
+    PRIMARY KEY (user_id, interest_id)
 );
 
 CREATE TABLE "articles_views"
 (
     "user_id"    UUID,
     "article_id" UUID,
-    "created_at" TIMESTAMPTZ NOT NULL
+    "created_at" TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY (user_id, article_id)
 );
 
 CREATE TABLE "likes"
@@ -73,7 +75,8 @@ CREATE TABLE "likes"
 CREATE TABLE "articles_interests"
 (
     "article_id"  UUID NOT NULL,
-    "interest_id" UUID NOT NULL
+    "interest_id" UUID NOT NULL,
+    Primary Key (article_id, interest_id)
 );
 
 ALTER TABLE "comments"
