@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: monew
+  datasource:
+    url: jdbc:postgresql://localhost:5432/monew
+    username: monew
+    password: monew1234
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
