@@ -1,7 +1,7 @@
 CREATE TABLE "users"
 (
     "id"         UUID         PRIMARY KEY,
-    "email"      VARCHAR(255) NOT NULL,
+    "email"      VARCHAR(255) NOT NULL UNIQUE,
     "nickname"   VARCHAR(255) NOT NULL,
     "password"   VARCHAR(255) NOT NULL,
     "created_at" TIMESTAMPTZ  NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE "articles"
 (
     "id"           UUID          PRIMARY KEY,
     "source"       VARCHAR(255)  NOT NULL,
-    "source_url"   VARCHAR(2048) NOT NULL,
+    "source_url"   VARCHAR(2048) NOT NULL UNIQUE,
     "title"        VARCHAR(255)  NOT NULL,
     "publish_date" TIMESTAMPTZ   NOT NULL,
     "summary"      VARCHAR(255)  NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE "notifications"
 CREATE TABLE "interests"
 (
     "id"       UUID        PRIMARY KEY,
-    "name"     VARCHAR(50) NOT NULL,
+    "name"     VARCHAR(50) NOT NULL UNIQUE,
     "keywords" TEXT[]      NULL
 );
 
