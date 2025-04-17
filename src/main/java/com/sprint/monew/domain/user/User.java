@@ -38,9 +38,11 @@ public class User {
 
   public User(UUID id, String email, String nickname, String password, Instant createdAt,
       boolean deleted) {
+    this.id = id;
     this.email = email;
     this.nickname = nickname;
     this.password = password;
+    this.createdAt = createdAt;
     this.deleted = deleted;
   }
 
