@@ -229,3 +229,10 @@ gradle-app.setting
 *.hprof
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,java,intellij,gradle
+
+
+### postgresql ###
+/postgresql_data
+
+### else ###
+.env
