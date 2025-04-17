@@ -26,14 +26,14 @@ public class User {
   private UUID id;
   @Column(length = 255, nullable = false, unique = true)
   private String email;
-  @Column(length = 50, nullable = false, unique = true)
+  @Column(length = 50, nullable = false)
   private String nickname;
   @Column(length = 255, nullable = false)
   private String password;
   @CreatedDate
   @Column(columnDefinition = "timestamp with time zone", updatable = false, nullable = false)
   private Instant createdAt;
-  @Column
+  @Column(nullable = false)
   private boolean deleted;
 
   public User(UUID id, String email, String nickname, String password, Instant createdAt,
