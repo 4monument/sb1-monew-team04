@@ -47,8 +47,7 @@ public class Notification {
   @Column(nullable = false)
   private Instant createdAt;
 
-  @Column(nullable = true)
-  //Not Null 이어야 하지 않나?
+  @Column(nullable = false)
   private Instant updatedAt;
 
   @Column(nullable = false)

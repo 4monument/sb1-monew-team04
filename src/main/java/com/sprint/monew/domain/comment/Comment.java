@@ -16,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 
 @Entity
@@ -43,7 +44,8 @@ public class Comment {
   @Column(nullable = false, updatable = false)
   private Instant createdAt;
 
-  @Column
+  @Column(nullable = false)
+  @ColumnDefault("false")
   private boolean deleted;
 
   @Builder(access = AccessLevel.PRIVATE)

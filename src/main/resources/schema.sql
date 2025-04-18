@@ -4,8 +4,8 @@ CREATE TABLE "users"
     "email"      VARCHAR(255) NOT NULL UNIQUE,
     "nickname"   VARCHAR(255) NOT NULL,
     "password"   VARCHAR(255) NOT NULL,
-    "created_at" TIMESTAMPTZ  NOT NULL,
-    "deleted"    BOOLEAN      NULL
+    "created_at" TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    "deleted"    BOOLEAN      NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE "articles"
@@ -14,9 +14,9 @@ CREATE TABLE "articles"
     "source"       VARCHAR(255)  NOT NULL,
     "source_url"   VARCHAR(2048) NOT NULL UNIQUE,
     "title"        VARCHAR(255)  NOT NULL,
-    "publish_date" TIMESTAMPTZ   NOT NULL,
+    "publish_date" TIMESTAMPTZ   NOT NULL DEFAULT now(),
     "summary"      VARCHAR(255)  NOT NULL,
-    "deleted"      BOOLEAN       NULL
+    "deleted"      BOOLEAN       NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE "comments"
@@ -25,8 +25,8 @@ CREATE TABLE "comments"
     "user_id"    UUID         NOT NULL,
     "article_id" UUID         NOT NULL,
     "content"    VARCHAR(255) NOT NULL,
-    "created_at" TIMESTAMPTZ  NOT NULL,
-    "deleted"    BOOLEAN      NULL
+    "created_at" TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    "deleted"    BOOLEAN      NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE "notifications"
@@ -36,9 +36,9 @@ CREATE TABLE "notifications"
     "resource_id"   UUID         NOT NULL,
     "resource_type" VARCHAR(50)  NOT NULL,
     "content"       VARCHAR(255) NOT NULL,
-    "created_at"    TIMESTAMPTZ  NOT NULL,
-    "updated_at"    TIMESTAMPTZ  NULL,
-    "confirmed"     BOOLEAN      NOT NULL
+    "created_at"    TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    "updated_at"    TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    "confirmed"     BOOLEAN      NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE "interests"
@@ -52,7 +52,7 @@ CREATE TABLE "users_interests"
 (
     "user_id"     UUID,
     "interest_id" UUID,
-    "created_at"  TIMESTAMPTZ NULL,
+    "created_at"  TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (user_id, interest_id)
 );
 
@@ -60,7 +60,7 @@ CREATE TABLE "articles_views"
 (
     "user_id"    UUID,
     "article_id" UUID,
-    "created_at" TIMESTAMPTZ NOT NULL,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (user_id, article_id)
 );
 
@@ -69,7 +69,7 @@ CREATE TABLE "likes"
     "id"         UUID        PRIMARY KEY,
     "comment_id" UUID        NOT NULL,
     "user_id"    UUID        NOT NULL,
-    "created_at" TIMESTAMPTZ NOT NULL
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "articles_interests"
