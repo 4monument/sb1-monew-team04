@@ -52,6 +52,6 @@ jobs:
             aws deploy create-deployment \
               --application-name monew-CodeDeploy \
               --deployment-group-name Production \
-              --s3-location bucket=monew-server-image,bundleType=zip,key=${GITHUB_SHA}.zip \
+              --s3-location bucket=monew-codedeploy-settings-file,bundleType=zip,key=${GITHUB_SHA}.zip \
               --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
               --region ap-northeast-2
