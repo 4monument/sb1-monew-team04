@@ -46,7 +46,7 @@ public class UserService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new EntityNotFoundException("User not found"));
     if (user.isDeleted()) {
-      return;
+      throw new IllegalStateException("User already deleted");
     }
     user.markDeleted();
   }
