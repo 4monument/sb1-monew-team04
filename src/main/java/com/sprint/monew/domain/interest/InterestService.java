@@ -87,15 +87,13 @@ public class InterestService {
 
   //관심사 물리 삭제
   public boolean deleteInterest(String interestId) {
-    /*
-    관심사는 삭제할 수 있습니다.
-     */
+
     Interest interest = interestRepository.findById(UUID.fromString(interestId))
         .orElseThrow(() -> new IllegalArgumentException("Interest not found"));
 
     interestRepository.delete(interest);
 
-    return false;
+    return true;
   }
 
   //관심사 정보 수정
