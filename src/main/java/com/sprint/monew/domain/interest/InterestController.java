@@ -1,5 +1,6 @@
 package com.sprint.monew.domain.interest;
 
+import com.sprint.monew.common.util.CursorPageResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +17,7 @@ public class InterestController {
 
   //관심사 목록 조회
   @GetMapping
-  public ResponseEntity<CursorPageResponseInterestDto> getInterests() {
+  public ResponseEntity<CursorPageResponseDto> getInterests() {
     return null;
   }
 

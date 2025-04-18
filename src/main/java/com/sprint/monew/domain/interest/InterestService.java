@@ -1,5 +1,6 @@
 package com.sprint.monew.domain.interest;
 
+import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 
@@ -15,7 +16,7 @@ public class InterestService {
   private final UserRepository userRepository;
 
   //관심사 목록 조회
-  public CursorPageResponseInterestDto getInterests(String keyword, String orderBy,
+  public CursorPageResponseDto getInterests(String keyword, String orderBy,
       String direction, String cursor, String after, int limit, String requestUserid) {
     /*
     - 검색어로 다음의 속성 중 하나라도 부분일치하는 데이터를 검색할 수 있습니다.
