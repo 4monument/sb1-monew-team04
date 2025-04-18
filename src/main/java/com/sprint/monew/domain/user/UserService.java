@@ -20,7 +20,7 @@ public class UserService {
     }
     User user = new User(null, request.email(), request.nickname(),
         request.password(), Instant.now(), false);
-    return toDto(userRepository.save(user));
+    return UserDto.from(userRepository.save(user));
   }
 
   @Transactional(readOnly = true)
@@ -30,7 +30,7 @@ public class UserService {
     if (!request.password().equals(user.getPassword())) {
       throw new IllegalArgumentException("Invalid credentials");
     }
-    return toDto(user);
+    return UserDto.from(user);
   }
 
   @Transactional
@@ -38,7 +38,7 @@ public class UserService {
     User user = userRepository.findByIdAndDeletedFalse(userId)
         .orElseThrow(() -> new EntityNotFoundException("User not found"));
     user.updateNickname(request.nickname());
-    return toDto(user);
+    return UserDto.from(user);
   }
 
   @Transactional
@@ -54,9 +54,5 @@ public class UserService {
       throw new EntityNotFoundException("User not found");
     }
     userRepository.deleteById(userId);
-  }
-
-  private UserDto toDto(User user) {
-    return new UserDto(user.getId(), user.getEmail(), user.getNickname(), user.getCreatedAt());
   }
 }
