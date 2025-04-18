@@ -45,6 +45,9 @@ public class UserService {
   public void softDelete(UUID userId) {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    if (user.isDeleted()) {
+      return;
+    }
     user.markDeleted();
   }
 
