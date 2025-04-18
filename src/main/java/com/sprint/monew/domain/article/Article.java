@@ -11,6 +11,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "articles")
@@ -37,7 +38,8 @@ public class Article {
   @Column(nullable = false)
   private String summary;
 
-  @Column
+  @Column(nullable = false)
+  @ColumnDefault("false")
   private boolean deleted;
 
   @Builder(access = AccessLevel.PRIVATE)
