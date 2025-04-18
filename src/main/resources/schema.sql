@@ -144,3 +144,4 @@ ALTER TABLE "articles_interests"
         FOREIGN KEY ("interest_id")
             REFERENCES "interests" ("id")
             ON DELETE CASCADE;
+
