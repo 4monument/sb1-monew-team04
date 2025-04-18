@@ -5,5 +5,5 @@ Resources:
       Properties:
         TaskDefinition: "arn:aws:ecs:ap-northeast-2:074787506837:task-definition/monew-task:1"
         LoadBalancerInfo:
-          ContainerName: discodeit-app
+          ContainerName: monew-app
           ContainerPort: 80
