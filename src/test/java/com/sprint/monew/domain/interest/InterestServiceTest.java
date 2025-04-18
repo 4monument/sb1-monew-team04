@@ -2,6 +2,7 @@ package com.sprint.monew.domain.interest;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,6 +11,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -67,6 +69,7 @@ class InterestServiceTest {
 
   @Nested
   class CreateInterest {
+
     @Test
     @DisplayName("관심사 등록 - 성공")
     void createInterestSuccess() {
@@ -93,7 +96,7 @@ class InterestServiceTest {
     }
 
     @Test
-    @DisplayName("관심사 등록 - 실패")
+    @DisplayName("관심사 등록 - 실패: 80%이상 유사한 이름을 가진 관심사가 존재함")
     void createInterestFailure() {
       //given
       InterestCreateRequest request = new InterestCreateRequest(
@@ -110,7 +113,38 @@ class InterestServiceTest {
     }
   }
 
+  @Nested
+  class DeleteInterest {
 
+    @Test
+    @DisplayName("관심사 삭제 - 성공")
+    void deleteInterestSuccess() {
+      //given
+      UUID testData1Id = interests.get(0).getId();
+      when(interestRepository.findById(testData1Id)).thenReturn(
+          Optional.ofNullable(interests.get(0)));
 
+      //when
+      boolean isDeleted = interestService.deleteInterest(testData1Id.toString());
 
+      //then
+      assertTrue(isDeleted);
+
+      verify(interestRepository, times(1)).delete(interests.get(0));
+    }
+
+    @Test
+    @DisplayName("관심사 삭제 - 실패")
+    void deleteInterestFailure() {
+      //given
+      UUID randomId = UUID.randomUUID();
+      when(interestRepository.findById(randomId)).thenReturn(Optional.empty());
+
+      //when & then
+      assertThrows(IllegalArgumentException.class,
+          () -> interestService.deleteInterest(randomId.toString()));
+
+      verify(interestRepository, never()).delete(any(Interest.class));
+    }
+  }
 }
