@@ -18,7 +18,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import java.time.Instant;
 
 @Configuration
-@EnableBatchProcessing
 @RequiredArgsConstructor
 public class NotificationDeleteBatch {
 

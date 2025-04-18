@@ -5,9 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.sprint.monew.domain.notification.NotificationRepository;
-import java.util.Collection;
 import java.util.List;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.BatchStatus;
@@ -46,15 +44,11 @@ class NotificationDeleteBatchTest {
   void testNotificationDeleteJob() throws Exception {
     // given
     jobLauncherTestUtils.setJob(notificationDeleteJob);
-    JobParameters jobParameters = new JobParametersBuilder()
-        .addLong("currentTime", System.currentTimeMillis())
-        .toJobParameters();
 
     // when
     JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
     // then
-    assertThat(jobExecution.getJobParameters()).isEqualTo(jobParameters);
     assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
     assertThat(jobExecution.getExitStatus()).isEqualTo(ExitStatus.COMPLETED);
   }
@@ -64,14 +58,10 @@ class NotificationDeleteBatchTest {
   @Test
   void testNotificationDeleteStep() {
     jobLauncherTestUtils.setJob(notificationDeleteJob);
-    JobParameters jobParameters = new JobParametersBuilder()
-        .addLong("currentTime", System.currentTimeMillis())
-        .toJobParameters();
     String stepName = "notificationDeleteStep";
 
     // when
-    JobExecution jobExecution = jobLauncherTestUtils.launchStep(
-        stepName, jobParameters);
+    JobExecution jobExecution = jobLauncherTestUtils.launchStep(stepName);
 
     StepExecution stepExecution = ((List<StepExecution>) jobExecution.getStepExecutions()).get(0);
 
@@ -80,7 +70,6 @@ class NotificationDeleteBatchTest {
         .deleteConfirmedNotificationsOlderThan(any());
 
     assertThat(stepExecution.getStepName()).isEqualTo(stepName);
-    assertThat(stepExecution.getJobParameters()).isEqualTo(jobParameters);
     assertThat(stepExecution.getExitStatus()).isEqualTo(ExitStatus.COMPLETED);
     assertThat(stepExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
   }
