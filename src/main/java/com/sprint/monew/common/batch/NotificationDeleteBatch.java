@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -17,6 +18,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import java.time.Instant;
 
 @Configuration
+@EnableBatchProcessing
 @RequiredArgsConstructor
 public class NotificationDeleteBatch {
 
@@ -33,7 +35,7 @@ public class NotificationDeleteBatch {
 
   @Bean
   public Step notificationDeleteStep() {
-    return new StepBuilder("deleteConfirmedNotificationStep", jobRepository)
+    return new StepBuilder("notificationDeleteStep", jobRepository)
         .tasklet(notificationDeleteTasklet(), transactionManager)
         .build();
   }
