@@ -21,7 +21,6 @@ public class NotificationDeleteSchedule {
 
   private final JobLauncher jobLauncher;
 
-  //@Resource(name = "notificationDeleteJob")
   @Resource(name = "notificationDeleteJob")
   private Job job;
 
@@ -34,7 +33,7 @@ public class NotificationDeleteSchedule {
         .addLong("time", System.currentTimeMillis())
         .toJobParameters();
 
-    log.info("Delete ConfirmedNotification start");
+    log.info("Delete ConfirmedNotification");
     jobLauncher.run(job, jobParameters);
   }
 }
