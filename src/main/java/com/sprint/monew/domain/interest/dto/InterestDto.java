@@ -1,5 +1,7 @@
-package com.sprint.monew.domain.interest;
+package com.sprint.monew.domain.interest.dto;
 
+import com.sprint.monew.domain.interest.Interest;
+import com.sprint.monew.domain.interest.InterestWithSubscriberCount;
 import java.util.List;
 import java.util.UUID;
 

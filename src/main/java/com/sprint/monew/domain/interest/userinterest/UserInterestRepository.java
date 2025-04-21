@@ -1,4 +1,4 @@
-package com.sprint.monew.domain.interest;
+package com.sprint.monew.domain.interest.userinterest;
 
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

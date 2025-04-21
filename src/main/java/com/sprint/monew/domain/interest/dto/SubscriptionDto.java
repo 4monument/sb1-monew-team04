@@ -1,5 +1,6 @@
-package com.sprint.monew.domain.interest;
+package com.sprint.monew.domain.interest.dto;
 
+import com.sprint.monew.domain.interest.Interest;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;

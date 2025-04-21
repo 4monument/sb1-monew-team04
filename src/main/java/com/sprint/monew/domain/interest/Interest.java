@@ -1,5 +1,6 @@
 package com.sprint.monew.domain.interest;
 
+import com.sprint.monew.common.util.StringListConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;

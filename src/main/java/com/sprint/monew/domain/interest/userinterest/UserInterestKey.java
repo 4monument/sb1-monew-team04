@@ -1,4 +1,4 @@
-package com.sprint.monew.domain.interest;
+package com.sprint.monew.domain.interest.userinterest;
 
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;

@@ -1,6 +1,11 @@
 package com.sprint.monew.domain.interest;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
+import com.sprint.monew.domain.interest.dto.InterestDto;
+import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
+import com.sprint.monew.domain.interest.dto.SubscriptionDto;
+import com.sprint.monew.domain.interest.userinterest.UserInterestRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 

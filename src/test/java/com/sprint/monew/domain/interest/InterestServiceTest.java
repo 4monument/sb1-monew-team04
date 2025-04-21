@@ -7,6 +7,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
+import com.sprint.monew.domain.interest.dto.InterestDto;
+import com.sprint.monew.domain.interest.userinterest.UserInterestRepository;
 import java.lang.reflect.Field;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import java.util.ArrayList;

@@ -1,6 +1,8 @@
 package com.sprint.monew.domain.interest;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
+import com.sprint.monew.domain.interest.dto.InterestDto;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

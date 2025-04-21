@@ -1,5 +1,6 @@
-package com.sprint.monew.domain.interest;
+package com.sprint.monew.domain.interest.userinterest;
 
+import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
