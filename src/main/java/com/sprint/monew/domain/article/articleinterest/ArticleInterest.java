@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,4 +32,21 @@ public class ArticleInterest {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "interest_id")
   private Interest interest;
+
+  @Builder(access = AccessLevel.PRIVATE)
+  private ArticleInterest(ArticleInterestKey id, Article article, Interest interest) {
+    this.id = id;
+    this.article = article;
+    this.interest = interest;
+  }
+
+  public static ArticleInterest create(Article article, Interest interest) {
+    ArticleInterestKey articleInterestKey = new ArticleInterestKey(article.getId(),
+        interest.getId());
+    return ArticleInterest.builder()
+        .article(article)
+        .interest(interest)
+        .id(articleInterestKey)
+        .build();
+  }
 }
