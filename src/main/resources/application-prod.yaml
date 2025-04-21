@@ -13,7 +13,7 @@ spring:
 
 logging:
   level:
-    com.sprint.mission.discodeit: info
+    com.sprint.monew: info
     org.hibernate.SQL: info
 
 management:
