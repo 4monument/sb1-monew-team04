@@ -10,6 +10,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  batch:
+      job:
+        initialize-schema: always
 
 logging:
   level:
