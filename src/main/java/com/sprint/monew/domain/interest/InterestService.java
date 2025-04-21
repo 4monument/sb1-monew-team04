@@ -5,12 +5,15 @@ import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
 import com.sprint.monew.domain.interest.dto.SubscriptionDto;
+import com.sprint.monew.domain.interest.userinterest.UserInterest;
+import com.sprint.monew.domain.interest.userinterest.UserInterestKey;
 import com.sprint.monew.domain.interest.userinterest.UserInterestRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -136,30 +139,41 @@ public class InterestService {
   }
 
   //관심사 구독
-  public SubscriptionDto subscribeToInterest(String interestId, String userId) {
-    Interest interest = interestRepository.findById(UUID.fromString(interestId))
+  public SubscriptionDto subscribeToInterest(UUID interestId, UUID userId) {
+    Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> new IllegalArgumentException("Interest not found"));
-    User user = userRepository.findById(UUID.fromString(userId))
+    User user = userRepository.findById(userId)
         .orElseThrow(() -> new IllegalArgumentException("User not found"));
-    /*
-    - 사용자는 관심사를 구독할 수 있습니다.
+
+    /* todo
     - 구독한 관심사와 관련된 뉴스 기사가 등록되면 알림을 받을 수 있습니다.
      */
 
-    return null;
+    UserInterest subscribe = new UserInterest(user, interest);
+    subscriptionRepository.save(subscribe);
+
+    return SubscriptionDto.from(
+        subscribe.getInterest(),
+        subscriptionRepository.countDistinctByInterestId(interestId));
   }
 
 
   //관심사 구독 취소
-  public SubscriptionDto unsubscribeFromInterest(String interestId, String userId) {
-    Interest interest = interestRepository.findById(UUID.fromString(interestId))
+  public boolean unsubscribeFromInterest(UUID interestId, UUID userId) {
+    Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> new IllegalArgumentException("Interest not found"));
-    User user = userRepository.findById(UUID.fromString(userId))
+    User user = userRepository.findById(userId)
         .orElseThrow(() -> new IllegalArgumentException("User not found"));
-    /*
 
-     */
-    return null;
+    UserInterestKey userInterestId = new UserInterestKey(user.getId(), interest.getId());
+
+    UserInterest subscribe = subscriptionRepository.findById(userInterestId).orElseThrow(
+        () -> new IllegalArgumentException("UserInterest not found")
+    );
+
+    subscriptionRepository.delete(subscribe);
+
+    return true;
   }
 
   //관심사 물리 삭제
@@ -240,5 +254,6 @@ public class InterestService {
     }
     return dp[str1.length()][str2.length()];
   }
+
 
 }

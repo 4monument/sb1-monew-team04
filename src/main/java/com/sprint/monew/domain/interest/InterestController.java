@@ -27,7 +27,15 @@ public class InterestController {
 
   //관심사 목록 조회
   @GetMapping
-  public ResponseEntity<CursorPageResponseDto> getInterests() {
+  public ResponseEntity<CursorPageResponseDto> getInterests(
+      @RequestHeader("Monew-Request-User-ID") String userId,
+      @RequestParam String keyword,
+      @RequestParam(required = false) String orderBy,
+      @RequestParam(required = false) String direction,
+      @RequestParam(required = false) String cursor,
+      @RequestParam Instant after,
+      @RequestParam int limit
+  ) {
     return null;
   }
 
@@ -40,14 +48,16 @@ public class InterestController {
 
   //관심사 구독
   @PostMapping("/{interestId}/subscriptions")
-  public ResponseEntity<InterestDto> subscribeInterest(@PathVariable String interestId) {
+  public ResponseEntity<InterestDto> subscribeInterest(@PathVariable String interestId,
+      @RequestHeader("Monew-Request-User-ID") String userId) {
     //헤더 - 요청자 id
     return null;
   }
 
   //관심사 구독 취소
   @DeleteMapping("/{interestId}/subscriptions")
-  public ResponseEntity<?> unsubscribeInterest(@PathVariable String interestId) {
+  public ResponseEntity<?> unsubscribeInterest(@PathVariable String interestId,
+      @RequestHeader("Monew-Request-User-ID") String userId) {
     return null;
   }
 

@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "users_interests")
 @NoArgsConstructor
-@AllArgsConstructor
 public class UserInterest {
 
   @EmbeddedId
@@ -37,4 +36,10 @@ public class UserInterest {
 
   @Column(nullable = false)
   private Instant createdAt;
+
+  public UserInterest(User user, Interest interest) {
+    this.user = user;
+    this.interest = interest;
+    this.createdAt = Instant.now();
+  }
 }
