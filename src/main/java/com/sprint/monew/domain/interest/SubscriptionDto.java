@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record SubscriptionDto(
-    UUID id, // 항상 null로 반환됨. why?
+    UUID id,
     UUID interestId,
     String interestName,
     List<String> interestKeywords,
@@ -13,14 +13,14 @@ public record SubscriptionDto(
     Instant createdAt
 ) {
 
-  public static SubscriptionDto from(Interest interest, int subscriberCount, Instant createdAt) {
+  public static SubscriptionDto from(Interest interest, int subscriberCount) {
     return new SubscriptionDto(
-        null,
+        interest.getId(),
         interest.getId(),
         interest.getName(),
         interest.getKeywords(),
         subscriberCount,
-        createdAt
+        interest.getCreatedAt()
     );
   }
 }

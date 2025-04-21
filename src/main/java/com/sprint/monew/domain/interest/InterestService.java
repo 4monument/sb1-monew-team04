@@ -4,6 +4,7 @@ import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -15,18 +16,89 @@ public class InterestService {
 
   private final InterestRepository interestRepository;
   private final UserRepository userRepository;
+  private final UserInterestRepository subscriptionRepository;
 
   //관심사 목록 조회
-  public CursorPageResponseDto getInterests(String keyword, String orderBy,
-      String direction, String cursor, String after, int limit, String requestUserid) {
-    /*
-    - 검색어로 다음의 속성 중 하나라도 부분일치하는 데이터를 검색할 수 있습니다.
-    - 관심사 이름, 키워드
-    - 다음의 속성으로 정렬 및 커서 페이지네이션을 구현합니다.
-    - 관심사 이름, 구독자 수
-     */
+  public CursorPageResponseDto<InterestDto> getInterests(String keyword, String orderBy,
+      String direction, String cursor, String after, int limit, UUID requestUserid) {
 
-    return null;
+    List<InterestDto> result = null;
+
+    if (orderBy.equalsIgnoreCase("name")) {
+      result = getResultOrderByName(keyword, direction, cursor, after, limit, requestUserid);
+    } else {
+      result = getResultOrderBySubscriberCount(keyword, direction, cursor, after, limit,
+          requestUserid);
+    }
+
+    boolean hasNext = result.size() > limit;
+    if (hasNext) {
+      result = result.subList(0, limit);
+    }
+
+    UUID nextCursor = null;
+    Instant nextAfter = null;
+
+    if (!result.isEmpty()) {
+      nextCursor = result.get(result.size() - 1).id();
+      nextAfter = interestRepository.findById(nextCursor)
+          .map(Interest::getCreatedAt)
+          .orElse(null);
+    }
+
+    int size = result.size();
+    long totalElements = interestRepository.countByKeyword(keyword);
+
+    return new CursorPageResponseDto<>(
+        result,
+        nextCursor,
+        nextAfter,
+        size,
+        totalElements,
+        hasNext
+    );
+  }
+
+  private List<InterestDto> getResultOrderByName(String keyword, String direction, String cursor,
+      String after, int limit, UUID requestUserid) {
+    if (direction.equalsIgnoreCase("DESC")) {
+      List<Interest> interests = interestRepository.findByNameOrKeywordsContainingOrderByNameDesc(
+          keyword, cursor, after, limit);
+
+      return interests.stream()
+          .map(i -> InterestDto.from(i, subscriptionRepository.countDistinctByInterestId(i.getId()),
+              subscriptionRepository.existsByUserIdAndInterestId(requestUserid, i.getId())))
+          .toList();
+    }
+    List<Interest> interests = interestRepository.findByNameOrKeywordsContainingOrderByNameAsc(
+        keyword, cursor, after, limit);
+
+    return interests.stream()
+        .map(i -> InterestDto.from(i, subscriptionRepository.countDistinctByInterestId(i.getId()),
+            subscriptionRepository.existsByUserIdAndInterestId(requestUserid, i.getId())))
+        .toList();
+  }
+
+  private List<InterestDto> getResultOrderBySubscriberCount(
+      String keyword, String direction, String cursor, String after, int limit,
+      UUID requestUserid) {
+    if (direction.equalsIgnoreCase("DESC")) {
+      List<InterestWithSubscriberCount> results = interestRepository
+          .findByNameOrKeywordsContainingOrderBySubscriberCountDesc(keyword, cursor, after, limit);
+
+      return results.stream().map(
+              ic -> InterestDto.from(ic,
+                  subscriptionRepository.existsByUserIdAndInterestId(requestUserid, ic.getId())))
+          .toList();
+    }
+
+    List<InterestWithSubscriberCount> results = interestRepository
+        .findByNameOrKeywordsContainingOrderBySubscriberCountAsc(keyword, cursor, after, limit);
+
+    return results.stream().map(
+            ic -> InterestDto.from(ic,
+                subscriptionRepository.existsByUserIdAndInterestId(requestUserid, ic.getId())))
+        .toList();
   }
 
   //관심사 등록
@@ -36,20 +108,20 @@ public class InterestService {
 
     boolean existsSimilarName = interestRepository.existsByName(request.name());
 
-    if( existsSimilarName ){
+    if (existsSimilarName) {
       throw new IllegalArgumentException("동일한 이름의 관심사가 이미 존재합니다.");
     }
 
     //findAll()해서 매번 다 비교하면 너무 오래걸리지 않을까?
     List<Interest> allInterests = interestRepository.findAll();
 
-    for(Interest i : allInterests) {
-      if(calculateSimilarity(i.getName(), interest.getName()) >= 0.8){
+    for (Interest i : allInterests) {
+      if (calculateSimilarity(i.getName(), interest.getName()) >= 0.8) {
         existsSimilarName = true;
         break;
       }
     }
-    if( existsSimilarName ){
+    if (existsSimilarName) {
       throw new IllegalArgumentException("유사한 이름의 관심사가 이미 존재합니다.");
     }
 
@@ -104,12 +176,12 @@ public class InterestService {
     return false;
   }
 
-  private double calculateSimilarity(String str1, String str2){
-    if( str1.equals(str2)){
+  private double calculateSimilarity(String str1, String str2) {
+    if (str1.equals(str2)) {
       return 1.0;
     }
 
-    if(str1 == null || str2 == null || str1.isEmpty() || str2.isEmpty()){
+    if (str1 == null || str2 == null || str1.isEmpty() || str2.isEmpty()) {
       return 0.0;
     }
 
@@ -123,10 +195,9 @@ public class InterestService {
   }
 
   /**
-   * 레벤슈타인 거리를 계산
-   * 한 문자열에서 다른 문자열로 변환하는 데 필요한 최소 편집 연산(삽입, 삭제, 대체)의 수.
+   * 레벤슈타인 거리를 계산 한 문자열에서 다른 문자열로 변환하는 데 필요한 최소 편집 연산(삽입, 삭제, 대체)의 수.
    */
-  private int levenshteinDistance(String str1, String str2){
+  private int levenshteinDistance(String str1, String str2) {
     int[][] dp = new int[str1.length() + 1][str2.length() + 1];
 
     for (int i = 0; i <= str1.length(); i++) {
