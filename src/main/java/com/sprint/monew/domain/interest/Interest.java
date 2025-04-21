@@ -28,4 +28,9 @@ public class Interest {
   @Convert(converter = StringListConverter.class) // List <-> JSONB 변환
   @Column(name = "keywords", columnDefinition = "jsonb")
   private List<String> keywords;
+
+  public Interest(String name, List<String> keywords) {
+    this.name = name;
+    this.keywords = keywords;
+  }
 }
