@@ -8,7 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    env:
+      NEW_TASK_DEF_ARN: ${{ env.ECS_TASK_DEFINITION }}
     steps:
       - name: Github Repository 파일 불러오기
         uses: actions/checkout@v4
@@ -42,15 +43,19 @@ jobs:
         run: docker push ${{ steps.login-ecr.outputs.registry }}/monew:latest
 
       - name: ECS 태스크 정의 업데이트
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECS_TASK_DEFINITION: ${{ secrets.ECS_TASK_DEFINITION }}
+
         run: |
           TASK_DEFINITION=$(
           aws ecs describe-task-definition \
-           --task-definition ${{ vars.ECS_TASK_DEFINITION }}
+           --task-definition ${{ env.ECS_TASK_DEFINITION }}
           )
           
           NEW_TASK_DEFINITION=$(
           echo $TASK_DEFINITION | jq \
-            --arg IMAGE "${{ steps.login-ecr.outputs.registry }}/monew:latest" \
+            --arg IMAGE "$ECR_REGISTRY/monew:latest" \
             '.taskDefinition | .containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)'
           )
           
@@ -60,6 +65,8 @@ jobs:
               --cli-input-json "$NEW_TASK_DEFINITION" | \
             jq -r '.taskDefinition.taskDefinitionArn'
           )
+          
+          echo "NEW_TASK_DEF_ARN=$NEW_TASK_DEF_ARN" >> $GITHUB_ENV
 
 
       - name: ECS 서비스 중지(프리티어 환경 고려)
