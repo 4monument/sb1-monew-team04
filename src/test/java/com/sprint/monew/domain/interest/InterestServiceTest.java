@@ -94,10 +94,25 @@ class InterestServiceTest {
 
       verify(interestRepository, times(1)).save(any(Interest.class));
     }
-
     @Test
-    @DisplayName("관심사 등록 - 실패: 80%이상 유사한 이름을 가진 관심사가 존재함")
-    void createInterestFailure() {
+    @DisplayName("관심사 등록 - 실패1: 동일한 이름의 관심사가 존재함")
+    void createInterestFailure1() {
+      //given
+      InterestCreateRequest request = new InterestCreateRequest(
+          "프로그래밍", List.of("개발자", "기술")
+      );
+      Interest mockInterest = new Interest(request.name(), request.keywords());
+
+      when(interestRepository.findAll()).thenReturn(interests);
+
+      //when & then
+      assertThrows(IllegalArgumentException.class, () -> interestService.createInterest(request));
+
+      verify(interestRepository, times(0)).save(any(Interest.class));
+    }
+    @Test
+    @DisplayName("관심사 등록 - 실패2: 80%이상 유사한 이름을 가진 관심사가 존재함")
+    void createInterestFailure2() {
       //given
       InterestCreateRequest request = new InterestCreateRequest(
           "프로그래밍1", List.of("개발자", "기술", "개발", "AI")
