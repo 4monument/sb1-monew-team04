@@ -10,6 +10,9 @@ import static org.mockito.Mockito.when;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
+import com.sprint.monew.domain.interest.dto.SubscriptionDto;
+import com.sprint.monew.domain.interest.userinterest.UserInterest;
+import com.sprint.monew.domain.interest.userinterest.UserInterestKey;
 import com.sprint.monew.domain.interest.userinterest.UserInterestRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
@@ -49,6 +52,10 @@ class InterestServiceTest {
   // 테스트에 사용할 Interest 객체 리스트
   private List<Interest> interests;
 
+  // 테스트 유저
+  private UUID userId;
+  private User user;
+
   @BeforeEach
   void setUp() {
     interests = new ArrayList<>();
@@ -73,6 +80,16 @@ class InterestServiceTest {
     setPrivateField(develop, "id", UUID.fromString("d4e5f6a7-b86c-7d0e-1f2a-3b4c5d6e7f8"));
     interests.add(develop);
 
+    // 테스트 유저
+    userId = UUID.randomUUID();
+    user = new User(
+        userId,
+        "test@example.com",
+        "테스트유저",
+        "hashedPassword123",
+        Instant.now(),
+        false
+    );
   }
 
   // 리플렉션을 사용하여 private 필드 값 설정
@@ -389,17 +406,6 @@ class InterestServiceTest {
   @Nested
   @DisplayName("수정")
   class updateInterest {
-
-    UUID userID = UUID.randomUUID();
-    User user = new User(
-        userID,
-        "test@example.com",
-        "테스트유저",
-        "hashedPassword123",
-        Instant.now(),
-        false
-    );
-
     @Test
     @DisplayName("성공")
     void updateInterestSuccess() {
@@ -411,15 +417,15 @@ class InterestServiceTest {
 
       InterestUpdateRequest request = new InterestUpdateRequest(keywords);
 
-      when(userRepository.findById(userID)).thenReturn(Optional.ofNullable(user));
+      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
       when(interestRepository.findById(interestId)).thenReturn(
           Optional.ofNullable(interests.get(1)));
       when(subscriptionRepository.countDistinctByInterestId(interestId)).thenReturn(2);
-      when(subscriptionRepository.existsByUserIdAndInterestId(userID, interestId)).thenReturn(
+      when(subscriptionRepository.existsByUserIdAndInterestId(userId, interestId)).thenReturn(
           false);
 
       //when
-      InterestDto interestDto = interestService.updateInterest(userID, interestId, request);
+      InterestDto interestDto = interestService.updateInterest(userId, interestId, request);
 
       //then
       assertNotNull(interestDto);
@@ -438,12 +444,12 @@ class InterestServiceTest {
 
       InterestUpdateRequest request = new InterestUpdateRequest(keywords);
 
-      when(userRepository.findById(userID)).thenReturn(Optional.ofNullable(user));
+      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
       when(interestRepository.findById(interestId)).thenReturn(Optional.empty());
 
       //when & then
       assertThrows(IllegalArgumentException.class,
-          () -> interestService.updateInterest(userID, interestId, request));
+          () -> interestService.updateInterest(userId, interestId, request));
 
       assertNotEquals(keywords, interests.get(1).getKeywords());
 
@@ -462,11 +468,121 @@ class InterestServiceTest {
 
       //when & then
       assertThrows(IllegalArgumentException.class,
-          () -> interestService.updateInterest(userID, interestId, request));
+          () -> interestService.updateInterest(userId, interestId, request));
 
       assertNotEquals(keywords, interests.get(1).getKeywords());
 
       verify(interestRepository, never()).save(any(Interest.class));
     }
+  }
+
+  @Nested
+  @DisplayName("관심사 구독")
+  class subscribe {
+    @Test
+    @DisplayName("성공")
+    void subscribeSuccess() {
+      //given
+      Interest interest = interests.get(1);
+
+      UserInterest subscribe = new UserInterest(user, interest);
+
+      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
+      when(interestRepository.findById(interest.getId())).thenReturn(Optional.of(interest));
+      when(subscriptionRepository.countDistinctByInterestId(interest.getId())).thenReturn(1);
+
+      //when
+      SubscriptionDto subscriptionDto = interestService.subscribeToInterest(interest.getId(),
+          userId);
+
+      //then
+      assertNotNull(subscriptionDto);
+
+      verify(subscriptionRepository,times(1)).save(any(UserInterest.class));
+    }
+
+    @Test
+    @DisplayName("실패: 존재하지 않는 관심사")
+    void subscribeFailureSinceInterestId() {
+      //given
+      UUID interestId = UUID.randomUUID();
+
+      when(interestRepository.findById(interestId)).thenReturn(Optional.empty());
+
+      //when & then
+      assertThrows(IllegalArgumentException.class, () -> interestService.subscribeToInterest(interestId, userId));
+
+      verify(subscriptionRepository, never()).save(any(UserInterest.class));
+    }
+
+    @Test
+    @DisplayName("실패: 존재하지 않는 유저")
+    void subscribeFailureSinceUserId() {
+      //given
+      Interest interest = interests.get(1);
+      UUID userId = UUID.randomUUID();
+
+      when(interestRepository.findById(interest.getId())).thenReturn(Optional.of(interest));
+      when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+      //when & then
+      assertThrows(IllegalArgumentException.class, () -> interestService.subscribeToInterest(interest.getId(), userId));
+
+      verify(subscriptionRepository, never()).save(any(UserInterest.class));
+    }
+  }
+
+  @Nested
+  @DisplayName("관심사 구독 취소")
+  class unsubscribe {
+    @Test
+    @DisplayName("성공")
+    void unsubscribeSuccess() {
+      //given
+      Interest interest = interests.get(1);
+
+      UserInterest subscribe = new UserInterest(user, interest);
+
+      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
+      when(interestRepository.findById(interest.getId())).thenReturn(Optional.of(interest));
+      when(subscriptionRepository.findById(any(UserInterestKey.class))).thenReturn(Optional.of(subscribe));
+
+
+      //when & then
+      assertTrue(interestService.unsubscribeFromInterest(interest.getId(), userId));
+
+      verify(subscriptionRepository,times(1)).delete(any(UserInterest.class));
+    }
+
+    @Test
+    @DisplayName("실패: 존재하지 않는 관심사")
+    void unsubscribeFailureSinceInterestId() {
+      //given
+      UUID interestId = UUID.randomUUID();
+
+      when(interestRepository.findById(interestId)).thenReturn(Optional.empty());
+
+      //when & then
+      assertThrows(IllegalArgumentException.class, () -> interestService.unsubscribeFromInterest(interestId, userId));
+
+      verify(subscriptionRepository, never()).delete(any(UserInterest.class));
+    }
+
+    @Test
+    @DisplayName("실패: 존재하지 않는 유저")
+    void unsubscribeFailureSinceUserId() {
+      //given
+      Interest interest = interests.get(1);
+      UUID userId = UUID.randomUUID();
+
+      when(interestRepository.findById(interest.getId())).thenReturn(Optional.of(interest));
+      when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+      //when & then
+      assertThrows(IllegalArgumentException.class, () -> interestService.unsubscribeFromInterest(interest.getId(), userId));
+
+      verify(subscriptionRepository, never()).delete(any(UserInterest.class));
+    }
+
   }
 }
