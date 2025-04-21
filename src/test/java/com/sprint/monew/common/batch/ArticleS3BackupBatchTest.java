@@ -10,14 +10,9 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.test.JobLauncherTestUtils;
-import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -30,8 +25,13 @@ import software.amazon.awssdk.services.s3.S3Client;
 
 
 @BatchTestConfig
+@SpringBootTest(
+    classes = {S3BackupBatch.class},
+    properties = {
+        "spring.main.allow-bean-definition-overriding=true",
+    }
+)
 @Testcontainers
-@SpringBootTest(classes = S3BackupBatch.class)
 @ActiveProfiles("test")
 class ArticleS3BackupBatchTest {
 
@@ -45,9 +45,9 @@ class ArticleS3BackupBatchTest {
   private static final String KEY = UUID.randomUUID().toString();
 
   @Autowired
-  @Qualifier("s3BackupJobLauncherTestUtils")   // 바뀐 이름 지정
   JobLauncherTestUtils jobLauncherTestUtils;
 
+  @Resource(name = "s3BackupJob")
   Job s3BackupJob;
 
   @Container
@@ -68,7 +68,6 @@ class ArticleS3BackupBatchTest {
         .credentialsProvider(generateCredentialsProvider())
         .forcePathStyle(true)
         .build();
-    // 지정한 이름의 S3 버킷을 생성
     s3Client.createBucket(b -> b.bucket(bucketName));
   }
 
@@ -77,7 +76,9 @@ class ArticleS3BackupBatchTest {
 //    jobLauncherTestUtils.setJob(s3BackupJob);
 //    JobExecution jobExecution = jobLauncherTestUtils.launchJob();
     // given
-
+    System.out.println("s3BackupJob.getName() = " + s3BackupJob.getName());
+    jobLauncherTestUtils.setJob(s3BackupJob);
+    jobLauncherTestUtils.launchJob();
     // when
 
     // then

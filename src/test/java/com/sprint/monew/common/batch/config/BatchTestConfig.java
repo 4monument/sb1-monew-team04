@@ -12,16 +12,16 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.RUNTIME) // 없애면 오류뜨네
 @Documented
 @SpringBatchTest
-@EnableBatchProcessing                             // Batch infrastructure 활성화
-@EnableAutoConfiguration                           // Spring Boot 자동 설정 로드
+@EnableBatchProcessing
+@EnableAutoConfiguration // Spring Boot 자동 설정 로드
 @ComponentScan(
     basePackages = "com.sprint.monew",
     excludeFilters = @ComponentScan.Filter(
         type = FilterType.REGEX,
-        pattern = ".*Batch.*" // “Batch” 이름이 들어간 빈은 모두 제외
+        pattern = ".*Batch$" // “Batch” 이름이 들어간 빈은 모두 제외(대소문자 구분 X)
     )
 )
 public @interface BatchTestConfig {

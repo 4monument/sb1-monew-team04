@@ -19,6 +19,7 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -44,6 +45,7 @@ import org.testcontainers.utility.DockerImageName;
     scripts = {"classpath:schema-batch-test.sql"},
     executionPhase = ExecutionPhase.BEFORE_TEST_METHOD
 )
+@Import(NotificationDeleteBatch.class)
 @Testcontainers
 class NotificationDeleteBatchTest {
 
@@ -63,7 +65,7 @@ class NotificationDeleteBatchTest {
   }
 
   @Autowired
-  @Qualifier("s3BackupJobLauncherTestUtils")
+  //@Qualifier("s3BackupJobLauncherTestUtils")
   JobLauncherTestUtils jobLauncherTestUtils;
 
   @Autowired

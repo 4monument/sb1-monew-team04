@@ -40,7 +40,6 @@ public class S3BackupBatch {
   @Resource(name = "articleS3Resource")
   private final S3Resource articleS3Resource;
 
-  @Primary
   @Bean(name = "s3BackupJob")
   public Job s3BackupJob() {
     return new JobBuilder("s3BackupJob", jobRepository)
