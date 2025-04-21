@@ -1,12 +1,15 @@
 package com.sprint.monew.domain.interest;
 
+import com.sprint.monew.domain.user.User;
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import java.time.Instant;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,16 +19,20 @@ import lombok.NoArgsConstructor;
 @Table(name = "users_interests")
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(UserInterestId.class)
 public class UserInterest {
 
-  @Id
-  @Column(name = "user_id")
-  private UUID userId;
+  @EmbeddedId
+  private UserInterestKey id;
 
-  @Id
-  @Column(name = "intrested_id")
-  private UUID interestId;
+  @MapsId("userId")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id")
+  private User user;
+
+  @MapsId("interestId")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "interest_id")
+  private Interest interest;
 
   @Column(nullable = false)
   private Instant createdAt;

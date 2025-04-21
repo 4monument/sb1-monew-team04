@@ -44,7 +44,7 @@ public interface InterestRepository extends JpaRepository<Interest, UUID> {
   //관심사 이름 or 키워드 검색(부분일치) & 구독자 수 오름차순 페이지네이션
   @Query(value =
       "SELECT i.*, COUNT(ui.user_id) AS subscriber_count FROM interests i " +
-          "LEFT JOIN users_interests ui ON i.id = ui.intrested_id " +
+          "LEFT JOIN users_interests ui ON i.id = ui.interest_id " +
           "WHERE (:keyword IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
           "EXISTS (SELECT 1 FROM jsonb_array_elements_text(i.keywords) k " +
           "WHERE LOWER(k) LIKE LOWER(CONCAT('%', :keyword, '%')))) " +
@@ -61,7 +61,7 @@ public interface InterestRepository extends JpaRepository<Interest, UUID> {
   //관심사 이름 or 키워드 검색(부분일치) & 구독자 수 내림차순 페이지네이션
   @Query(value =
       "SELECT i.*, COUNT(ui.user_id) AS subscriber_count FROM interests i " +
-          "LEFT JOIN users_interests ui ON i.id = ui.intrested_id " +
+          "LEFT JOIN users_interests ui ON i.id = ui.interest_id " +
           "WHERE (:keyword IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
           "EXISTS (SELECT 1 FROM jsonb_array_elements_text(i.keywords) k " +
           "WHERE LOWER(k) LIKE LOWER(CONCAT('%', :keyword, '%')))) " +
