@@ -7,4 +7,3 @@ Resources:
         LoadBalancerInfo:
           ContainerName: monew-app
           ContainerPort: 80
-          TargetGroupArn: arn:aws:elasticloadbalancing:ap-northeast-2:074787506837:targetgroup/tg-monew--monew-service/f01b2c192c9d8607
