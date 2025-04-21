@@ -49,7 +49,7 @@ public class ArticleCollectBatch {
   public Step articleStepByJpaItemWriter() {
      return new StepBuilder("articleStepByJpaItemWriter", jobRepository)
          .<Article, Article>chunk(10, transactionManager)
-         .reader(jpaPagingItemReader()) // 나중에 구현
+         .reader(null) // 나중에 구현
          .writer(articleJpaItemWriter()) //
          .build();
   }

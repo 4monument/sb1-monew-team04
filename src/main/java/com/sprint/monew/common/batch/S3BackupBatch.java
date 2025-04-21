@@ -33,6 +33,8 @@ public class S3BackupBatch {
         .reader(jpaPagingItemReader())
         .writer(null)
         .build();
+
+    return null;
   }
 
 
@@ -45,12 +47,5 @@ public class S3BackupBatch {
         .entityManagerFactory(emf)
         .queryString(query)
         .build();
-  }
-
-
-
-  private S3BackupItemWriter s3BackupItemWriter() {
-
-    return new S3BackupItemWriter();
   }
 }
