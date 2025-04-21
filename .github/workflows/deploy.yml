@@ -45,7 +45,7 @@ jobs:
         run: |
           TASK_DEFINITION=$(
           aws ecs describe-task-definition \
-           --task-definition ${{ secrets.ECS_TASK_DEFINITION }}
+           --task-definition ${{ vars.ECS_TASK_DEFINITION }}
           )
           
           NEW_TASK_DEFINITION=$(
