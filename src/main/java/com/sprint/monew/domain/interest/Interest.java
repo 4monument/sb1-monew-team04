@@ -39,4 +39,8 @@ public class Interest {
     this.keywords = keywords;
     this.createdAt = Instant.now();
   }
+
+  public void updateKeywords( List<String> keywords) {
+    this.keywords = keywords;
+  }
 }

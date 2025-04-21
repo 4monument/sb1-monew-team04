@@ -174,13 +174,29 @@ public class InterestService {
   }
 
   //관심사 정보 수정
-  public boolean updateInterest(String interestId, InterestUpdateRequest interestUpdateRequest) {
-    /*
-    키워드만 수정할 수 있습니다.
-     */
-    return false;
+  public InterestDto updateInterest(UUID requestUserId, UUID interestId, InterestUpdateRequest request) {
+
+    if( request.keywords() == null || request.keywords().isEmpty()) {
+      throw new IllegalArgumentException("keywords is empty");
+    }
+    User user = userRepository.findById(requestUserId)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+    Interest interest = interestRepository.findById(interestId)
+        .orElseThrow(() -> new IllegalArgumentException("Interest not found"));
+
+    interest.updateKeywords(request.keywords());
+
+    interestRepository.save(interest);
+
+    return InterestDto.from(
+        interest,
+        subscriptionRepository.countDistinctByInterestId(interestId),
+        subscriptionRepository.existsByUserIdAndInterestId(user.getId(), interestId)
+    );
   }
 
+  //두 문자열 간 유사도 검사
   private double calculateSimilarity(String str1, String str2) {
     if (str1.equals(str2)) {
       return 1.0;

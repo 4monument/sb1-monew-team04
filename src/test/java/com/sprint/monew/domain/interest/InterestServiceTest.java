@@ -9,9 +9,13 @@ import static org.mockito.Mockito.when;
 
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
+import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
 import com.sprint.monew.domain.interest.userinterest.UserInterestRepository;
+import com.sprint.monew.domain.user.User;
+import com.sprint.monew.domain.user.UserRepository;
 import java.lang.reflect.Field;
 import com.sprint.monew.common.util.CursorPageResponseDto;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +36,9 @@ class InterestServiceTest {
 
   @Mock
   private InterestRepository interestRepository;
+
+  @Mock
+  private UserRepository userRepository;
 
   @Mock
   private UserInterestRepository subscriptionRepository;
@@ -128,7 +135,7 @@ class InterestServiceTest {
   }
 
   @Nested
-  @DisplayName("관심사 삭제")
+  @DisplayName("관심사 물리 삭제")
   class DeleteInterest {
 
     @Test
@@ -183,11 +190,11 @@ class InterestServiceTest {
       searchResult.add(interests.get(0));
       UUID interestId = interests.get(0).getId();
 
-
       when(interestRepository
           .findByNameOrKeywordsContainingOrderByNameAsc(keyword, cursor, after, limit))
           .thenReturn(searchResult);
-      when(interestRepository.findById(interestId)).thenReturn(Optional.ofNullable(interests.get(0)));
+      when(interestRepository.findById(interestId)).thenReturn(
+          Optional.ofNullable(interests.get(0)));
       when(subscriptionRepository
           .existsByUserIdAndInterestId(userId, interestId)).thenReturn(true);
       when(subscriptionRepository
@@ -227,7 +234,8 @@ class InterestServiceTest {
       when(interestRepository
           .findByNameOrKeywordsContainingOrderByNameDesc(keyword, cursor, after, limit))
           .thenReturn(searchResult);
-      when(interestRepository.findById(interestId2)).thenReturn(Optional.ofNullable(interests.get(3)));
+      when(interestRepository.findById(interestId2)).thenReturn(
+          Optional.ofNullable(interests.get(3)));
       when(subscriptionRepository
           .existsByUserIdAndInterestId(userId, interestId1)).thenReturn(true);
       when(subscriptionRepository
@@ -275,7 +283,8 @@ class InterestServiceTest {
       when(interestRepository
           .findByNameOrKeywordsContainingOrderBySubscriberCountDesc(keyword, cursor, after, limit))
           .thenReturn(searchResult);
-      when(interestRepository.findById(interestId)).thenReturn(Optional.ofNullable(interests.get(0)));
+      when(interestRepository.findById(interestId)).thenReturn(
+          Optional.ofNullable(interests.get(0)));
       when(subscriptionRepository
           .existsByUserIdAndInterestId(userId, interestId)).thenReturn(true);
 
@@ -327,7 +336,8 @@ class InterestServiceTest {
           .findByNameOrKeywordsContainingOrderBySubscriberCountAsc(keyword, cursor, after, limit))
           .thenReturn(searchResult);
 
-      when(interestRepository.findById(interestId2)).thenReturn(Optional.ofNullable(interests.get(3)));
+      when(interestRepository.findById(interestId2)).thenReturn(
+          Optional.ofNullable(interests.get(3)));
 
       when(subscriptionRepository
           .existsByUserIdAndInterestId(userId, interestId1)).thenReturn(true);
@@ -373,6 +383,90 @@ class InterestServiceTest {
       assertNull(result.nextAfter());
       assertEquals(0, result.totalElements());
       assertFalse(result.hasNext());
+    }
+  }
+
+  @Nested
+  @DisplayName("수정")
+  class updateInterest {
+
+    UUID userID = UUID.randomUUID();
+    User user = new User(
+        userID,
+        "test@example.com",
+        "테스트유저",
+        "hashedPassword123",
+        Instant.now(),
+        false
+    );
+
+    @Test
+    @DisplayName("성공")
+    void updateInterestSuccess() {
+      //given
+      UUID interestId = interests.get(1).getId();
+
+      List<String> keywords = new ArrayList<>(interests.get(1).getKeywords());
+      keywords.add("밴드");
+
+      InterestUpdateRequest request = new InterestUpdateRequest(keywords);
+
+      when(userRepository.findById(userID)).thenReturn(Optional.ofNullable(user));
+      when(interestRepository.findById(interestId)).thenReturn(
+          Optional.ofNullable(interests.get(1)));
+      when(subscriptionRepository.countDistinctByInterestId(interestId)).thenReturn(2);
+      when(subscriptionRepository.existsByUserIdAndInterestId(userID, interestId)).thenReturn(
+          false);
+
+      //when
+      InterestDto interestDto = interestService.updateInterest(userID, interestId, request);
+
+      //then
+      assertNotNull(interestDto);
+      assertEquals(interestDto.keywords(), keywords);
+
+    }
+
+    @Test
+    @DisplayName("실패: 존재하지 않는 관심사 id")
+    void updateInterestIdFailure() {
+
+      UUID interestId = UUID.randomUUID();
+
+      List<String> keywords = new ArrayList<>(interests.get(1).getKeywords());
+      keywords.add("밴드");
+
+      InterestUpdateRequest request = new InterestUpdateRequest(keywords);
+
+      when(userRepository.findById(userID)).thenReturn(Optional.ofNullable(user));
+      when(interestRepository.findById(interestId)).thenReturn(Optional.empty());
+
+      //when & then
+      assertThrows(IllegalArgumentException.class,
+          () -> interestService.updateInterest(userID, interestId, request));
+
+      assertNotEquals(keywords, interests.get(1).getKeywords());
+
+      verify(interestRepository, never()).save(any(Interest.class));
+    }
+
+    @Test
+    @DisplayName("실패: 키워드는 1개 이상이어야 한다")
+    void updateInterestKeywordFailure() {
+      //given
+      UUID interestId = interests.get(1).getId();
+
+      List<String> keywords = new ArrayList<>();
+
+      InterestUpdateRequest request = new InterestUpdateRequest(keywords);
+
+      //when & then
+      assertThrows(IllegalArgumentException.class,
+          () -> interestService.updateInterest(userID, interestId, request));
+
+      assertNotEquals(keywords, interests.get(1).getKeywords());
+
+      verify(interestRepository, never()).save(any(Interest.class));
     }
   }
 }
