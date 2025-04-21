@@ -2,6 +2,8 @@ package com.sprint.monew.domain.article;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -23,8 +25,9 @@ public class Article {
   @GeneratedValue
   private UUID id;
 
+  @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private String source;
+  private Source source;
 
   @Column(nullable = false, length = 2048, unique = true)
   private String sourceUrl;
@@ -43,7 +46,7 @@ public class Article {
   private boolean deleted;
 
   @Builder(access = AccessLevel.PRIVATE)
-  private Article(String source, String sourceUrl, String title, Instant publishDate, String summary) {
+  private Article(Source source, String sourceUrl, String title, Instant publishDate, String summary) {
     this.source = source;
     this.sourceUrl = sourceUrl;
     this.title = title;
@@ -52,7 +55,7 @@ public class Article {
     this.deleted = false;
   }
 
-  public static Article create(String source, String sourceUrl, String title, Instant publishDate,
+  public static Article create(Source source, String sourceUrl, String title, Instant publishDate,
       String summary) {
     return Article.builder()
         .source(source)
@@ -61,6 +64,10 @@ public class Article {
         .publishDate(publishDate)
         .summary(summary)
         .build();
+  }
+
+  public enum Source {
+    NAVER, HANKYUNG, CHOSUN, YONHAP
   }
 
   public void logicallyDelete() {
