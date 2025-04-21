@@ -12,8 +12,8 @@ public record S3ConfigProperties(
     String accessKey,
     @NotBlank(message = "AWS S3 secret-key를 지정해주세요.")
     String secretKey,
-    @NotBlank(message = "AWS S3 bucketname이 지정해주세요.")
-    String bucketName,
+    @NotBlank(message = "AWS S3 bucket을 지정해주세요.")
+    String bucket,
     @NotBlank(message = "AWS S3 region을 지정해주세요")
     String region) {
 }

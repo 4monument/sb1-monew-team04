@@ -5,6 +5,7 @@ import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
@@ -46,6 +47,7 @@ public class ArticleCollectBatch {
 
   // 안 쓸 step : QueryDsl로 커스텀한 Step과 비교용으로 만든 간단한 step
   @Bean
+  @StepScope
   public Step articleStepByJpaItemWriter() {
      return new StepBuilder("articleStepByJpaItemWriter", jobRepository)
          .<Article, Article>chunk(10, transactionManager)

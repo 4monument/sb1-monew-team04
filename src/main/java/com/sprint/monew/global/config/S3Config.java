@@ -8,8 +8,7 @@ import lombok.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.context.annotation.Primary;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -21,9 +20,10 @@ import software.amazon.awssdk.services.s3.S3Client;
 public class S3Config {
 
   private final S3ConfigProperties s3Properties;
-  private final S3OutputStreamProvider s3OutputStreamProvider;
+  //private final S3OutputStreamProvider s3OutputStreamProvider;
   //private final S3Operations s3Operations;
 
+  @Primary
   @Bean
   public S3Client s3Client() {
     AwsBasicCredentials credentials = getAwsBasicCredentials();
@@ -37,9 +37,11 @@ public class S3Config {
 
   // 멀티파트, 메모리 완화 기능 위해 S3Resource.create 사용 및 S3Resource로 반환
   @Bean(name = "articleS3Resource")
-  public S3Resource articleS3Resource() {
+  public S3Resource articleS3Resource(S3Client s3Client,
+      S3OutputStreamProvider s3OutputStreamProvider) {
     //s3Operations.createResource(s3Properties.bucketName(), ...)
-    String location = "s3://" + s3Properties.bucketName();
+
+    String location = "s3://" + s3Properties.bucket() + "/";
     return S3Resource.create(location, s3Client(), s3OutputStreamProvider);
   }
 

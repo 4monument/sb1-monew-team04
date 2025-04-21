@@ -37,15 +37,12 @@ dependencies {
 	//implementation 'org.springframework.ai:spring-ai-starter-vector-store-mongodb-atlas'
 
 	// cloud - s3
-	implementation 'software.amazon.awssdk:s3:2.31.7'
 	implementation "io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0"
-
+	//implementation 'software.amazon.awssdk:s3:2.31.7'
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
-
-
 
 	//querydsl
 	implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
@@ -56,6 +53,14 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.batch:spring-batch-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	testImplementation "org.junit.jupiter:junit-jupiter:5.8.1"
+
+	// S3 테스트 컨테이너
+	testImplementation "org.testcontainers:testcontainers:1.20.6"
+	testImplementation "cloud.localstack:localstack-utils:0.2.23"
+	testImplementation "org.testcontainers:junit-jupiter:1.20.6"
+	testImplementation "org.testcontainers:localstack:1.20.6"
 }
 
 dependencyManagement {
