@@ -8,8 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      NEW_TASK_DEF_ARN: ${{ env.ECS_TASK_DEFINITION }}
     steps:
       - name: Github Repository 파일 불러오기
         uses: actions/checkout@v4
