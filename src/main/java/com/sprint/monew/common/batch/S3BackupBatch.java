@@ -15,6 +15,7 @@ import lombok.Value;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
@@ -40,7 +41,7 @@ public class S3BackupBatch {
   private final S3Resource articleS3Resource;
 
   @Primary
-  @Bean
+  @Bean(name = "s3BackupJob")
   public Job s3BackupJob() {
     return new JobBuilder("s3BackupJob", jobRepository)
         .incrementer(new RunIdIncrementer())

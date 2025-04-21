@@ -58,6 +58,7 @@ dependencies {
 
 	// S3 테스트 컨테이너
 	testImplementation "org.testcontainers:testcontainers:1.20.6"
+	testImplementation "org.testcontainers:postgresql:1.20.6"
 	testImplementation "cloud.localstack:localstack-utils:0.2.23"
 	testImplementation "org.testcontainers:junit-jupiter:1.20.6"
 	testImplementation "org.testcontainers:localstack:1.20.6"
