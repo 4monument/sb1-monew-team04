@@ -9,8 +9,7 @@ import org.springframework.web.client.RestClient;
 @Component
 public class NaverArticleClient {
 
-  @Value("${article.api.naver.url:localhost}")
-  private String url;
+  private static final String url = "https://openapi.naver.com/v1/search/news.json";
 
   @Value("${article.api.naver.id:test}")
   private String id;
