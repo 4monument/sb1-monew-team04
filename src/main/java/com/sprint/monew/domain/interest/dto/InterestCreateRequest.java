@@ -1,4 +1,4 @@
-package com.sprint.monew.domain.interest;
+package com.sprint.monew.domain.interest.dto;
 
 import java.util.List;
 

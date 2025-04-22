@@ -45,7 +45,8 @@ CREATE TABLE "interests"
 (
     "id"       UUID        PRIMARY KEY,
     "name"     VARCHAR(50) NOT NULL UNIQUE,
-    "keywords" TEXT[]      NULL
+    "keywords" JSONB      NULL,
+    "created_at"  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "users_interests"
