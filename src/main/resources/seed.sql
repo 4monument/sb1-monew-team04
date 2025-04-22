@@ -1,6 +1,8 @@
 -- 확장 설치 (한 번만 실행)
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+ALTER TABLE "users"
+    ALTER COLUMN "created_at" SET DEFAULT now();
 -- USERS (사용자)
 INSERT INTO "users" ("id", "email", "nickname", "password")
 VALUES
@@ -10,8 +12,8 @@ VALUES
 -- INTERESTS (관심사)
 INSERT INTO "interests" ("id", "name", "keywords")
 VALUES
-    (gen_random_uuid(), '기술', ARRAY['기술', '인공지능', '소프트웨어']),
-    (gen_random_uuid(), '건강', ARRAY['운동', '웰빙', '의료']);
+    (gen_random_uuid(), '기술', '["기술", "인공지능", "소프트웨어"]'::jsonb),
+    (gen_random_uuid(), '건강', '["운동", "웰빙", "의료"]'::jsonb);
 
 -- USERS_INTERESTS (사용자-관심사 연결)
 WITH
@@ -26,10 +28,10 @@ UNION
 SELECT u2.user_id, i2.interest_id FROM u2, i2;
 
 -- ARTICLES (기사)
-INSERT INTO "articles" ("id", "source", "source_url", "title", "summary")
+INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date")
 VALUES
-    (gen_random_uuid(), '테크뉴스', 'https://site.com/ai', '인공지능의 미래', 'AI가 바꾸는 세상에 대한 이야기'),
-    (gen_random_uuid(), '건강매거진', 'https://site.com/health', '건강하게 사는 법', '건강을 유지하는 실용적인 팁');
+    (gen_random_uuid(), '테크뉴스', 'https://site.com/ai', '인공지능의 미래', 'AI가 바꾸는 세상에 대한 이야기', now()),
+    (gen_random_uuid(), '건강매거진', 'https://site.com/health', '건강하게 사는 법', '건강을 유지하는 실용적인 팁', now());
 
 -- ARTICLES_INTERESTS (기사-관심사 연결)
 WITH
@@ -48,10 +50,10 @@ WITH
     au2 AS (SELECT id FROM users WHERE email = 'hoyeon@example.com'),
     aa2 AS (SELECT id FROM articles WHERE title = '건강하게 사는 법')
 
-INSERT INTO "comments" ("id", "user_id", "article_id", "content")
-SELECT gen_random_uuid(), au1.id, aa1.id, '정말 흥미로운 기사네요!' FROM au1, aa1
+INSERT INTO "comments" ("id", "user_id", "article_id", "content", "created_at")
+SELECT gen_random_uuid(), au1.id, aa1.id, '정말 흥미로운 기사네요!', now() FROM au1, aa1
 UNION
-SELECT gen_random_uuid(), au2.id, aa2.id, '도움이 많이 됐어요!' FROM au2, aa2;
+SELECT gen_random_uuid(), au2.id, aa2.id, '도움이 많이 됐어요!', now() FROM au2, aa2;
 
 -- LIKES (좋아요)
 WITH
