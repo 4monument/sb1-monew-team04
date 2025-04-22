@@ -7,6 +7,7 @@ import io.awspring.cloud.s3.S3Resource;
 import jakarta.persistence.EntityManagerFactory;
 import java.io.BufferedOutputStream;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -40,7 +41,7 @@ public class S3BackupBatch {
   private final PlatformTransactionManager transactionManager;
   private final S3ConfigProperties s3Properties;
   private final S3Client s3Client;
-  //private S3Resource articleS3Resource; // 매일 변하는 변수(백업 하는 날마다 PATH가 달라짐)
+  private S3Resource articleS3Resource; // 매일 변하는 변수(백업 하는 날마다 PATH가 달라짐)
 
   @Bean("s3BackupJob")
   public Job s3BackupJob(@Qualifier("s3BackupStep") Step s3BackupStep) {
@@ -53,12 +54,18 @@ public class S3BackupBatch {
   @JobScope
   public Step s3BackupStep(
       @Qualifier("s3BackupJpaPagingItemReader") JpaPagingItemReader<Article> jpaPagingItemReader,
-      @Qualifier("s3BackupCustomItemWriter") ItemWriter<Article> s3BackupCustomItemWriter) {
+      @Qualifier("s3BackupCustomItemWriter") ItemWriter<Article> s3BackupCustomItemWriter,
+      @Value("#{jobParameters['backupTargetDate']}") LocalDate backupTargetDate,
+      S3OutputStreamProvider s3OutputStreamProvider) {
 
+    articleS3Resource = createS3Resource(backupTargetDate, s3OutputStreamProvider);
     return new StepBuilder("s3BackupStep", jobRepository)
         .<Article, Article>chunk(2, transactionManager)
         .reader(jpaPagingItemReader)
         .writer(s3BackupCustomItemWriter)
+        .faultTolerant()
+        .retryLimit(3)
+        .retry(Exception.class)
         .build();
   }
 
@@ -67,32 +74,26 @@ public class S3BackupBatch {
   @Bean
   @StepScope
   public JpaPagingItemReader<Article> s3BackupJpaPagingItemReader(
-      @Value("#{jobParameters['backupBaseDateTime']}") LocalDateTime backupBaseDateTime) {
+      @Value("#{jobParameters['backupTargetDate']}") LocalDate backupTargetDate) {
 
-    Instant startOfRunDate = getStartOfBackupDate(backupBaseDateTime);
+    Instant startOfRunDate = getStartOfBackupDate(backupTargetDate);
     String publishDateParam = "startOfToday";
     // 임시 쿼리 : 나중에 시간나면 QueryDSL로 바꿀 것
-    String tempQuery = String.format("SELECT a FROM Article a WHERE a.publishDate >= :%s",
+    String backupTargetDateQuery = String.format("SELECT a FROM Article a WHERE a.publishDate >= :%s",
         publishDateParam);
 
     return new JpaPagingItemReaderBuilder<Article>()
         .name("articleJpaPagingItemReader")
         .pageSize(10) // 나중에 pageSize 조절하고 동적으로 받을지 결정
         .entityManagerFactory(emf)
-        .queryString(tempQuery)
+        .queryString(backupTargetDateQuery)
         .parameterValues(Map.of(publishDateParam, startOfRunDate)) // 나중에 QueryDSL로
         .build();
   }
 
   @Bean
   @StepScope
-  public ItemWriter<Article> s3BackupCustomItemWriter(
-      @Value("#{jobParameters['backupBaseDateTime']}") LocalDateTime backupBaseDateTime,
-      S3OutputStreamProvider s3OutputStreamProvider) {
-
-    S3Resource articleS3Resource = createS3Resource(backupBaseDateTime, s3OutputStreamProvider);
-    log.info("S3 Resource Created : {}", articleS3Resource.getLocation());
-
+  public ItemWriter<Article> s3BackupCustomItemWriter() {
     return items -> {
       try (BufferedOutputStream writer =
           new BufferedOutputStream(articleS3Resource.getOutputStream())) {
@@ -111,18 +112,18 @@ public class S3BackupBatch {
     };
   }
 
-  private Instant getStartOfBackupDate(LocalDateTime runDateParam) {
-    return runDateParam.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
+  private Instant getStartOfBackupDate(LocalDate backupTargetDate) {
+    return backupTargetDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
   }
 
-  private S3Resource createS3Resource(LocalDateTime runDateTime,
+  private S3Resource createS3Resource(LocalDate backupTargetDate,
       S3OutputStreamProvider s3OutputStreamProvider) {
-    String fileName = runDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
+    String fileName = backupTargetDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
     String location = "s3://" + s3Properties.bucket() + "/" + fileName;
     return S3Resource.create(location, s3Client, s3OutputStreamProvider);
   }
 
-  //  @Bean
+//    @Bean
 //  public FlatFileItemWriter<Article> flatFileItemWriter() {
 //    // 문제는
 ////    String location = "s3://" + s3Properties.bucket() + "/";

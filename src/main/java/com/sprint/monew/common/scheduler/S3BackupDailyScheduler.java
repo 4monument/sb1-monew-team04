@@ -2,6 +2,7 @@ package com.sprint.monew.common.scheduler;
 
 
 import jakarta.annotation.Resource;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
@@ -28,9 +29,9 @@ public class S3BackupDailyScheduler {
   public void dailyS3Backup()
       throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
 
-    LocalDateTime backupBaseDatetime = LocalDateTime.now().minusDays(1);
+    LocalDate backupTargetDate = LocalDate.now().minusDays(1);
     JobParameters jobParameters = new JobParametersBuilder()
-        .addLocalDateTime("backupBaseDateTime", backupBaseDatetime)
+        .addLocalDate("backupTargetDate", backupTargetDate)
         .toJobParameters();
 
     jobLauncher.run(s3BackupJob, jobParameters);
