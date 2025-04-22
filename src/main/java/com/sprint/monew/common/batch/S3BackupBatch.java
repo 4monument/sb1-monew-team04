@@ -74,7 +74,7 @@ public class S3BackupBatch {
         .build();
   }
 
-  // ItemReader : jpaPagingItemReader 기본 구현체 사용
+  // ItemReader : jpaPagingItemReader 기본 구현체 사용 -> offset 기반이라 한계
   // 오늘 날짜의 기사만 백업
   @Bean
   @StepScope
