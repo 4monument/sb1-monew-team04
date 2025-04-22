@@ -18,7 +18,7 @@ public record ArticleDto (
   public static ArticleDto from(Article article, Long commentCount, Long viewCount, boolean viewedByMe) {
     return new ArticleDto(
         article.getId(),
-        article.getSource(),
+        article.getSource().name(),
         article.getSourceUrl(),
         article.getTitle(),
         article.getPublishDate(),
