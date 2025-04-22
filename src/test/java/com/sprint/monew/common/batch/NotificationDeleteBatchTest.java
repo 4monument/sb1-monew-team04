@@ -44,7 +44,6 @@ import org.testcontainers.utility.DockerImageName;
     scripts = {"classpath:schema-batch-test.sql"},
     executionPhase = ExecutionPhase.BEFORE_TEST_METHOD
 )
-@Import(NotificationDeleteBatch.class)
 @Testcontainers
 class NotificationDeleteBatchTest {
 
