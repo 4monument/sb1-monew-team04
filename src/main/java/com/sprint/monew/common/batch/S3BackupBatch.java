@@ -1,17 +1,24 @@
 package com.sprint.monew.common.batch;
 
 import com.sprint.monew.domain.article.Article;
+import com.sprint.monew.global.config.S3ConfigProperties;
+import io.awspring.cloud.autoconfigure.s3.properties.S3Properties;
+import io.awspring.cloud.s3.S3OutputStreamProvider;
 import io.awspring.cloud.s3.S3Resource;
 import jakarta.annotation.Resource;
 import jakarta.persistence.EntityManagerFactory;
 import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
@@ -28,7 +35,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
+import software.amazon.awssdk.services.s3.S3Client;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class S3BackupBatch {
@@ -36,23 +45,39 @@ public class S3BackupBatch {
   private final EntityManagerFactory emf;
   private final JobRepository jobRepository;
   private final PlatformTransactionManager transactionManager;
+  private final S3ConfigProperties s3Properties;
+  private final S3Client s3Client;
 
-  @Resource(name = "articleS3Resource")
-  private final S3Resource articleS3Resource;
+  //@Resource(name = "articleS3Resource")
+  private S3Resource articleS3Resource;
 
   @Bean("s3BackupJob")
-  public Job s3BackupJob(@Qualifier("s3BackupStep") Step s3BackupStep) {
+  public Job s3BackupJob(@Qualifier("s3BackupStep") Step s3BackupStep){
     return new JobBuilder("s3BackupJob", jobRepository)
-        .incrementer(new RunIdIncrementer())
         .start(s3BackupStep)
         .build();
   }
+
+
+  //  @Bean(name = "articleS3Resource")
+  //  public S3Resource articleS3Resource(S3OutputStreamProvider s3OutputStreamProvider) {
+  //    //s3Operations.createResource(s3Properties.bucketName(), ...)
+  //    String location = "s3://" + s3Properties.bucket() + "/";
+  //    return S3Resource.create(location, s3Client(), s3OutputStreamProvider);
+  //  }
 
   @Bean("s3BackupStep")
   @JobScope
   public Step s3BackupStep(
       @Qualifier("s3BackupJpaPagingItemReader") JpaPagingItemReader<Article> jpaPagingItemReader,
-      @Qualifier("s3BackupCustomItemWriter") ItemWriter<Article> s3BackupCustomItemWriter) {
+      @Qualifier("s3BackupCustomItemWriter") ItemWriter<Article> s3BackupCustomItemWriter,
+      @Value("#{jobParameters['runDate']}") LocalDateTime runDateTime,
+      S3OutputStreamProvider s3OutputStreamProvider) throws IOException {
+
+      String fileName = runDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
+      String location = "s3://" + s3Properties.bucket() + "/" + fileName;
+      articleS3Resource = S3Resource.create(location, s3Client, s3OutputStreamProvider);
+      log.info("S3 Resource Created : {}", articleS3Resource.getLocation());
 
     return new StepBuilder("s3BackupStep", jobRepository)
         .<Article, Article>chunk(2, transactionManager)
@@ -86,7 +111,9 @@ public class S3BackupBatch {
     return items -> {
       try (OutputStream os = articleS3Resource.getOutputStream()) {
         BufferedOutputStream writer = new BufferedOutputStream(os);
-        for (Article item : items) {
+        log.info("S3 Backup Writer Run");
+        log.info("s3b");
+         for (Article item : items) {
           writer.write(String.format("%s|%s|%s|%s|%s|%s|%s\n",
               item.getId(),
               item.getSource(),
@@ -96,22 +123,10 @@ public class S3BackupBatch {
               item.getSummary(),
               item.isDeleted()).getBytes());
         }
-
-        // 테스트
-        writer.write(String.format("%s|%s|%s|%s\n",
-            "12",
-            "ㅇㄹㅇㄴㄹ",
-            "http~~~",
-            "ttitlet").getBytes());
+//        writer.flush();
+//        writer.close();  자원정리는 마지막 리스너에서
       }
     };
-    //  private UUID id;
-    //  private String source;
-    //  private String sourceUrl;
-    //  private String title;
-    //  private Instant publishDate;
-    //  private String summary;
-    //  private boolean deleted;
   }
   private Instant getStartOfRunDate(LocalDateTime runDateParam) {
     return runDateParam.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
