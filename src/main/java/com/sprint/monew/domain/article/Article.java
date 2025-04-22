@@ -1,13 +1,20 @@
 package com.sprint.monew.domain.article;
 
+import com.sprint.monew.domain.article.articleinterest.ArticleInterest;
+import com.sprint.monew.domain.article.articleview.ArticleView;
+import com.sprint.monew.domain.interest.Interest;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -45,6 +52,12 @@ public class Article {
   @ColumnDefault("false")
   private boolean deleted;
 
+  @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
+  List<ArticleInterest> articleInterests = new ArrayList<>();
+
+  @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
+  List<ArticleView> articleViews = new ArrayList<>();
+
   @Builder(access = AccessLevel.PRIVATE)
   private Article(Source source, String sourceUrl, String title, Instant publishDate, String summary) {
     this.source = source;
@@ -68,6 +81,19 @@ public class Article {
 
   public enum Source {
     NAVER, HANKYUNG, CHOSUN, YONHAP
+  }
+
+  public void addInterest(Interest interest) {
+    boolean exists = articleInterests.stream()
+        .anyMatch(ai -> ai.getInterest().getId().equals(interest.getId()));
+    if (exists) {
+      return;
+    }
+    this.articleInterests.add(ArticleInterest.create(this, interest));
+  }
+
+  public void removeInterest(Interest interest) {
+    articleInterests.removeIf(ai -> ai.getInterest().getId().equals(interest.getId()));
   }
 
   public void logicallyDelete() {
