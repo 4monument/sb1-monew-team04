@@ -10,10 +10,10 @@ VALUES
     (gen_random_uuid(), 'hoyeon@example.com', '호연', 'hashed_pw2');
 
 -- INTERESTS (관심사)
-INSERT INTO "interests" ("id", "name", "keywords")
+INSERT INTO "interests" ("id", "name", "keywords", "created_at")
 VALUES
-    (gen_random_uuid(), '기술', '["기술", "인공지능", "소프트웨어"]'::jsonb),
-    (gen_random_uuid(), '건강', '["운동", "웰빙", "의료"]'::jsonb);
+    (gen_random_uuid(), '기술', '["기술", "인공지능", "소프트웨어"]'::jsonb, now()),
+    (gen_random_uuid(), '건강', '["운동", "웰빙", "의료"]'::jsonb, now());
 
 -- USERS_INTERESTS (사용자-관심사 연결)
 WITH
