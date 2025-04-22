@@ -1,8 +1,12 @@
 package com.sprint.monew.domain.notification;
 
+import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.interest.userinterest.UserInterestRepository;
+import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +18,29 @@ public class NotificationService {
 
   private final NotificationRepository notificationRepository;
   private final UserRepository userRepository;
+  private final UserInterestRepository subscriberRepository;
 
-  //알림 등록
-  public void createNotification(String notificationId, String userId) {
+  //알림 등록 - 일괄 등록
+  public List<NotificationDto> createNotifications(UUID userId) {
 
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+    List<UnreadInterestArticleCount> unreadInterestArticleCounts = subscriberRepository.countUnreadArticlesByInterest(
+        user.getId());
+
+    List<NotificationDto> notificationDtos = new ArrayList<>();
+
+    for (UnreadInterestArticleCount unreadInterestArticleCount : unreadInterestArticleCounts) {
+      Notification notification = new Notification(user, unreadInterestArticleCount.getInterestId(),
+          ResourceType.INTEREST, unreadInterestArticleCount.getInterestName() + "와/과 관련된 기사가 "
+          + unreadInterestArticleCount.getUnreadCount() + "건 등록되었습니다.");
+
+      notificationRepository.save(notification);
+      notificationDtos.add(NotificationDto.from(notification));
+    }
+
+    return notificationDtos;
   }
 
   //알림 수정 - 전체 알림 확인
