@@ -28,8 +28,9 @@ public class S3BackupDailyScheduler {
   public void dailyS3Backup()
       throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
 
+    LocalDateTime startOfYesterday = LocalDateTime.now().minusDays(1);
     JobParameters jobParameters = new JobParametersBuilder()
-        .addLocalDateTime("dateTime", LocalDateTime.now())
+        .addLocalDateTime("backupDateTime", startOfYesterday)
         .toJobParameters();
 
     jobLauncher.run(s3BackupJob, jobParameters);

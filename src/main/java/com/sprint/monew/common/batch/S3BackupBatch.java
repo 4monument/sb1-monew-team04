@@ -2,17 +2,11 @@ package com.sprint.monew.common.batch;
 
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.global.config.S3ConfigProperties;
-import io.awspring.cloud.autoconfigure.s3.properties.S3Properties;
 import io.awspring.cloud.s3.S3OutputStreamProvider;
 import io.awspring.cloud.s3.S3Resource;
-import jakarta.annotation.Resource;
 import jakarta.persistence.EntityManagerFactory;
 import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -24,7 +18,6 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemWriter;
@@ -60,8 +53,7 @@ public class S3BackupBatch {
   @JobScope
   public Step s3BackupStep(
       @Qualifier("s3BackupJpaPagingItemReader") JpaPagingItemReader<Article> jpaPagingItemReader,
-      @Qualifier("s3BackupCustomItemWriter") ItemWriter<Article> s3BackupCustomItemWriter,
-      S3OutputStreamProvider s3OutputStreamProvider) {
+      @Qualifier("s3BackupCustomItemWriter") ItemWriter<Article> s3BackupCustomItemWriter) {
 
     return new StepBuilder("s3BackupStep", jobRepository)
         .<Article, Article>chunk(2, transactionManager)
@@ -75,9 +67,9 @@ public class S3BackupBatch {
   @Bean
   @StepScope
   public JpaPagingItemReader<Article> s3BackupJpaPagingItemReader(
-      @Value("#{jobParameters['dateTime']}") LocalDateTime runDateParam) {
+      @Value("#{jobParameters['backupDateTime']}") LocalDateTime toBackupDateTime) {
 
-    Instant startOfRunDate = getStartOfRunDate(runDateParam);
+    Instant startOfRunDate = getStartOfBackupDate(toBackupDateTime);
     String publishDateParam = "startOfToday";
     // 임시 쿼리 : 나중에 시간나면 QueryDSL로 바꿀 것
     String tempQuery = String.format("SELECT a FROM Article a WHERE a.publishDate >= :%s",
@@ -94,7 +86,10 @@ public class S3BackupBatch {
 
   @Bean
   @StepScope
-  public ItemWriter<Article> s3BackupCustomItemWriter(@Value("#{jobParameters['dateTime']}") LocalDateTime runDateTime, S3OutputStreamProvider s3OutputStreamProvider) throws IOException {
+  public ItemWriter<Article> s3BackupCustomItemWriter(
+      @Value("#{jobParameters['backupDateTime']}") LocalDateTime runDateTime,
+      S3OutputStreamProvider s3OutputStreamProvider) {
+
     S3Resource articleS3Resource = createS3Resource(runDateTime, s3OutputStreamProvider);
     log.info("S3 Resource Created : {}", articleS3Resource.getLocation());
 
@@ -116,7 +111,7 @@ public class S3BackupBatch {
     };
   }
 
-  private Instant getStartOfRunDate(LocalDateTime runDateParam) {
+  private Instant getStartOfBackupDate(LocalDateTime runDateParam) {
     return runDateParam.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
   }
 
