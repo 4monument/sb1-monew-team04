@@ -16,7 +16,7 @@ public class ChosunArticleClient {
 
   private final RestClient restClient;
 
-  public ChosunArticleResponse getArticle(Category category) {
+  public ChosunArticleResponse getArticle(ChosunCategory category) {
     return restClient.get()
         .uri(baseUrl + "/category/" + category.getOriginalName() + outputType)
         .retrieve()
@@ -31,7 +31,7 @@ public class ChosunArticleClient {
   }
 
   @Getter
-  public enum Category {
+  public enum ChosunCategory {
     POLITICS("politics"),
     ECONOMY("economy"),
     NATIONAL("national"),
@@ -43,7 +43,7 @@ public class ChosunArticleClient {
 
     private final String originalName;
 
-    Category(String originalName) {
+    ChosunCategory(String originalName) {
       this.originalName = originalName;
     }
   }

@@ -15,7 +15,7 @@ public class HankyungArticleClient {
 
   private final RestClient restClient;
 
-  public HankyungArticleResponse getArticle(Category category) {
+  public HankyungArticleResponse getArticle(HankyungCategory category) {
     return restClient.get()
         .uri(baseUrl + category.getOriginalName())
         .retrieve()
@@ -23,7 +23,7 @@ public class HankyungArticleClient {
   }
 
   @Getter
-  public enum Category {
+  public enum HankyungCategory {
     ALL("all-news"),
     ECONOMY("economy"),
     IT("it"),
@@ -40,7 +40,7 @@ public class HankyungArticleClient {
 
     private final String originalName;
 
-    Category(String originalName) {
+    HankyungCategory(String originalName) {
       this.originalName = originalName;
     }
   }
