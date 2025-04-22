@@ -100,7 +100,7 @@ public class NotificationService {
 
     int size = Math.min(notifications.size(), limit);
 
-    long totalElements = notifications.size();
+    long totalElements = notificationRepository.countUnconfirmedByUserId(userId);
 
     List<NotificationDto> notificationDtos = notifications.stream()
         .map(NotificationDto::from)
