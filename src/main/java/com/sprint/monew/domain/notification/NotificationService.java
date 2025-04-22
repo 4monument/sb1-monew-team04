@@ -85,7 +85,7 @@ public class NotificationService {
     PageRequest pagerequest = PageRequest.of(0, limit + 1);
 
     List<Notification> notifications
-        = notificationRepository.findByConfirmedFalseAndUserIdWithCursor(userId, cursor, after,
+        = notificationRepository.findUnconfirmedWithCursor(userId, cursor, after,
         pagerequest);
 
     boolean hasNext = notifications.size() > limit;
