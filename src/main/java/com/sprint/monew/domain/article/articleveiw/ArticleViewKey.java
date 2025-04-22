@@ -15,5 +15,5 @@ import lombok.NoArgsConstructor;
 public class ArticleViewKey {
 
   private UUID articleId;
-  private UUID interestId;
+  private UUID userId;
 }
