@@ -24,8 +24,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 @RequiredArgsConstructor
 public class ArticleCollectBatch {
 
-  // Chunk 프로세싱으로
-
   @Autowired
   private EntityManagerFactory emf;
 

@@ -1,4 +1,4 @@
-package com.sprint.monew.common.batch;
+package com.sprint.monew.common.batch.temp;
 
 
 import static com.sprint.monew.domain.article.QArticle.*;

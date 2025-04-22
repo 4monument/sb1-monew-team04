@@ -8,6 +8,7 @@ import java.io.BufferedOutputStream;
 import java.io.OutputStream;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -64,19 +65,19 @@ public class S3BackupBatch {
   @Bean
   @StepScope
   public JpaPagingItemReader<Article> s3BackupJpaPagingItemReader(
-      @Value("#{jobParameters['date']}") LocalDate today) {
+      @Value("#{jobParameters['runDate']}") LocalDateTime runDateParam) {
     // 임시 쿼리 : 나중에 시간나면 QueryDSL로 바꿀 것
     // 오늘 날짜의 기사만 백업
+    Instant startOfRunDate = getStartOfRunDate(runDateParam);
     String publishDateParam = "today";
     String tempQuery = String.format("SELECT a FROM Article a WHERE a.publishDate >= :%s", publishDateParam);
-    Instant startOfToday = today.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
     return new JpaPagingItemReaderBuilder<Article>()
         .name("articleJpaPagingItemReader")
         .pageSize(10) // 나중에 pageSize 조절하고 동적으로 받을지 결정
         .entityManagerFactory(emf)
         .queryString(tempQuery)
-        .parameterValues(Map.of(publishDateParam, startOfToday)) // 나중에 QueryDSL로
+        .parameterValues(Map.of(publishDateParam, startOfRunDate)) // 나중에 QueryDSL로
         .build();
   }
 
@@ -95,6 +96,13 @@ public class S3BackupBatch {
               item.getSummary(),
               item.isDeleted()).getBytes());
         }
+
+        // 테스트
+        writer.write(String.format("%s|%s|%s|%s\n",
+            "12",
+            "ㅇㄹㅇㄴㄹ",
+            "http~~~",
+            "ttitlet").getBytes());
       }
     };
     //  private UUID id;
@@ -104,6 +112,9 @@ public class S3BackupBatch {
     //  private Instant publishDate;
     //  private String summary;
     //  private boolean deleted;
+  }
+  private Instant getStartOfRunDate(LocalDateTime runDateParam) {
+    return runDateParam.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
   }
 
   //  @Bean
