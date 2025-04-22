@@ -3,6 +3,7 @@ package com.sprint.monew.domain.article;
 import com.sprint.monew.domain.article.articleinterest.ArticleInterest;
 import com.sprint.monew.domain.article.articleview.ArticleView;
 import com.sprint.monew.domain.interest.Interest;
+import com.sprint.monew.domain.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -92,8 +93,13 @@ public class Article {
     this.articleInterests.add(ArticleInterest.create(this, interest));
   }
 
-  public void removeInterest(Interest interest) {
-    articleInterests.removeIf(ai -> ai.getInterest().getId().equals(interest.getId()));
+  public void addView(User user) {
+    boolean exists = articleViews.stream()
+        .anyMatch(av -> av.getUser().getId().equals(user.getId()));
+    if (exists) {
+      return;
+    }
+    this.articleViews.add(ArticleView.create(user, this));
   }
 
   public void logicallyDelete() {
