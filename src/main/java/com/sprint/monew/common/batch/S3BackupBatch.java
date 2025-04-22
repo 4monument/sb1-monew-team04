@@ -8,7 +8,6 @@ import jakarta.persistence.EntityManagerFactory;
 import java.io.BufferedOutputStream;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -76,18 +75,21 @@ public class S3BackupBatch {
   public JpaPagingItemReader<Article> s3BackupJpaPagingItemReader(
       @Value("#{jobParameters['backupTargetDate']}") LocalDate backupTargetDate) {
 
-    Instant startOfRunDate = getStartOfBackupDate(backupTargetDate);
-    String publishDateParam = "startOfToday";
+    String from = "startOfDay";
+    String to = "endOfDay";
+    Instant startOfBackupTarget = getStartOfBackupInstant(backupTargetDate);
+    Instant endOfBackupTarget = getStartOfBackupInstant(backupTargetDate.plusDays(1));
+    Map<String, Object> parameterValues = Map.of(from, startOfBackupTarget, to, endOfBackupTarget);
     // 임시 쿼리 : 나중에 시간나면 QueryDSL로 바꿀 것
-    String backupTargetDateQuery = String.format("SELECT a FROM Article a WHERE a.publishDate >= :%s",
-        publishDateParam);
+    String backupTargetDateQuery = String.format(
+        "SELECT a FROM Article a WHERE a.publishDate >= :%s AND a.publishDate < %s", from, to);
 
     return new JpaPagingItemReaderBuilder<Article>()
         .name("articleJpaPagingItemReader")
         .pageSize(10) // 나중에 pageSize 조절하고 동적으로 받을지 결정
         .entityManagerFactory(emf)
         .queryString(backupTargetDateQuery)
-        .parameterValues(Map.of(publishDateParam, startOfRunDate)) // 나중에 QueryDSL로
+        .parameterValues(parameterValues) // 나중에 QueryDSL로
         .build();
   }
 
@@ -112,7 +114,7 @@ public class S3BackupBatch {
     };
   }
 
-  private Instant getStartOfBackupDate(LocalDate backupTargetDate) {
+  private Instant getStartOfBackupInstant(LocalDate backupTargetDate) {
     return backupTargetDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
   }
 
