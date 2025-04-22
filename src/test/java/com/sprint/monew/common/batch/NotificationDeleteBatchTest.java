@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import com.sprint.monew.common.batch.config.BatchTestConfig;
 import com.sprint.monew.domain.notification.NotificationRepository;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,15 +34,13 @@ import org.testcontainers.utility.DockerImageName;
 
 
 //@Transactional
+//properties = {
+//        "spring.main.allow-bean-definition-overriding=true",
+//    }
 @BatchTestConfig
-@SpringBootTest(
-    classes = {NotificationDeleteBatch.class},
-    properties = {
-        "spring.main.allow-bean-definition-overriding=true",
-    }
-)
+@SpringBootTest(classes = {NotificationDeleteBatch.class})
 @ActiveProfiles("test")
-@Sql(//,
+@Sql(
     scripts = {"classpath:schema-batch-test.sql"},
     executionPhase = ExecutionPhase.BEFORE_TEST_METHOD
 )
@@ -57,7 +56,7 @@ class NotificationDeleteBatchTest {
       .withPassword("test-password");
 
   @DynamicPropertySource
-  static void overrideProperties(DynamicPropertyRegistry registry){
+  static void overrideProperties(@NotNull DynamicPropertyRegistry registry){
     registry.add("spring.datasource.url", postgres::getJdbcUrl);
     registry.add("spring.datasource.username", postgres::getUsername);
     registry.add("spring.datasource.password", postgres::getPassword);

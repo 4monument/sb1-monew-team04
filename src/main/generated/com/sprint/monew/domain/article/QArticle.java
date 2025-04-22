@@ -25,7 +25,7 @@ public class QArticle extends EntityPathBase<Article> {
 
     public final DateTimePath<java.time.Instant> publishDate = createDateTime("publishDate", java.time.Instant.class);
 
-    public final StringPath source = createString("source");
+    public final EnumPath<Article.Source> source = createEnum("source", Article.Source.class);
 
     public final StringPath sourceUrl = createString("sourceUrl");
 
