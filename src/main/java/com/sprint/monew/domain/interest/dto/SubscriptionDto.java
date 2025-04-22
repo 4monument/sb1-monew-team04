@@ -1,12 +1,14 @@
 package com.sprint.monew.domain.interest.dto;
 
 import com.sprint.monew.domain.interest.Interest;
+import com.sprint.monew.domain.interest.userinterest.UserInterest;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 public record SubscriptionDto(
-    UUID id,
+    //UserInterest 의 id가 복합키이기때문에 String 으로 변경
+    String id,
     UUID interestId,
     String interestName,
     List<String> interestKeywords,
@@ -14,9 +16,9 @@ public record SubscriptionDto(
     Instant createdAt
 ) {
 
-  public static SubscriptionDto from(Interest interest, int subscriberCount) {
+  public static SubscriptionDto from(String userInterestId ,Interest interest, int subscriberCount) {
     return new SubscriptionDto(
-        interest.getId(),
+        userInterestId,
         interest.getId(),
         interest.getName(),
         interest.getKeywords(),

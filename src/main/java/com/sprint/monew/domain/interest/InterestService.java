@@ -153,6 +153,7 @@ public class InterestService {
     subscriptionRepository.save(subscribe);
 
     return SubscriptionDto.from(
+        subscribe.getId().toString(),
         subscribe.getInterest(),
         subscriptionRepository.countDistinctByInterestId(interestId));
   }
