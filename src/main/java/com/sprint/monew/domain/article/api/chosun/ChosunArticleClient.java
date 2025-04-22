@@ -1,37 +1,37 @@
 package com.sprint.monew.domain.article.api.chosun;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ChosunArticleClient {
 
   private static final String baseUrl = "https://www.chosun.com/arc/outboundfeeds/rss";
   private static final String outputType = "/?outputType=xml";
 
-  public ChosunArticleResponse getArticle(@PathVariable Category category) {
-    RestClient restClient = RestClient.create();
+  private final RestClient restClient;
 
-    if (category == Category.ALL) {
-      return restClient.get()
-          .uri(baseUrl + outputType)
-          .retrieve()
-          .body(ChosunArticleResponse.class);
-    }
-
+  public ChosunArticleResponse getArticle(Category category) {
     return restClient.get()
         .uri(baseUrl + "/category/" + category.getOriginalName() + outputType)
         .retrieve()
         .body(ChosunArticleResponse.class);
   }
 
+  public ChosunArticleResponse getArticle() {
+    return restClient.get()
+        .uri(baseUrl + outputType)
+        .retrieve()
+        .body(ChosunArticleResponse.class);
+  }
+
   @Getter
   public enum Category {
-    ALL(""),
     POLITICS("politics"),
     ECONOMY("economy"),
     NATIONAL("national"),

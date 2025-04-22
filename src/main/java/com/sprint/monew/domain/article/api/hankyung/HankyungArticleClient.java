@@ -1,19 +1,21 @@
 package com.sprint.monew.domain.article.api.hankyung;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class HankyungArticleClient {
 
   private static final String baseUrl = "https://www.hankyung.com/feed/";
 
-  public HankyungArticleResponse getArticle(Category category) {
-    RestClient restClient = RestClient.create();
+  private final RestClient restClient;
 
+  public HankyungArticleResponse getArticle(Category category) {
     return restClient.get()
         .uri(baseUrl + category.getOriginalName())
         .retrieve()
