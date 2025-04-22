@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -44,8 +45,9 @@ public class NotificationService {
   }
 
   //알림 수정 - 전체 알림 확인
-  public void checkAllNotifications(String userId) {
-    User user = userRepository.findById(UUID.fromString(userId)).orElseThrow();
+  public void checkAllNotifications(UUID userId) {
+
+    User user = userRepository.findById(userId).orElseThrow();
 
     List<Notification> notifications = notificationRepository.findByUser(user);
     Instant updatedAt = Instant.now();
@@ -55,32 +57,62 @@ public class NotificationService {
     });
 
     notificationRepository.saveAll(notifications);
-
   }
 
   //알림 수정 - 알림 확인(단일)
-  public void checkNotification(String notificationId, String userId) {
-    User user = userRepository.findById(UUID.fromString(userId)).orElseThrow();
-    Notification notification = notificationRepository.findById(UUID.fromString(notificationId))
-        .orElseThrow();
+  public void checkNotification(UUID notificationId, UUID userId) {
+
+    User user = userRepository.findById(userId).orElseThrow(
+        () -> new IllegalArgumentException("User not found")
+    );
+
+    Notification notification = notificationRepository.findById(notificationId)
+        .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
+
     notification.confirm(Instant.now());
     notificationRepository.save(notification);
   }
 
-  //알림 삭제
-  public void deleteNotification(String notificationId, String userId) {
-
-  }
-
-
   //알림 목록 조회
-  public CursorPageResponseNotificationDto getAllNotifications(String cursor, String after,
-      int limit, String userId) {
-    User user = userRepository.findById(UUID.fromString(userId)).orElseThrow();
+  public CursorPageResponseDto<NotificationDto> getAllNotifications(UUID cursor, Instant after,
+      int limit, UUID userId) {
+    User user = userRepository.findById(userId).orElseThrow(
+        () -> new IllegalArgumentException("User not found")
+    );
 
-    List<Notification> notifications = notificationRepository.findByUser(user);
-    //todo-페이지네이션 구현 및 적용
-    return null;
+    createNotifications(user.getId());
+
+    PageRequest pagerequest = PageRequest.of(0, limit + 1);
+
+    List<Notification> notifications
+        = notificationRepository.findByConfirmedFalseAndUserIdWithCursor(userId, cursor, after,
+        pagerequest);
+
+    boolean hasNext = notifications.size() > limit;
+
+    if (hasNext) {
+      notifications = notifications.subList(0, limit);
+    }
+
+    UUID nextCursor = notifications.get(notifications.size() - 1).getId();
+
+    Instant nextAfter = notifications.get(notifications.size() - 1).getCreatedAt();
+
+    int size = Math.min(notifications.size(), limit);
+
+    long totalElements = notifications.size();
+
+    List<NotificationDto> notificationDtos = notifications.stream()
+        .map(NotificationDto::from)
+        .toList();
+
+    return new CursorPageResponseDto(
+        notificationDtos,
+        nextCursor,
+        nextAfter,
+        size,
+        totalElements,
+        hasNext
+    );
   }
-
 }
