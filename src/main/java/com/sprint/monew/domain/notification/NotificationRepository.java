@@ -24,10 +24,16 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
       "SELECT n "
           + "FROM Notification n "
           + "WHERE n.user.id = :userId AND n.confirmed = false "
-          + "AND (( CAST( :cursorId as UUID ) IS NULL OR n.id < :cursorId )"
-          + "OR ( CAST( :afterAt as timestamp ) IS NULL OR n.createdAt < :afterAt ))"
-          + "ORDER BY n.createdAt DESC, n.id DESC"
-  )
+          // 커서가 없거나, 생성 시간이 이것보다 작거나, 생성 시간이 같다면 ID가 이것보다 작은
+          + "AND (:cursorId IS NULL OR n.createdAt < :afterAt OR (n.createdAt = :afterAt AND n.id < :cursorId))"
+          + "ORDER BY n.createdAt DESC, n.id DESC")
   List<Notification> findUnconfirmedWithCursor(UUID userId, UUID cursorId,
       Instant afterAt, Pageable pageable);
+
+  @Query(
+      "SELECT n "
+          + "FROM Notification n "
+          + "WHERE n.user.id = :userId AND n.confirmed = false")
+  int countUnconfirmedByUserId(UUID userId);
+
 }
