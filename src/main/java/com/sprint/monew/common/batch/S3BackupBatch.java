@@ -67,9 +67,9 @@ public class S3BackupBatch {
   @Bean
   @StepScope
   public JpaPagingItemReader<Article> s3BackupJpaPagingItemReader(
-      @Value("#{jobParameters['backupDateTime']}") LocalDateTime toBackupDateTime) {
+      @Value("#{jobParameters['backupBaseDateTime']}") LocalDateTime backupBaseDateTime) {
 
-    Instant startOfRunDate = getStartOfBackupDate(toBackupDateTime);
+    Instant startOfRunDate = getStartOfBackupDate(backupBaseDateTime);
     String publishDateParam = "startOfToday";
     // 임시 쿼리 : 나중에 시간나면 QueryDSL로 바꿀 것
     String tempQuery = String.format("SELECT a FROM Article a WHERE a.publishDate >= :%s",
@@ -87,10 +87,10 @@ public class S3BackupBatch {
   @Bean
   @StepScope
   public ItemWriter<Article> s3BackupCustomItemWriter(
-      @Value("#{jobParameters['backupDateTime']}") LocalDateTime runDateTime,
+      @Value("#{jobParameters['backupBaseDateTime']}") LocalDateTime backupBaseDateTime,
       S3OutputStreamProvider s3OutputStreamProvider) {
 
-    S3Resource articleS3Resource = createS3Resource(runDateTime, s3OutputStreamProvider);
+    S3Resource articleS3Resource = createS3Resource(backupBaseDateTime, s3OutputStreamProvider);
     log.info("S3 Resource Created : {}", articleS3Resource.getLocation());
 
     return items -> {
