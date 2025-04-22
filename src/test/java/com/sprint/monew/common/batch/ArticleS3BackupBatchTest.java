@@ -23,14 +23,8 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
-
 @BatchTestConfig
-@SpringBootTest(
-    classes = {S3BackupBatch.class},
-    properties = {
-        "spring.main.allow-bean-definition-overriding=true",
-    }
-)
+@SpringBootTest(classes = S3BackupBatch.class)
 @Testcontainers
 @ActiveProfiles("test")
 class ArticleS3BackupBatchTest {
@@ -45,7 +39,8 @@ class ArticleS3BackupBatchTest {
   private static final String KEY = UUID.randomUUID().toString();
 
   @Autowired
-  JobLauncherTestUtils jobLauncherTestUtils;
+  JobLauncherTestUtils jobLauncherTestUtils; 
+  // 빨간줄 뜨긴하는데 정상 작동 -> 혹시 나중에 문제생기면 커스텀 
 
   @Resource(name = "s3BackupJob")
   Job s3BackupJob;

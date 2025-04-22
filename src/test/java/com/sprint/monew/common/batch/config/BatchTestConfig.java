@@ -16,12 +16,12 @@ import org.springframework.context.annotation.FilterType;
 @Documented
 @SpringBatchTest
 @EnableBatchProcessing
-@EnableAutoConfiguration // Spring Boot 자동 설정 로드
+@EnableAutoConfiguration // Spring Boot 자동 설정(테스트 코드에서 Spring Boot가 여러 Job등록 못하게 해야하니 수동)
 @ComponentScan(
     basePackages = "com.sprint.monew",
     excludeFilters = @ComponentScan.Filter(
         type = FilterType.REGEX,
-        pattern = ".*Batch$" // “Batch” 이름이 들어간 빈은 모두 제외(대소문자 구분 X)
+        pattern = ".*Batch$" // “Batch"로 끝나는 빈의 이름은 모두 제외(Batch클래스명 만들때 주의)
     )
 )
 public @interface BatchTestConfig {
