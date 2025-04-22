@@ -47,8 +47,6 @@ public class S3Config {
 //    return S3Resource.create(location, s3Client(), s3OutputStreamProvider);
 //  }
 
-
-
 //  @Bean
 //  public Resource resourceLoader(ResourceLoader resourceLoader) {
 //    String location = "s3://" + s3Properties.bucketName();

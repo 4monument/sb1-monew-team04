@@ -47,7 +47,7 @@ public class S3BackupBatch {
   private final PlatformTransactionManager transactionManager;
   private final S3ConfigProperties s3Properties;
   private final S3Client s3Client;
-  private S3Resource articleS3Resource; // 매일 변하는 변수(백업 하는 날마다 PATH가 달라짐)
+  //private S3Resource articleS3Resource; // 매일 변하는 변수(백업 하는 날마다 PATH가 달라짐)
 
   @Bean("s3BackupJob")
   public Job s3BackupJob(@Qualifier("s3BackupStep") Step s3BackupStep) {
@@ -61,11 +61,7 @@ public class S3BackupBatch {
   public Step s3BackupStep(
       @Qualifier("s3BackupJpaPagingItemReader") JpaPagingItemReader<Article> jpaPagingItemReader,
       @Qualifier("s3BackupCustomItemWriter") ItemWriter<Article> s3BackupCustomItemWriter,
-      @Value("#{jobParameters['dateTime']}") LocalDateTime runDateTime,
       S3OutputStreamProvider s3OutputStreamProvider) {
-
-    articleS3Resource = createS3Resource(runDateTime, s3OutputStreamProvider);
-    log.info("S3 Resource Created : {}", articleS3Resource.getLocation());
 
     return new StepBuilder("s3BackupStep", jobRepository)
         .<Article, Article>chunk(2, transactionManager)
@@ -97,12 +93,15 @@ public class S3BackupBatch {
   }
 
   @Bean
-  public ItemWriter<Article> s3BackupCustomItemWriter() {
+  @StepScope
+  public ItemWriter<Article> s3BackupCustomItemWriter(@Value("#{jobParameters['dateTime']}") LocalDateTime runDateTime, S3OutputStreamProvider s3OutputStreamProvider) throws IOException {
+    S3Resource articleS3Resource = createS3Resource(runDateTime, s3OutputStreamProvider);
+    log.info("S3 Resource Created : {}", articleS3Resource.getLocation());
+
     return items -> {
       try (BufferedOutputStream writer =
           new BufferedOutputStream(articleS3Resource.getOutputStream())) {
         log.info("S3 Backup Writer Run");
-        log.info("s3b");
         for (Article item : items) {
           writer.write(String.format("%s|%s|%s|%s|%s|%s|%s\n",
               item.getId(),
