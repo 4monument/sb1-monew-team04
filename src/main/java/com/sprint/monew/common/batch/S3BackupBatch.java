@@ -47,37 +47,25 @@ public class S3BackupBatch {
   private final PlatformTransactionManager transactionManager;
   private final S3ConfigProperties s3Properties;
   private final S3Client s3Client;
-
-  //@Resource(name = "articleS3Resource")
-  private S3Resource articleS3Resource;
+  private S3Resource articleS3Resource; // 매일 변하는 변수(백업 하는 날마다 PATH가 달라짐)
 
   @Bean("s3BackupJob")
-  public Job s3BackupJob(@Qualifier("s3BackupStep") Step s3BackupStep){
+  public Job s3BackupJob(@Qualifier("s3BackupStep") Step s3BackupStep) {
     return new JobBuilder("s3BackupJob", jobRepository)
         .start(s3BackupStep)
         .build();
   }
-
-
-  //  @Bean(name = "articleS3Resource")
-  //  public S3Resource articleS3Resource(S3OutputStreamProvider s3OutputStreamProvider) {
-  //    //s3Operations.createResource(s3Properties.bucketName(), ...)
-  //    String location = "s3://" + s3Properties.bucket() + "/";
-  //    return S3Resource.create(location, s3Client(), s3OutputStreamProvider);
-  //  }
 
   @Bean("s3BackupStep")
   @JobScope
   public Step s3BackupStep(
       @Qualifier("s3BackupJpaPagingItemReader") JpaPagingItemReader<Article> jpaPagingItemReader,
       @Qualifier("s3BackupCustomItemWriter") ItemWriter<Article> s3BackupCustomItemWriter,
-      @Value("#{jobParameters['runDate']}") LocalDateTime runDateTime,
-      S3OutputStreamProvider s3OutputStreamProvider) throws IOException {
+      @Value("#{jobParameters['dateTime']}") LocalDateTime runDateTime,
+      S3OutputStreamProvider s3OutputStreamProvider) {
 
-      String fileName = runDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
-      String location = "s3://" + s3Properties.bucket() + "/" + fileName;
-      articleS3Resource = S3Resource.create(location, s3Client, s3OutputStreamProvider);
-      log.info("S3 Resource Created : {}", articleS3Resource.getLocation());
+    articleS3Resource = createS3Resource(runDateTime, s3OutputStreamProvider);
+    log.info("S3 Resource Created : {}", articleS3Resource.getLocation());
 
     return new StepBuilder("s3BackupStep", jobRepository)
         .<Article, Article>chunk(2, transactionManager)
@@ -87,15 +75,17 @@ public class S3BackupBatch {
   }
 
   // ItemReader : jpaPagingItemReader 기본 구현체 사용
+  // 오늘 날짜의 기사만 백업
   @Bean
   @StepScope
   public JpaPagingItemReader<Article> s3BackupJpaPagingItemReader(
-      @Value("#{jobParameters['runDate']}") LocalDateTime runDateParam) {
-    // 임시 쿼리 : 나중에 시간나면 QueryDSL로 바꿀 것
-    // 오늘 날짜의 기사만 백업
+      @Value("#{jobParameters['dateTime']}") LocalDateTime runDateParam) {
+
     Instant startOfRunDate = getStartOfRunDate(runDateParam);
-    String publishDateParam = "today";
-    String tempQuery = String.format("SELECT a FROM Article a WHERE a.publishDate >= :%s", publishDateParam);
+    String publishDateParam = "startOfToday";
+    // 임시 쿼리 : 나중에 시간나면 QueryDSL로 바꿀 것
+    String tempQuery = String.format("SELECT a FROM Article a WHERE a.publishDate >= :%s",
+        publishDateParam);
 
     return new JpaPagingItemReaderBuilder<Article>()
         .name("articleJpaPagingItemReader")
@@ -109,11 +99,11 @@ public class S3BackupBatch {
   @Bean
   public ItemWriter<Article> s3BackupCustomItemWriter() {
     return items -> {
-      try (OutputStream os = articleS3Resource.getOutputStream()) {
-        BufferedOutputStream writer = new BufferedOutputStream(os);
+      try (BufferedOutputStream writer =
+          new BufferedOutputStream(articleS3Resource.getOutputStream())) {
         log.info("S3 Backup Writer Run");
         log.info("s3b");
-         for (Article item : items) {
+        for (Article item : items) {
           writer.write(String.format("%s|%s|%s|%s|%s|%s|%s\n",
               item.getId(),
               item.getSource(),
@@ -123,13 +113,19 @@ public class S3BackupBatch {
               item.getSummary(),
               item.isDeleted()).getBytes());
         }
-//        writer.flush();
-//        writer.close();  자원정리는 마지막 리스너에서
       }
     };
   }
+
   private Instant getStartOfRunDate(LocalDateTime runDateParam) {
     return runDateParam.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
+  }
+
+  private S3Resource createS3Resource(LocalDateTime runDateTime,
+      S3OutputStreamProvider s3OutputStreamProvider) {
+    String fileName = runDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
+    String location = "s3://" + s3Properties.bucket() + "/" + fileName;
+    return S3Resource.create(location, s3Client, s3OutputStreamProvider);
   }
 
   //  @Bean
