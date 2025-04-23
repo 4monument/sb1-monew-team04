@@ -9,17 +9,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
-
-import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @Table(name = "users_interests", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "interest_id"})
+    @UniqueConstraint(columnNames = {"user_id", "interest_id"})
 })
 @NoArgsConstructor
 public class Subscription {
@@ -38,7 +37,7 @@ public class Subscription {
   @Column(nullable = false)
   private Instant createdAt;
 
-  public UserInterest(User user, Interest interest) {
+  public Subscription(User user, Interest interest) {
     this.id = UUID.randomUUID();
     this.user = user;
     this.interest = interest;
