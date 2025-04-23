@@ -2,6 +2,7 @@ package com.sprint.monew.domain.article.articleinterest;
 
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.interest.Interest;
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,6 +34,9 @@ public class ArticleInterest {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "interest_id")
   private Interest interest;
+
+  @Column(nullable = false)
+  private Instant createdAt;
 
   @Builder(access = AccessLevel.PRIVATE)
   private ArticleInterest(ArticleInterestKey id, Article article, Interest interest) {

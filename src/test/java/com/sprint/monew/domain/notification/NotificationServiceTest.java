@@ -3,11 +3,16 @@ package com.sprint.monew.domain.notification;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.article.Article;
+import com.sprint.monew.domain.article.Article.Source;
+import com.sprint.monew.domain.comment.Comment;
 import com.sprint.monew.domain.interest.Interest;
-import com.sprint.monew.domain.interest.userinterest.UserInterestRepository;
+import com.sprint.monew.domain.interest.userinterest.SubscriptionRepository;
+import com.sprint.monew.domain.like.Like;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
@@ -35,7 +40,8 @@ class NotificationServiceTest {
   private NotificationRepository notificationRepository;
 
   @Mock
-  private UserInterestRepository subscriberRepository;
+  private SubscriptionRepository subscriberRepository;
+
 
   @Mock
   private UserRepository userRepository;
@@ -77,44 +83,73 @@ class NotificationServiceTest {
   @DisplayName("알림 생성")
   class createNotificationTest {
 
+    //todo
     @Test
-    @DisplayName("성공: 구독 중인 관심사 관련 기사 등록 시")
+    @DisplayName("성공: 구독 중인 관심사 관련 기사 등록")
     void createNotificationInInterestSuccess() {
       //given
+      Instant afterAt = Instant.now();
       Interest interest = interests.get(0);
+
+      //기사 관심사 등록
+      Article article = Article.create(
+          Source.NAVER,
+          "https://news.example.com/tech/2025/04/23/article12345",
+          "인공지능 기술의 최신 동향과 미래 전망",
+          Instant.parse("2025-04-22T15:30:00Z"),
+          "최근 인공지능 기술의 발전과 산업 적용 사례를 분석하고, 향후 5년간의 기술 발전 방향을 예측한 보고서입니다."
+      );
+
+      //ArticleInterest 생성
+      article.addInterest(interest);
 
       List<UnreadInterestArticleCount> queryResult = new ArrayList<>();
       queryResult.add(new TestUnreadInterestArticleCount(
-          interest.getId(),
-          interest.getName(),
+          interest,
+          user,
           1L
       ));
 
-      when(userRepository.findById(user.getId())).thenReturn(Optional.ofNullable(user));
-      when(subscriberRepository.countUnreadArticlesByInterest(user.getId()))
+      when(subscriberRepository.findNewArticleCountWithUserInterest(afterAt))
           .thenReturn(queryResult);
 
       NotificationDto expectedNotification = NotificationDto.from(
           new Notification(user,
-              queryResult.get(0).getInterestId(),
+              interest.getId(),
               ResourceType.INTEREST,
-              queryResult.get(0).getInterestName() + "와/과 관련된 기사가 "
-                  + queryResult.get(0).getUnreadCount() + "건 등록되었습니다."));
+              queryResult.get(0).getInterest().getName() + "와/과 관련된 기사가 "
+                  + queryResult.get(0).getTotalNewArticles() + "건 등록되었습니다."));
+
       //when
-      List<NotificationDto> notifications = notificationService.createNotifications(user.getId());
+      List<Notification> notifications = notificationService.createArticleInterestNotifications(afterAt);
 
       //then
-      assertEquals(expectedNotification.userId(), notifications.get(0).userId());
-      assertEquals(expectedNotification.resourceId(), notifications.get(0).resourceId());
-      assertEquals(expectedNotification.resourceType(), notifications.get(0).resourceType());
-      assertEquals(expectedNotification.content(), notifications.get(0).content());
+      assertEquals(expectedNotification.userId(), notifications.get(0).getUser().getId());
+      assertEquals(expectedNotification.resourceId(), notifications.get(0).getResourceId());
+      assertEquals(expectedNotification.resourceType(),
+          notifications.get(0).getResourceType().toString());
+      assertEquals(expectedNotification.content(), notifications.get(0).getContent());
       assertFalse(expectedNotification.confirmed());
     }
 
 
     @Test
-    @DisplayName("성공: 내가 작성한 댓글에 좋아요 눌릴 시")
+    @DisplayName("성공: 내가 작성한 댓글에 좋아요 눌림")
     void createNotificationMyCommentSuccess() {
+      //given
+      Instant afterAt = Instant.now();
+
+      Comment comment = mock(Comment.class);
+      Like like = new Like();
+      like.setUser(user);
+      like.setComment(comment);
+
+      //유저가 가지고있는 마지막 좋아요 알림 시간보다 이후에 생성된 좋아요
+      when(lik)
+
+      //when
+
+
 
     }
 
