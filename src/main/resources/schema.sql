@@ -1,6 +1,6 @@
 CREATE TABLE "users"
 (
-    "id"         UUID         PRIMARY KEY,
+    "id"         UUID PRIMARY KEY,
     "email"      VARCHAR(255) NOT NULL UNIQUE,
     "nickname"   VARCHAR(255) NOT NULL,
     "password"   VARCHAR(255) NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE "users"
 
 CREATE TABLE "articles"
 (
-    "id"           UUID          PRIMARY KEY,
+    "id"           UUID PRIMARY KEY,
     "source"       VARCHAR(255)  NOT NULL,
     "source_url"   VARCHAR(2048) NOT NULL UNIQUE,
     "title"        VARCHAR(255)  NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE "articles"
 
 CREATE TABLE "comments"
 (
-    "id"         UUID         PRIMARY KEY,
+    "id"         UUID PRIMARY KEY,
     "user_id"    UUID         NOT NULL,
     "article_id" UUID         NOT NULL,
     "content"    VARCHAR(255) NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE "comments"
 
 CREATE TABLE "notifications"
 (
-    "id"            UUID         PRIMARY KEY,
+    "id"            UUID PRIMARY KEY,
     "user_id"       UUID         NOT NULL,
     "resource_id"   UUID         NOT NULL,
     "resource_type" VARCHAR(50)  NOT NULL,
@@ -43,31 +43,33 @@ CREATE TABLE "notifications"
 
 CREATE TABLE "interests"
 (
-    "id"       UUID        PRIMARY KEY,
-    "name"     VARCHAR(50) NOT NULL UNIQUE,
-    "keywords" JSONB      NULL,
-    "created_at"  TIMESTAMPTZ NOT NULL DEFAULT now()
+    "id"         UUID PRIMARY KEY,
+    "name"       VARCHAR(50) NOT NULL UNIQUE,
+    "keywords"   JSONB       NULL,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE "users_interests"
 (
+    "id"          UUID PRIMARY KEY,
     "user_id"     UUID,
     "interest_id" UUID,
     "created_at"  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    PRIMARY KEY (user_id, interest_id)
+    UNIQUE (user_id, interest_id)
 );
 
 CREATE TABLE "articles_views"
 (
+    "id"         UUID PRIMARY KEY,
     "user_id"    UUID,
     "article_id" UUID,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
-    PRIMARY KEY (user_id, article_id)
+    UNIQUE (user_id, article_id)
 );
 
 CREATE TABLE "likes"
 (
-    "id"         UUID        PRIMARY KEY,
+    "id"         UUID PRIMARY KEY,
     "comment_id" UUID        NOT NULL,
     "user_id"    UUID        NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -75,9 +77,10 @@ CREATE TABLE "likes"
 
 CREATE TABLE "articles_interests"
 (
+    "id"          UUID PRIMARY KEY,
     "article_id"  UUID NOT NULL,
     "interest_id" UUID NOT NULL,
-    Primary Key (article_id, interest_id)
+    UNIQUE (article_id, interest_id)
 );
 
 ALTER TABLE "comments"
