@@ -1,20 +1,22 @@
-package com.sprint.monew.domain.interest.userinterest;
+package com.sprint.monew.domain.interest.subscription;
 
+import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.user.User;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface UserInterestRepository extends JpaRepository<UserInterest, UserInterestKey> {
+public interface SubscriptionRepository extends JpaRepository<Subscription, UUID> {
 
   int countDistinctByInterestId(UUID interestId);
 
   boolean existsByUserIdAndInterestId(UUID userId, UUID interestId);
 
-  List<UserInterest> findByUser(User user);
+  Optional<Subscription> findByUserAndInterest(User user, Interest interest);
 
 //  @Query(
 //      "SELECT ui.interest.id as interestId, ui.interest.name as interestName, COUNT(DISTINCT ai.article.id) as unreadCount "
@@ -36,7 +38,7 @@ public interface UserInterestRepository extends JpaRepository<UserInterest, User
   //유저-관심사-기사수를 구한다. -> 해당 엔티티마다 notification 전부 만들어야한다.
   @Query(
       "SELECT ui.interest, ui.user, ai.new_article_count  "
-          + "FROM UserInterest ui "
+          + "FROM Subscription ui "
           + "JOIN (SELECT a.interest, count(a.article) as new_article_count "
           + "      FROM ArticleInterest as a "
           + "      WHERE a.createdAt > :afterAt "

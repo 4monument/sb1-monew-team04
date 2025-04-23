@@ -43,6 +43,7 @@ public class ArticleInterest {
     this.id = id;
     this.article = article;
     this.interest = interest;
+    this.createdAt = Instant.now();
   }
 
   public static ArticleInterest create(Article article, Interest interest) {

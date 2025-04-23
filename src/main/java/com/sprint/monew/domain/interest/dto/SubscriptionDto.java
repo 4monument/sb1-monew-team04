@@ -1,7 +1,6 @@
 package com.sprint.monew.domain.interest.dto;
 
 import com.sprint.monew.domain.interest.Interest;
-import com.sprint.monew.domain.interest.userinterest.UserInterest;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -16,7 +15,8 @@ public record SubscriptionDto(
     Instant createdAt
 ) {
 
-  public static SubscriptionDto from(String userInterestId ,Interest interest, int subscriberCount) {
+  public static SubscriptionDto from(String userInterestId, Interest interest,
+      int subscriberCount) {
     return new SubscriptionDto(
         userInterestId,
         interest.getId(),

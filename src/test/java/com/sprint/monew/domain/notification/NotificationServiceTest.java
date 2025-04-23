@@ -11,8 +11,8 @@ import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.comment.Comment;
 import com.sprint.monew.domain.interest.Interest;
-import com.sprint.monew.domain.interest.userinterest.SubscriptionRepository;
 import com.sprint.monew.domain.like.Like;
+import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
@@ -83,7 +83,6 @@ class NotificationServiceTest {
   @DisplayName("알림 생성")
   class createNotificationTest {
 
-    //todo
     @Test
     @DisplayName("성공: 구독 중인 관심사 관련 기사 등록")
     void createNotificationInInterestSuccess() {
@@ -145,7 +144,6 @@ class NotificationServiceTest {
       like.setComment(comment);
 
       //유저가 가지고있는 마지막 좋아요 알림 시간보다 이후에 생성된 좋아요
-      when(lik)
 
       //when
 
