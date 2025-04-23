@@ -1,8 +1,8 @@
 package com.sprint.monew.domain.notification;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
-import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.interest.Interest;
+import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
@@ -24,7 +24,7 @@ public class NotificationService {
   private final UserRepository userRepository;
   private final SubscriptionRepository subscriberRepository;
 
-  //알림 등록 - 일괄 등록
+  //알림 등록 - 관심사 기사 등록 시 일괄 등록
   public List<Notification> createArticleInterestNotifications(Instant afterAt) {
 
     List<UnreadInterestArticleCount> unreadInterestArticleCounts
@@ -50,13 +50,6 @@ public class NotificationService {
     }
     return newNotifications;
   }
-
-  //알림 등록 - 좋아요
-  public List<Notification> createLikeNotification(User userId) {
-    List<Notification> notifications = new ArrayList<>();
-    return notifications;
-  }
-
 
   //알림 수정 - 전체 알림 확인
   public void checkAllNotifications(UUID userId) {
