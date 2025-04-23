@@ -10,6 +10,7 @@ import java.util.UUID;
 public class UserActivityService {
 
     private final UserActivityQueryRepository userActivityQueryRepository;
+    private final UserActivityMongoRepository userActivityMongoRepository;
 
     public UserActivityDto getUserActivity(UUID userId) {
         return userActivityQueryRepository.findUserActivity(userId);

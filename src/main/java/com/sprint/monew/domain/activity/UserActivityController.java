@@ -21,7 +21,7 @@ public class UserActivityController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserActivityDto> getUserActivity(
             @PathVariable UUID userId,
-            @RequestHeader("Monew-Request-User-ID") UUID headerUserId
+            @RequestHeader(name = "Monew-Request-User-ID", required = false) UUID headerUserId
     ) {
         return ResponseEntity.ok(userActivityService.getUserActivity(userId));
     }

@@ -13,7 +13,7 @@ public record CommentDto(
         UUID userId,
         String userNickname,
         String content,
-        long likeCount,
+        int likeCount,
         boolean likedByMe,
         Instant createdAt
 ) {
