@@ -3,14 +3,15 @@ package com.sprint.monew.domain.article.articleview;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.user.User;
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,15 +24,14 @@ import org.springframework.data.annotation.CreatedDate;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ArticleView {
 
-  @EmbeddedId
-  private ArticleViewKey id;
+  @Id
+  @GeneratedValue
+  private UUID id;
 
-  @MapsId("userId")
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
 
-  @MapsId("articleId")
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "article_id")
   private Article article;
@@ -41,16 +41,13 @@ public class ArticleView {
   private Instant createdAt;
 
   @Builder(access = AccessLevel.PRIVATE)
-  private ArticleView(ArticleViewKey id, User user, Article article) {
-    this.id = id;
+  private ArticleView(User user, Article article) {
     this.user = user;
     this.article = article;
   }
 
   public static ArticleView create(User user, Article article) {
-    ArticleViewKey key = new ArticleViewKey(user.getId(), article.getId());
     return ArticleView.builder()
-        .id(key)
         .user(user)
         .article(article)
         .build();
