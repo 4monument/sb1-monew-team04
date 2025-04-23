@@ -38,7 +38,7 @@ public class ArticleView {
 
   @CreatedDate
   @Column(nullable = false)
-  private Instant createdAt;
+  private Instant viewedAt;
 
   @Builder(access = AccessLevel.PRIVATE)
   private ArticleView(ArticleViewKey id, User user, Article article) {
