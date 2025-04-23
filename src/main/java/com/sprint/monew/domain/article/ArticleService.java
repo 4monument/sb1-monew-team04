@@ -53,7 +53,8 @@ public class ArticleService {
 
   @Transactional(readOnly = true)
   public CursorPageResponseDto<ArticleDto> getArticles(
-      ArticleRequest articleRequest, Pageable pageable) {
+      ArticleRequest articleRequest, Pageable pageable, UUID userId) {
+
     return null;
   }
 
