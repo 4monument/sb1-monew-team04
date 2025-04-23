@@ -2,7 +2,12 @@ package com.sprint.monew.domain.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
@@ -46,7 +51,6 @@ class NotificationServiceTest {
   @InjectMocks
   private NotificationService notificationService;
 
-
   // 테스트용 Interest
   private List<Interest> interests;
 
@@ -81,7 +85,7 @@ class NotificationServiceTest {
   class createNotificationTest {
 
     @Test
-    @DisplayName("성공: 구독 중인 관심사 관련 기사 등록")
+    @DisplayName("성공: 구독 중인 관심사 관련 기사 등록 시")
     void createNotificationInInterestSuccess() {
       //given
       Instant afterAt = Instant.now();
@@ -132,12 +136,6 @@ class NotificationServiceTest {
   }
 
   @Nested
-  @DisplayName("알림 수정")
-  class updateNotificationTest {
-
-  }
-
-  @Nested
   @DisplayName("알림 조회")
   class getNotificationTest {
 
@@ -155,8 +153,17 @@ class NotificationServiceTest {
       PageRequest pageRequest = PageRequest.of(0, limit + 1);
 
       List<Notification> expectNotifications = new ArrayList<>();
-      expectNotifications.add(new Notification(user, interest.getId(), ResourceType.INTEREST,
-          interest.getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다."));
+
+      Notification notification1 = new Notification(user, interests.get(0).getId(),
+          ResourceType.INTEREST,
+          interests.get(0).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+
+      Notification notification2 = new Notification(user, interests.get(1).getId(),
+          ResourceType.INTEREST,
+          interests.get(1).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+
+      expectNotifications.add(notification1);
+      expectNotifications.add(notification2);
 
       when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
       when(notificationRepository
@@ -181,6 +188,10 @@ class NotificationServiceTest {
 
       assertEquals(expectNotifications.get(0).getContent(),
           allNotifications.content().get(0).content());
+
+      allNotifications.content().forEach(notification ->
+          assertFalse(notification.confirmed())
+      );
 
     }
 
@@ -229,6 +240,7 @@ class NotificationServiceTest {
       //then
       assertEquals(notification2.getId(), allNotifications.nextCursor());
       assertEquals(notification2.getCreatedAt(), allNotifications.nextAfter());
+      assertFalse(allNotifications.content().get(0).confirmed());
       assertTrue(allNotifications.hasNext());
 
     }
@@ -278,7 +290,119 @@ class NotificationServiceTest {
       //then
       assertEquals(notification1.getId(), allNotifications.nextCursor());
       assertEquals(notification1.getCreatedAt(), allNotifications.nextAfter());
+      allNotifications.content().forEach(notification ->
+          assertFalse(notification.confirmed())
+      );
       assertFalse(allNotifications.hasNext());
+    }
+  }
+
+  @Nested
+  @DisplayName("알림 확인(수정)")
+  class checkNotification {
+
+    @Test
+    @DisplayName("성공: 단일 확인")
+    void checkNotificationSuccess() {
+      //given
+      String likedUserName = "테스트";
+      UUID notificationId = UUID.randomUUID();
+      UUID commentId = UUID.randomUUID();
+
+      Notification notification = new Notification(user,
+          commentId,
+          ResourceType.COMMENT,
+          likedUserName + "님이 나의 댓글을 좋아합니다."
+      );
+      ReflectionTestUtils.setField(notification, "id", notificationId);
+
+      Instant initialUpdatedAt = notification.getUpdatedAt();
+
+      when(userRepository.findById(user.getId())).thenReturn(Optional.ofNullable(user));
+      when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(notification));
+
+      //when
+      notificationService.checkNotification(notification.getId(), user.getId());
+
+      //then
+      assertTrue(notification.isConfirmed());
+      assertTrue(initialUpdatedAt.isBefore(notification.getUpdatedAt()));
+
+      verify(notificationRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("실패: 단일 확인 - 유효하지 않은 알림 id")
+    void checkNotificationByIdFailure() {
+      //given
+      UUID notificationId = UUID.randomUUID();
+
+      when(userRepository.findById(user.getId())).thenReturn(Optional.ofNullable(user));
+      when(notificationRepository.findById(notificationId)).thenReturn(Optional.empty());
+
+      //when & then
+      assertThrows(IllegalArgumentException.class,
+          () -> notificationService.checkNotification(notificationId, user.getId()));
+
+      //then
+      verify(notificationRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("실패: 단일 확인 - 유효하지 않은 유저 id")
+    void checkNotificationForNoneFailure() {
+
+      //given
+      String likedUserName = "테스트";
+      UUID userId = UUID.randomUUID();
+      UUID notificationId = UUID.randomUUID();
+      UUID commentId = UUID.randomUUID();
+
+      Notification notification = new Notification(user,
+          commentId,
+          ResourceType.COMMENT,
+          likedUserName + "님이 나의 댓글을 좋아합니다."
+      );
+      ReflectionTestUtils.setField(notification, "id", notificationId);
+
+      when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+      //when & then
+      assertThrows(IllegalArgumentException.class,
+          () -> notificationService.checkNotification(notificationId, userId));
+
+      //then
+      verify(notificationRepository, never()).save(any());
+
+    }
+
+    @Test
+    @DisplayName("성공: 전체 확인")
+    void checkAllNotificationsSuccess() {
+      //given
+      UUID userId = user.getId();
+
+      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
+      //when
+      notificationService.checkAllNotifications(userId);
+
+      //then
+      verify(notificationRepository, times(1)).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("실패: 전체 확인 - 유효하지 않은 유저 id")
+    void checkAllNotificationsFailure() {
+      //given
+      UUID userId = UUID.randomUUID();
+
+      when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+      //when & then
+      assertThrows(IllegalArgumentException.class,
+          () -> notificationService.checkAllNotifications(userId));
+
+      verify(notificationRepository, never()).saveAll(any());
 
     }
   }
