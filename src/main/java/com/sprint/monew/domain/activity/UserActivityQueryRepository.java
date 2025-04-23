@@ -65,7 +65,6 @@ public class UserActivityQueryRepository {
                 .fetch();
 
         // 3. 작성한 댓글
-        // [class java.util.UUID, class java.util.UUID, class java.util.UUID, class java.lang.String, class java.lang.String, class java.lang.Integer, class java.lang.Boolean, class java.time.Instant]] with root cause
         List<CommentDto> comments = queryFactory
                 .select(Projections.constructor(CommentDto.class,
                         comment.id,
@@ -86,27 +85,25 @@ public class UserActivityQueryRepository {
                 .orderBy(comment.createdAt.desc())
                 .limit(10)
                 .fetch();
+
         // 4. 좋아요한 댓글
         List<CommentDto> likedComments = queryFactory
                 .select(Projections.constructor(CommentDto.class,
-                        comment.id,
-                        comment.article.id,
-                        comment.user.id,
-                        comment.user.nickname,
-                        comment.content,
-                        comment.likes.size(),
-                        JPAExpressions.selectOne()
-                                .from(likeSub)
-                                .where(likeSub.comment.id.eq(comment.id)
-                                        .and(likeSub.user.id.eq(userId)))
-                                .exists(),
-                        comment.createdAt
+                        likeSub.comment.id,
+                        likeSub.comment.article.id,
+                        likeSub.comment.user.id,
+                        likeSub.comment.user.nickname,
+                        likeSub.comment.content,
+                        likeSub.comment.likes.size(), // 좋아요 수
+                        Expressions.constant(true), // likedByMe는 true 고정
+                        likeSub.comment.createdAt
                 ))
-                .from(comment)
-                .where(comment.user.id.eq(userId))
-                .orderBy(comment.createdAt.desc())
+                .from(likeSub)
+                .where(likeSub.user.id.eq(userId))
+                .orderBy(likeSub.comment.createdAt.desc())
                 .limit(10)
                 .fetch();
+
         // 5. 본 기사 기록
         List<ArticleViewDto> viewedArticles = queryFactory
                 .select(Projections.constructor(ArticleViewDto.class,
