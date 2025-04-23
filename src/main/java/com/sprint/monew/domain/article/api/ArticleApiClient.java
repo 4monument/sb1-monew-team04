@@ -91,6 +91,7 @@ public class ArticleApiClient {
                 .source(Source.HANKYUNG)
                 .sourceUrl(item.link())
                 .title(item.title())
+                //한경은 summary가 없어서 타이틀을 대신 넣었습니다.
                 .summary(item.title())
                 .publishDate(item.pubDate().toInstant())
                 .build()
