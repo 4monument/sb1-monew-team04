@@ -75,8 +75,9 @@ CREATE TABLE "likes"
 
 CREATE TABLE "articles_interests"
 (
-    "article_id"  UUID NOT NULL,
-    "interest_id" UUID NOT NULL,
+    "article_id"  UUID        NOT NULL,
+    "interest_id" UUID        NOT NULL,
+    "created_at"  TIMESTAMPTZ NOT NULL DEFAULT now(),
     Primary Key (article_id, interest_id)
 );
 
