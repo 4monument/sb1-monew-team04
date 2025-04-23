@@ -3,13 +3,16 @@ package com.sprint.monew.domain.notification;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
+import com.sprint.monew.domain.comment.Comment;
 import com.sprint.monew.domain.interest.Interest;
-import com.sprint.monew.domain.interest.userinterest.UserInterestRepository;
+import com.sprint.monew.domain.interest.userinterest.SubscriptionRepository;
+import com.sprint.monew.domain.like.Like;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
@@ -37,7 +40,8 @@ class NotificationServiceTest {
   private NotificationRepository notificationRepository;
 
   @Mock
-  private UserInterestRepository subscriberRepository;
+  private SubscriptionRepository subscriberRepository;
+
 
   @Mock
   private UserRepository userRepository;
@@ -81,7 +85,7 @@ class NotificationServiceTest {
 
     //todo
     @Test
-    @DisplayName("성공: 구독 중인 관심사 관련 기사 등록 시")
+    @DisplayName("성공: 구독 중인 관심사 관련 기사 등록")
     void createNotificationInInterestSuccess() {
       //given
       Instant afterAt = Instant.now();
@@ -117,7 +121,7 @@ class NotificationServiceTest {
                   + queryResult.get(0).getTotalNewArticles() + "건 등록되었습니다."));
 
       //when
-      List<Notification> notifications = notificationService.createNotifications(afterAt);
+      List<Notification> notifications = notificationService.createArticleInterestNotifications(afterAt);
 
       //then
       assertEquals(expectedNotification.userId(), notifications.get(0).getUser().getId());
@@ -130,8 +134,22 @@ class NotificationServiceTest {
 
 
     @Test
-    @DisplayName("성공: 내가 작성한 댓글에 좋아요 눌릴 시")
+    @DisplayName("성공: 내가 작성한 댓글에 좋아요 눌림")
     void createNotificationMyCommentSuccess() {
+      //given
+      Instant afterAt = Instant.now();
+
+      Comment comment = mock(Comment.class);
+      Like like = new Like();
+      like.setUser(user);
+      like.setComment(comment);
+
+      //유저가 가지고있는 마지막 좋아요 알림 시간보다 이후에 생성된 좋아요
+      when(lik)
+
+      //when
+
+
 
     }
 

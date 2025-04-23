@@ -2,7 +2,7 @@ package com.sprint.monew.domain.notification;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.Interest;
-import com.sprint.monew.domain.interest.userinterest.UserInterestRepository;
+import com.sprint.monew.domain.interest.userinterest.SubscriptionRepository;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
@@ -22,10 +22,10 @@ public class NotificationService {
 
   private final NotificationRepository notificationRepository;
   private final UserRepository userRepository;
-  private final UserInterestRepository subscriberRepository;
+  private final SubscriptionRepository subscriberRepository;
 
   //알림 등록 - 일괄 등록
-  public List<Notification> createNotifications(Instant afterAt) {
+  public List<Notification> createArticleInterestNotifications(Instant afterAt) {
 
     List<UnreadInterestArticleCount> unreadInterestArticleCounts
         = subscriberRepository.findNewArticleCountWithUserInterest(afterAt);
@@ -50,6 +50,13 @@ public class NotificationService {
     }
     return newNotifications;
   }
+
+  //알림 등록 - 좋아요
+  public List<Notification> createLikeNotification(User userId) {
+    List<Notification> notifications = new ArrayList<>();
+    return notifications;
+  }
+
 
   //알림 수정 - 전체 알림 확인
   public void checkAllNotifications(UUID userId) {
