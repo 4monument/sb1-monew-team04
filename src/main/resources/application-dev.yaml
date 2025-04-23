@@ -12,7 +12,7 @@ spring:
         format_sql: true
   batch:
       job:
-        initialize-schema: always
+        initialize-schema: never
 
 logging:
   level:

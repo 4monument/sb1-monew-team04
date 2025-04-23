@@ -17,11 +17,10 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationDeleteSchedule {
+public class NotificationDeleteScheduler {
 
   private final JobLauncher jobLauncher;
 
-  //@Resource(name = "notificationDeleteJob")
   @Resource(name = "notificationDeleteJob")
   private Job job;
 
@@ -34,7 +33,7 @@ public class NotificationDeleteSchedule {
         .addLong("time", System.currentTimeMillis())
         .toJobParameters();
 
-    log.info("Delete ConfirmedNotification start");
+    log.info("Delete ConfirmedNotification");
     jobLauncher.run(job, jobParameters);
   }
 }

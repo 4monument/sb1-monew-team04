@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.List;
@@ -26,6 +27,7 @@ public class Interest {
 
   @Column(name = "name", nullable = false)
   private String name;
+
 
   @Convert(converter = StringListConverter.class) // List <-> JSONB 변환
   @Column(name = "keywords", columnDefinition = "jsonb")
