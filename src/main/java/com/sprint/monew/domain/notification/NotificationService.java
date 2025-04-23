@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -25,6 +26,7 @@ public class NotificationService {
   private final SubscriptionRepository subscriberRepository;
 
   //알림 등록 - 관심사 기사 등록 시 일괄 등록
+  @Transactional
   public List<Notification> createArticleInterestNotifications(Instant afterAt) {
 
     List<UnreadInterestArticleCount> unreadInterestArticleCounts
@@ -52,9 +54,12 @@ public class NotificationService {
   }
 
   //알림 수정 - 전체 알림 확인
+  @Transactional
   public void checkAllNotifications(UUID userId) {
 
-    User user = userRepository.findById(userId).orElseThrow();
+    User user = userRepository.findById(userId).orElseThrow(
+        () -> new IllegalArgumentException("User not found")
+    );
 
     List<Notification> notifications = notificationRepository.findByUser(user);
     Instant updatedAt = Instant.now();
@@ -69,7 +74,7 @@ public class NotificationService {
   //알림 수정 - 알림 확인(단일)
   public void checkNotification(UUID notificationId, UUID userId) {
 
-    User user = userRepository.findById(userId)
+    userRepository.findById(userId)
         .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
     Notification notification = notificationRepository.findById(notificationId)
@@ -109,7 +114,7 @@ public class NotificationService {
         .map(NotificationDto::from)
         .toList();
 
-    return new CursorPageResponseDto(
+    return new CursorPageResponseDto<>(
         notificationDtos,
         nextCursor,
         nextAfter,
