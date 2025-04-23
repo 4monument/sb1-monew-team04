@@ -1,11 +1,17 @@
 package com.sprint.monew.domain.article;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.article.articleview.ArticleView;
+import com.sprint.monew.domain.article.articleview.ArticleViewRepository;
 import com.sprint.monew.domain.article.dto.ArticleDto;
 import com.sprint.monew.domain.article.dto.ArticleRestoreResultDto;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
 import com.sprint.monew.domain.article.dto.request.ArticleRequest;
 import com.sprint.monew.domain.comment.CommentRepository;
+import com.sprint.monew.domain.user.User;
+import com.sprint.monew.domain.user.UserRepository;
+import com.sprint.monew.global.error.ErrorCode;
+import com.sprint.monew.global.error.exception.article.ArticleViewAlreadyExistException;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -22,10 +28,26 @@ import org.springframework.transaction.annotation.Transactional;
 public class ArticleService {
 
   private final ArticleRepository articleRepository;
+  private final UserRepository userRepository;
   private final CommentRepository commentRepository;
+  private final ArticleViewRepository articleViewRepository;
 
   public ArticleViewDto registerArticleView(UUID id, UUID userId) {
-    return null;
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new IllegalArgumentException(ErrorCode.USER_NOT_FOUND.getMessage()));
+    Article article = articleRepository.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException(ErrorCode.ARTICLE_NOT_FOUND.getMessage()));
+
+    if (articleViewRepository.existsByUserAndArticle(user, article)) {
+      throw ArticleViewAlreadyExistException.withId(user.getId(), article.getId());
+    }
+
+    ArticleView articleView = ArticleView.create(user, article);
+    articleViewRepository.save(articleView);
+    long commentCount = commentRepository.countByArticle(article);
+    long viewCount = articleViewRepository.countByArticle(article);
+
+    return ArticleViewDto.from(articleView, commentCount, viewCount);
   }
 
   @Transactional(readOnly = true)

@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface ArticleViewRepository extends JpaRepository<ArticleView, UUID> {
 
   boolean existsByUserAndArticle(User user, Article article);
+
+  long countByArticle(Article article);
 }
