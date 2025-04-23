@@ -4,8 +4,8 @@ import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
-import com.sprint.monew.domain.interest.dto.SubscriptionDto;
 import com.sprint.monew.domain.interest.subscription.Subscription;
+import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
 import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
@@ -145,9 +145,7 @@ public class InterestService {
     Subscription subscribe = new Subscription(user, interest);
     subscriptionRepository.save(subscribe);
 
-    return SubscriptionDto.from(
-        subscribe.getId().toString(),
-        subscribe.getInterest(),
+    return SubscriptionDto.from(subscribe,
         subscriptionRepository.countDistinctByInterestId(interestId));
   }
 
