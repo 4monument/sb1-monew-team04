@@ -37,12 +37,11 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
   //관심사-유저와 위 테이블 조인
   //유저-관심사-기사수를 구한다. -> 해당 엔티티마다 notification 전부 만들어야한다.
   @Query(
-      "SELECT ui.interest, ui.user, ai.new_article_count  "
-          + "FROM Subscription ui "
-          + "JOIN (SELECT a.interest, count(a.article) as new_article_count "
-          + "      FROM ArticleInterest as a "
-          + "      WHERE a.createdAt > :afterAt "
-          + "               GROUP BY a.interest) ai ON ui.interest = ai.interest "
+      "SELECT ui.interest AS interest, ui.user AS user, COUNT(ai) AS articleCount " +
+          "FROM Subscription ui " +
+          "JOIN ArticleInterest ai ON ui.interest = ai.interest " +
+          "WHERE ai.createdAt > :afterAt " +
+          "GROUP BY ui.interest, ui.user"
   )
   List<UnreadInterestArticleCount> findNewArticleCountWithUserInterest(Instant afterAt);
 
