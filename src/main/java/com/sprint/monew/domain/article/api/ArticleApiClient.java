@@ -48,7 +48,7 @@ public class ArticleApiClient {
   }
 
   /**
-   * @param query query만 넣고 싶으면 이거 쓰세요
+   * @param query query만 넣고 싶으면 이거 써주세요.
    */
   public List<ArticleApiDto> getNaverArticle(String query) {
     return getNaverArticle(query, 10, 1);
