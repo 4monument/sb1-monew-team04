@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,7 +21,9 @@ import org.springframework.data.annotation.CreatedDate;
 
 @Getter
 @Entity
-@Table(name = "articles_views")
+@Table(name = "articles_views", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "article_id"})
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ArticleView {
 

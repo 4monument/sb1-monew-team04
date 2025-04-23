@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +18,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "articles_interests")
+@Table(name = "articles_interests", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"article_id", "interest_id"})
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ArticleInterest {
 
