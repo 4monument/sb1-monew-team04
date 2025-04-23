@@ -1,19 +1,21 @@
 package com.sprint.monew.domain.article.api.hankyung;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class HankyungArticleClient {
 
   private static final String baseUrl = "https://www.hankyung.com/feed/";
 
-  public HankyungArticleResponse getArticle(Category category) {
-    RestClient restClient = RestClient.create();
+  private final RestClient restClient;
 
+  public HankyungArticleResponse getArticle(HankyungCategory category) {
     return restClient.get()
         .uri(baseUrl + category.getOriginalName())
         .retrieve()
@@ -21,7 +23,7 @@ public class HankyungArticleClient {
   }
 
   @Getter
-  public enum Category {
+  public enum HankyungCategory {
     ALL("all-news"),
     ECONOMY("economy"),
     IT("it"),
@@ -38,7 +40,7 @@ public class HankyungArticleClient {
 
     private final String originalName;
 
-    Category(String originalName) {
+    HankyungCategory(String originalName) {
       this.originalName = originalName;
     }
   }
