@@ -33,9 +33,9 @@ public class ArticleService {
   private final ArticleViewRepository articleViewRepository;
 
   public ArticleViewDto registerArticleView(UUID id, UUID userId) {
-    User user = userRepository.findById(userId)
+    User user = userRepository.findByIdAndDeletedFalse(userId)
         .orElseThrow(() -> new IllegalArgumentException(ErrorCode.USER_NOT_FOUND.getMessage()));
-    Article article = articleRepository.findById(id)
+    Article article = articleRepository.findByIdAndDeletedFalse(id)
         .orElseThrow(() -> new IllegalArgumentException(ErrorCode.ARTICLE_NOT_FOUND.getMessage()));
 
     if (articleViewRepository.existsByUserAndArticle(user, article)) {
@@ -44,7 +44,7 @@ public class ArticleService {
 
     ArticleView articleView = ArticleView.create(user, article);
     articleViewRepository.save(articleView);
-    long commentCount = commentRepository.countByArticle(article);
+    long commentCount = commentRepository.countByArticleAndDeletedFalse(article);
     long viewCount = articleViewRepository.countByArticle(article);
 
     return ArticleViewDto.from(articleView, commentCount, viewCount);
