@@ -36,11 +36,11 @@ public class UserActivityDocument {
     private List<SubscriptionDto> subscriptions = new ArrayList<>();
 
     @Builder.Default
-    private List<CommentDto> recentComments = new ArrayList<>();
+    private List<CommentDto> comments = new ArrayList<>();
 
     @Builder.Default
-    private List<CommentDto> likedComments = new ArrayList<>();
+    private List<CommentDto> commentLikes = new ArrayList<>();
 
     @Builder.Default
-    private List<ArticleViewDto> recentViewedNews = new ArrayList<>();
+    private List<ArticleViewDto> articleViews = new ArrayList<>();
 }
