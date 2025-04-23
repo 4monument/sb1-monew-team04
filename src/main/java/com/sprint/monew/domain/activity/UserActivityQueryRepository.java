@@ -3,7 +3,7 @@ package com.sprint.monew.domain.activity;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sprint.monew.domain.article.QArticle;
-import com.sprint.monew.domain.article.QArticleView;
+import com.sprint.monew.domain.article.articleview.QArticleView;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
 import com.sprint.monew.domain.comment.QComment;
 import com.sprint.monew.domain.comment.dto.CommentDto;
@@ -80,11 +80,11 @@ public class UserActivityQueryRepository {
                 .select(Projections.constructor(ArticleViewDto.class,
                         article.id,
                         article.title,
-                        articleView.viewedAt))
+                        articleView.createdAt))
                 .from(articleView)
                 .join(articleView.article, article)
                 .where(articleView.user.id.eq(userId))
-                .orderBy(articleView.viewedAt.desc())
+                .orderBy(articleView.createdAt.desc())
                 .limit(10)
                 .fetch();
 
