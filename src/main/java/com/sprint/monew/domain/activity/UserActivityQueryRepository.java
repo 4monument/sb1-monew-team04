@@ -3,11 +3,12 @@ package com.sprint.monew.domain.activity;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sprint.monew.domain.article.QArticle;
-import com.sprint.monew.domain.article.QArticleView;
+import com.sprint.monew.domain.article.articleview.QArticleView;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
 import com.sprint.monew.domain.comment.QComment;
 import com.sprint.monew.domain.comment.dto.CommentDto;
 import com.sprint.monew.domain.interest.QInterest;
+import com.sprint.monew.domain.interest.dto.SubscriptionDto;
 import com.sprint.monew.domain.interest.userinterest.QUserInterest;
 import com.sprint.monew.domain.like.QLike;
 import com.sprint.monew.domain.user.QUser;
@@ -34,7 +35,7 @@ public class UserActivityQueryRepository {
         QArticle article = QArticle.article;
         QArticleView articleView = QArticleView.articleView;
 
-        // 1. 사용자f
+        // 1. 사용자
         User fetchedUser = queryFactory.selectFrom(user)
                 .where(user.id.eq(userId))
                 .fetchOne();
@@ -43,9 +44,15 @@ public class UserActivityQueryRepository {
             throw new EntityNotFoundException("사용자 없음");
         }
 
-        // 2. 관심사 이름
-        List<String> interestNames = queryFactory
-                .select(interest.name)
+        // 2. 관심사
+        List<SubscriptionDto> subscriptions = queryFactory
+                .select(Projections.constructor(SubscriptionDto.class,
+                        interest.id,
+                        interest.id,
+                        interest.name,
+                        interest.keywords,
+                        interest.id,
+                        interest.createdAt))
                 .from(userInterest)
                 .join(userInterest.interest, interest)
                 .where(userInterest.user.id.eq(userId))
@@ -80,18 +87,20 @@ public class UserActivityQueryRepository {
                 .select(Projections.constructor(ArticleViewDto.class,
                         article.id,
                         article.title,
-                        articleView.viewedAt))
+                        articleView.createdAt))
                 .from(articleView)
                 .join(articleView.article, article)
                 .where(articleView.user.id.eq(userId))
-                .orderBy(articleView.viewedAt.desc())
+                .orderBy(articleView.createdAt.desc())
                 .limit(10)
                 .fetch();
 
         return new UserActivityDto(
                 userId,
+                fetchedUser.getEmail(),
                 fetchedUser.getNickname(),
-                interestNames,
+                fetchedUser.getCreatedAt(),
+                subscriptions,
                 comments,
                 likedComments,
                 viewedArticles
