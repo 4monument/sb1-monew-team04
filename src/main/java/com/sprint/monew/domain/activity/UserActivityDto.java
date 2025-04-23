@@ -17,4 +17,30 @@ public record UserActivityDto(
         List<CommentDto> recentComments,
         List<CommentDto> likedComments,
         List<ArticleViewDto> recentViewedNews
-) {}
+) {
+    public static UserActivityDto fromDocument(UserActivityDocument document) {
+        return new UserActivityDto(
+                document.getId(),
+                document.getEmail(),
+                document.getNickname(),
+                document.getCreatedAt(),
+                document.getSubscriptions(),
+                document.getRecentComments(),
+                document.getLikedComments(),
+                document.getRecentViewedNews()
+        );
+    }
+
+    public static UserActivityDocument toDocument(UserActivityDto dto) {
+        return UserActivityDocument.builder()
+                .id(dto.id())
+                .email(dto.email())
+                .nickname(dto.nickname())
+                .createdAt(dto.createdAt())
+                .subscriptions(dto.subscriptions())
+                .recentComments(dto.recentComments())
+                .likedComments(dto.likedComments())
+                .recentViewedNews(dto.recentViewedNews())
+                .build();
+    }
+}
