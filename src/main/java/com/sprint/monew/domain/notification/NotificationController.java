@@ -1,5 +1,6 @@
 package com.sprint.monew.domain.notification;
 
+import com.sprint.monew.common.util.CursorPageResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,7 @@ public class NotificationController {
 
   // 알림 목록 조회
   @GetMapping
-  public ResponseEntity<CursorPageResponseNotificationDto> getNotifications() {
+  public ResponseEntity<CursorPageResponseDto> getNotifications() {
     return null;
   }
 
