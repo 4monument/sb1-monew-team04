@@ -26,6 +26,8 @@ repositories {
 
 ext {
 	set('springAiVersion', "1.0.0-M7")
+	springDataVersion = "3.4.4"
+	queryDslVersion = "5.0.0"
 }
 
 dependencies {
@@ -36,12 +38,32 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	//implementation 'org.springframework.ai:spring-ai-starter-vector-store-mongodb-atlas'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+	implementation "io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0"
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	//querydsl
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
+	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"
+	implementation 'org.springframework.batch:spring-batch-infrastructure:5.2.2'
+	//implementation "org.springframework.data:spring-data-commons:${springDataVersion}:querydsl"
+	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+	annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.batch:spring-batch-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	testImplementation "org.junit.jupiter:junit-jupiter:5.8.1"
+
+	// S3 테스트 컨테이너
+	testImplementation "org.testcontainers:testcontainers:1.20.6"
+	testImplementation "org.testcontainers:postgresql:1.20.6"
+	testImplementation "cloud.localstack:localstack-utils:0.2.23"
+	testImplementation "org.testcontainers:junit-jupiter:1.20.6"
+	testImplementation "org.testcontainers:localstack:1.20.6"
 }
 
 dependencyManagement {
@@ -66,3 +88,13 @@ jacocoTestReport {
 	}
 }
 
+def querydslDir = "build/generated/querydsl"
+
+tasks.withType(JavaCompile) {
+	options.generatedSourceOutputDirectory = file(querydslDir)
+//	options.compilerArgs << "-parameters"
+}
+
+clean {
+	delete file(querydslDir)
+}

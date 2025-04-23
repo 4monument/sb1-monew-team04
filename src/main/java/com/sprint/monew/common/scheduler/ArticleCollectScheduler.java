@@ -1,6 +1,5 @@
 package com.sprint.monew.common.scheduler;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ArticleCollectSchedule {
+public class ArticleCollectScheduler {
 
   //private final ArticleService articleService;
   private final JobLauncher jobLauncher;
@@ -20,7 +19,8 @@ public class ArticleCollectSchedule {
   @Scheduled(cron = "0 0 0/1 * * ?", zone = "Asia/Seoul")
   public void collectArticles() {
     JobParameters jobParameters = new JobParametersBuilder()
-        .addLong("time", System.currentTimeMillis()).toJobParameters();
+        .addLong("time", System.currentTimeMillis())
+        .toJobParameters();
 
     log.info("Article collection start");
     //jobLauncher.run(newJob(), jobParameters);
