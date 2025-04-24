@@ -53,7 +53,6 @@
 
 저희 팀은 효율적인 협업을 위해 **정기적인 공유 시간**, **일정 관리 툴**, **이슈 기반 태스크 관리** 등을 체계적으로 운영하였습니다.
 
----
 
 ### 🕘 **Daily 협업 루틴**
 
@@ -62,7 +61,6 @@
 - **오전 10:00 ~ 10:20**  
   → 오늘 할 일을 각자 정리하여 `todo list`로 공유합니다.
 
----
 
 ### 🗓 **Notion 기반 일정 관리**
 
@@ -73,7 +71,6 @@
   <img src="https://github.com/user-attachments/assets/ed0ac1ed-f914-41d8-ab36-01d8ee67fa83" width="800"/>
 </p>
 
----
 
 ### 📌 **GitHub Project를 통한 업무 추적**
 
@@ -84,7 +81,6 @@
   <img src="https://github.com/user-attachments/assets/385b38c5-4805-4790-b235-22bcbae4e4ee" width="800"/>
 </p>
 
----
 
 ### 🧠 **기술 공유 및 이슈 정리**
 
