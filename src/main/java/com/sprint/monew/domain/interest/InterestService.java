@@ -3,6 +3,7 @@ package com.sprint.monew.domain.interest;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
+import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
 import com.sprint.monew.domain.interest.subscription.Subscription;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
@@ -24,21 +25,22 @@ public class InterestService {
   private final SubscriptionRepository subscriptionRepository;
 
   //관심사 목록 조회
-  public CursorPageResponseDto<InterestDto> getInterests(String keyword, String orderBy,
-      String direction, String cursor, String after, int limit, UUID requestUserid) {
+  public CursorPageResponseDto<InterestDto> getInterests(InterestSearchRequest request,
+      UUID requestUserid) {
 
     List<InterestDto> result = null;
 
+    String orderBy = request.orderBy();
+
     if (orderBy.equalsIgnoreCase("name")) {
-      result = getResultOrderByName(keyword, direction, cursor, after, limit, requestUserid);
+      result = getResultOrderByName(request, requestUserid);
     } else {
-      result = getResultOrderBySubscriberCount(keyword, direction, cursor, after, limit,
-          requestUserid);
+      result = getResultOrderBySubscriberCount(request, requestUserid);
     }
 
-    boolean hasNext = result.size() > limit;
+    boolean hasNext = result.size() > request.limit();
     if (hasNext) {
-      result = result.subList(0, limit);
+      result = result.subList(0, request.limit());
     }
 
     UUID nextCursor = null;
@@ -52,7 +54,7 @@ public class InterestService {
     }
 
     int size = result.size();
-    long totalElements = interestRepository.countByKeyword(keyword);
+    long totalElements = interestRepository.countByKeyword(request.keyword());
 
     return new CursorPageResponseDto<>(
         result,
@@ -64,8 +66,16 @@ public class InterestService {
     );
   }
 
-  private List<InterestDto> getResultOrderByName(String keyword, String direction, String cursor,
-      String after, int limit, UUID requestUserid) {
+  private List<InterestDto> getResultOrderByName(InterestSearchRequest request,
+      UUID requestUserid) {
+    //todo - 리팩토링
+    String orderBy = request.orderBy();
+    UUID cursor = request.cursor();
+    String keyword = request.keyword();
+    Instant after = request.after();
+    int limit = request.limit();
+    String direction = request.direction();
+
     if (direction.equalsIgnoreCase("DESC")) {
       List<Interest> interests = interestRepository.findByNameOrKeywordsContainingOrderByNameDesc(
           keyword, cursor, after, limit);
@@ -84,9 +94,16 @@ public class InterestService {
         .toList();
   }
 
-  private List<InterestDto> getResultOrderBySubscriberCount(
-      String keyword, String direction, String cursor, String after, int limit,
+  private List<InterestDto> getResultOrderBySubscriberCount(InterestSearchRequest request,
       UUID requestUserid) {
+
+    String orderBy = request.orderBy();
+    UUID cursor = request.cursor();
+    String keyword = request.keyword();
+    Instant after = request.after();
+    int limit = request.limit();
+    String direction = request.direction();
+
     if (direction.equalsIgnoreCase("DESC")) {
       List<InterestWithSubscriberCount> results = interestRepository
           .findByNameOrKeywordsContainingOrderBySubscriberCountDesc(keyword, cursor, after, limit);
@@ -108,6 +125,12 @@ public class InterestService {
 
   //관심사 등록
   public InterestDto createInterest(InterestCreateRequest request) {
+
+    boolean existsSimilarName = interestRepository.existsByName(request.name());
+
+    if (existsSimilarName) {
+      throw new IllegalArgumentException("동일한 이름의 관심사가 이미 존재합니다.");
+    }
 
     Interest interest = new Interest(request.name(), request.keywords());
 
@@ -168,9 +191,9 @@ public class InterestService {
   }
 
   //관심사 물리 삭제
-  public boolean deleteInterest(String interestId) {
+  public boolean deleteInterest(UUID interestId) {
 
-    Interest interest = interestRepository.findById(UUID.fromString(interestId))
+    Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> new IllegalArgumentException("Interest not found"));
 
     interestRepository.delete(interest);
@@ -185,8 +208,11 @@ public class InterestService {
     if (request.keywords() == null || request.keywords().isEmpty()) {
       throw new IllegalArgumentException("keywords is empty");
     }
-    User user = userRepository.findById(requestUserId)
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    User user = null;
+    if (requestUserId != null) {
+      user = userRepository.findById(requestUserId)
+          .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
 
     Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> new IllegalArgumentException("Interest not found"));
@@ -198,7 +224,8 @@ public class InterestService {
     return InterestDto.from(
         interest,
         subscriptionRepository.countDistinctByInterestId(interestId),
-        subscriptionRepository.existsByUserIdAndInterestId(user.getId(), interestId)
+        user == null ? true
+            : subscriptionRepository.existsByUserIdAndInterestId(user.getId(), interestId)
     );
   }
 

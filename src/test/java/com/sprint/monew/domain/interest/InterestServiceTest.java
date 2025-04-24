@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
+import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
 import com.sprint.monew.domain.interest.subscription.Subscription;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
@@ -169,7 +170,7 @@ class InterestServiceTest {
           Optional.ofNullable(interests.get(0)));
 
       //when
-      boolean isDeleted = interestService.deleteInterest(testData1Id.toString());
+      boolean isDeleted = interestService.deleteInterest(testData1Id);
 
       //then
       assertTrue(isDeleted);
@@ -186,7 +187,7 @@ class InterestServiceTest {
 
       //when & then
       assertThrows(IllegalArgumentException.class,
-          () -> interestService.deleteInterest(randomId.toString()));
+          () -> interestService.deleteInterest(randomId));
 
       verify(interestRepository, never()).delete(any(Interest.class));
     }
@@ -203,9 +204,13 @@ class InterestServiceTest {
       String keyword = "프로그래";
       String orderBy = "name";
       String direction = "asc";
-      String cursor = null;
-      String after = null;
+      UUID cursor = null;
+      Instant after = null;
       int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
       UUID userId = UUID.randomUUID();
 
       List<Interest> searchResult = new ArrayList<>();
@@ -224,8 +229,7 @@ class InterestServiceTest {
 
       // when
       CursorPageResponseDto<InterestDto> result = interestService.getInterests(
-          keyword, orderBy, direction, cursor, after, limit, userId
-      );
+          interestSearchRequest, userId);
 
       //then
       assertNotNull(result);
@@ -241,12 +245,17 @@ class InterestServiceTest {
       String keyword = "개발";
       String orderBy = "name";
       String direction = "desc";
-      String cursor = null;
-      String after = null;
+      UUID cursor = null;
+      Instant after = null;
       int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
       UUID userId = UUID.randomUUID();
 
       List<Interest> searchResult = new ArrayList<>();
+
       searchResult.add(interests.get(0));
       searchResult.add(interests.get(3));
 
@@ -268,8 +277,7 @@ class InterestServiceTest {
 
       // when
       CursorPageResponseDto<InterestDto> result = interestService.getInterests(
-          keyword, orderBy, direction, cursor, after, limit, userId
-      );
+          interestSearchRequest, userId);
 
       //then
       assertNotNull(result);
@@ -285,9 +293,13 @@ class InterestServiceTest {
       String keyword = "프로그래";
       String orderBy = "subscriberCount";
       String direction = "desc";
-      String cursor = null;
-      String after = null;
+      UUID cursor = null;
+      Instant after = null;
       int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
       UUID userId = UUID.randomUUID();
 
       List<InterestWithSubscriberCount> searchResult = new ArrayList<>();
@@ -312,8 +324,7 @@ class InterestServiceTest {
 
       // when
       CursorPageResponseDto<InterestDto> result = interestService.getInterests(
-          keyword, orderBy, direction, cursor, after, limit, userId
-      );
+          interestSearchRequest, userId);
 
       //then
       assertNotNull(result);
@@ -329,9 +340,13 @@ class InterestServiceTest {
       String keyword = "개발";
       String orderBy = "subscriberCount";
       String direction = "asc";
-      String cursor = null;
-      String after = null;
+      UUID cursor = null;
+      Instant after = null;
       int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
       UUID userId = UUID.randomUUID();
 
       List<InterestWithSubscriberCount> searchResult = new ArrayList<>();
@@ -351,7 +366,7 @@ class InterestServiceTest {
           interests.get(3).getName(),
           interests.get(3).getKeywords(),
           interests.get(3).getCreatedAt(),
-          0L
+          1L
       ));
 
       when(interestRepository
@@ -369,8 +384,7 @@ class InterestServiceTest {
 
       // when
       CursorPageResponseDto<InterestDto> result = interestService.getInterests(
-          keyword, orderBy, direction, cursor, after, limit, userId
-      );
+          interestSearchRequest, userId);
 
       //then
       assertNotNull(result);
@@ -386,17 +400,20 @@ class InterestServiceTest {
       String keyword = "뷰티";
       String orderBy = "name";
       String direction = "asc";
-      String cursor = null;
-      String after = null;
+      UUID cursor = null;
+      Instant after = null;
       int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
       UUID userId = UUID.randomUUID();
 
       when(interestRepository.countByKeyword(keyword)).thenReturn(0);
 
       // when
       CursorPageResponseDto<InterestDto> result = interestService.getInterests(
-          keyword, orderBy, direction, cursor, after, limit, userId
-      );
+          interestSearchRequest, userId);
 
       //then
       assertNotNull(result);
@@ -555,7 +572,7 @@ class InterestServiceTest {
 
       when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
       when(interestRepository.findById(interest.getId())).thenReturn(Optional.of(interest));
-      when(subscriptionRepository.findById(any(UUID.class))).thenReturn(
+      when(subscriptionRepository.findByUserAndInterest(user, interest)).thenReturn(
           Optional.of(subscribe));
 
       //when & then
