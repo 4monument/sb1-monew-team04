@@ -1,8 +1,8 @@
 package com.sprint.monew.domain.interest;
 
 
-import java.util.List;
+import com.sprint.monew.common.batch.util.Keywords;
 
 public interface CustomInterestRepository {
-  List<String> findAllKeyword();
+  Keywords findAllKeyword();
 }
