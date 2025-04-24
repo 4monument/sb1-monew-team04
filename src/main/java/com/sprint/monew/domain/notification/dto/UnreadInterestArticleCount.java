@@ -1,12 +1,13 @@
 package com.sprint.monew.domain.notification.dto;
 
-import java.util.UUID;
+import com.sprint.monew.domain.interest.Interest;
+import com.sprint.monew.domain.user.User;
 
 public interface UnreadInterestArticleCount {
 
-  UUID getInterestId();
+  Interest getInterest();
 
-  String getInterestName();
+  User getUser();
 
-  Long getUnreadCount();
+  Long getTotalNewArticles();
 }

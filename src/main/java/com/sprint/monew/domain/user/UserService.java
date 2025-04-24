@@ -1,5 +1,9 @@
 package com.sprint.monew.domain.user;
 
+import com.sprint.monew.domain.user.exception.EmailAlreadyExistsException;
+import com.sprint.monew.domain.user.exception.InvalidCredentialsException;
+import com.sprint.monew.domain.user.exception.UserAlreadyDeletedException;
+import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
 import java.util.UUID;
@@ -16,7 +20,7 @@ public class UserService {
   @Transactional
   public UserDto register(UserRegisterRequest request) {
     if (userRepository.existsByEmail(request.email())) {
-      throw new IllegalArgumentException("Email already in use");
+      throw EmailAlreadyExistsException.withEmail(request.email());
     }
     User user = new User(null, request.email(), request.nickname(),
         request.password(), Instant.now(), false);
@@ -26,9 +30,9 @@ public class UserService {
   @Transactional(readOnly = true)
   public UserDto login(UserLoginRequest request) {
     User user = userRepository.findByEmailAndDeletedFalse(request.email())
-        .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        .orElseThrow(() -> UserNotFoundException.withEmail(request.email()));
     if (!request.password().equals(user.getPassword())) {
-      throw new IllegalArgumentException("Invalid credentials");
+      throw InvalidCredentialsException.wrongPassword();
     }
     return UserDto.from(user);
   }
@@ -36,7 +40,7 @@ public class UserService {
   @Transactional
   public UserDto updateNickname(UUID userId, UserUpdateRequest request) {
     User user = userRepository.findByIdAndDeletedFalse(userId)
-        .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
     user.updateNickname(request.nickname());
     return UserDto.from(user);
   }
@@ -44,9 +48,9 @@ public class UserService {
   @Transactional
   public void softDelete(UUID userId) {
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
     if (user.isDeleted()) {
-      throw new IllegalStateException("User already deleted");
+      throw UserAlreadyDeletedException.withUserId(userId);
     }
     user.markDeleted();
   }
@@ -54,7 +58,7 @@ public class UserService {
   @Transactional
   public void hardDelete(UUID userId) {
     if (!userRepository.existsById(userId)) {
-      throw new EntityNotFoundException("User not found");
+      throw UserNotFoundException.withId(userId);
     }
     userRepository.deleteById(userId);
   }

@@ -4,38 +4,24 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-public record ErrorResponse (
-  Instant timestamp,
-  String code,
-  String message,
-  Map<String, Object> details,
-  int status
-) {
-  public static ErrorResponse fromMonewEx(MonewException exception) {
-    return new ErrorResponse(
-        Instant.now(),
-        exception.getErrorCode().name(),
-        exception.getMessage(),
-        exception.getDetails(),
-        exception.getErrorCode().getStatus());
-  }
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-  public static ErrorResponse fromEx(Exception exception, int status) {
-    return new ErrorResponse(
-        Instant.now(),
-        exception.getClass().getSimpleName(),
-        exception.getMessage(),
-        new HashMap<>(),
-        status);
-  }
+@Getter
+@RequiredArgsConstructor
+public class ErrorResponse {
+    private final Instant timestamp;
+    private final String code;
+    private final String message;
+    private final Map<String, Object> details;
+    private final String exceptionType;
+    private final int status;
 
-  public static ErrorResponse of(ErrorCode errorCode, Map<String, Object> details) {
-    return new ErrorResponse(
-        Instant.now(),
-        errorCode.name(),
-        errorCode.getMessage(),
-        details,
-        errorCode.getStatus()
-    );
-  }
-}
+    public ErrorResponse(MonewException exception, int status) {
+        this(Instant.now(), exception.getErrorCode().name(), exception.getMessage(), exception.getDetails(), exception.getClass().getSimpleName(), status);
+    }
+
+    public ErrorResponse(Exception exception, int status) {
+        this(Instant.now(), exception.getClass().getSimpleName(), exception.getMessage(), new HashMap<>(), exception.getClass().getSimpleName(), status);
+    }
+} 

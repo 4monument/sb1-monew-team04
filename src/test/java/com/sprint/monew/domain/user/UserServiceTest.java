@@ -5,6 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.sprint.monew.domain.user.exception.EmailAlreadyExistsException;
+import com.sprint.monew.domain.user.exception.InvalidCredentialsException;
+import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
 import java.util.Optional;
@@ -69,8 +72,7 @@ class UserServiceTest {
 
     // when, then
     assertThatThrownBy(() -> userService.register(request))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Email already in use");
+        .isInstanceOf(EmailAlreadyExistsException.class);
 
     verify(userRepository).existsByEmail(request.email());
     verify(userRepository, never()).save(any(User.class));
@@ -104,8 +106,7 @@ class UserServiceTest {
 
     // when, then
     assertThatThrownBy(() -> userService.login(request))
-        .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage("User not found");
+        .isInstanceOf(UserNotFoundException.class);
 
     verify(userRepository).findByEmailAndDeletedFalse(request.email());
   }
@@ -119,8 +120,7 @@ class UserServiceTest {
 
     // when, then
     assertThatThrownBy(() -> userService.login(request))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Invalid credentials");
+        .isInstanceOf(InvalidCredentialsException.class);
 
     verify(userRepository).findByEmailAndDeletedFalse(request.email());
   }
@@ -152,8 +152,7 @@ class UserServiceTest {
 
     // when, then
     assertThatThrownBy(() -> userService.updateNickname(nonExistingId, request))
-        .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage("User not found");
+        .isInstanceOf(UserNotFoundException.class);
 
     verify(userRepository).findByIdAndDeletedFalse(nonExistingId);
   }
@@ -181,8 +180,7 @@ class UserServiceTest {
 
     // when, then
     assertThatThrownBy(() -> userService.softDelete(nonExistingId))
-        .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage("User not found");
+        .isInstanceOf(UserNotFoundException.class);
 
     verify(userRepository).findById(nonExistingId);
   }
@@ -211,8 +209,7 @@ class UserServiceTest {
 
     // when, then
     assertThatThrownBy(() -> userService.hardDelete(nonExistingId))
-        .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage("User not found");
+        .isInstanceOf(UserNotFoundException.class);
 
     verify(userRepository).existsById(nonExistingId);
     verify(userRepository, never()).deleteById(any(UUID.class));

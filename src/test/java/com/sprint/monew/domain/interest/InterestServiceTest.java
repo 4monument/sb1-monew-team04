@@ -1,23 +1,28 @@
 package com.sprint.monew.domain.interest;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
-import com.sprint.monew.domain.interest.dto.SubscriptionDto;
-import com.sprint.monew.domain.interest.userinterest.UserInterest;
-import com.sprint.monew.domain.interest.userinterest.UserInterestKey;
-import com.sprint.monew.domain.interest.userinterest.UserInterestRepository;
+import com.sprint.monew.domain.interest.subscription.Subscription;
+import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
+import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import java.lang.reflect.Field;
-import com.sprint.monew.common.util.CursorPageResponseDto;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +49,7 @@ class InterestServiceTest {
   private UserRepository userRepository;
 
   @Mock
-  private UserInterestRepository subscriptionRepository;
+  private SubscriptionRepository subscriptionRepository;
 
   @InjectMocks
   private InterestService interestService;
@@ -406,6 +411,7 @@ class InterestServiceTest {
   @Nested
   @DisplayName("수정")
   class updateInterest {
+
     @Test
     @DisplayName("성공")
     void updateInterestSuccess() {
@@ -479,13 +485,14 @@ class InterestServiceTest {
   @Nested
   @DisplayName("관심사 구독")
   class subscribe {
+
     @Test
     @DisplayName("성공")
     void subscribeSuccess() {
       //given
       Interest interest = interests.get(1);
 
-      UserInterest subscribe = new UserInterest(user, interest);
+      Subscription subscribe = new Subscription(user, interest);
 
       when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
       when(interestRepository.findById(interest.getId())).thenReturn(Optional.of(interest));
@@ -498,7 +505,7 @@ class InterestServiceTest {
       //then
       assertNotNull(subscriptionDto);
 
-      verify(subscriptionRepository,times(1)).save(any(UserInterest.class));
+      verify(subscriptionRepository, times(1)).save(any(Subscription.class));
     }
 
     @Test
@@ -510,9 +517,10 @@ class InterestServiceTest {
       when(interestRepository.findById(interestId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class, () -> interestService.subscribeToInterest(interestId, userId));
+      assertThrows(IllegalArgumentException.class,
+          () -> interestService.subscribeToInterest(interestId, userId));
 
-      verify(subscriptionRepository, never()).save(any(UserInterest.class));
+      verify(subscriptionRepository, never()).save(any(Subscription.class));
     }
 
     @Test
@@ -526,32 +534,34 @@ class InterestServiceTest {
       when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class, () -> interestService.subscribeToInterest(interest.getId(), userId));
+      assertThrows(IllegalArgumentException.class,
+          () -> interestService.subscribeToInterest(interest.getId(), userId));
 
-      verify(subscriptionRepository, never()).save(any(UserInterest.class));
+      verify(subscriptionRepository, never()).save(any(Subscription.class));
     }
   }
 
   @Nested
   @DisplayName("관심사 구독 취소")
   class unsubscribe {
+
     @Test
     @DisplayName("성공")
     void unsubscribeSuccess() {
       //given
       Interest interest = interests.get(1);
 
-      UserInterest subscribe = new UserInterest(user, interest);
+      Subscription subscribe = new Subscription(user, interest);
 
       when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
       when(interestRepository.findById(interest.getId())).thenReturn(Optional.of(interest));
-      when(subscriptionRepository.findById(any(UserInterestKey.class))).thenReturn(Optional.of(subscribe));
-
+      when(subscriptionRepository.findById(any(UUID.class))).thenReturn(
+          Optional.of(subscribe));
 
       //when & then
       assertTrue(interestService.unsubscribeFromInterest(interest.getId(), userId));
 
-      verify(subscriptionRepository,times(1)).delete(any(UserInterest.class));
+      verify(subscriptionRepository, times(1)).delete(any(Subscription.class));
     }
 
     @Test
@@ -563,9 +573,10 @@ class InterestServiceTest {
       when(interestRepository.findById(interestId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class, () -> interestService.unsubscribeFromInterest(interestId, userId));
+      assertThrows(IllegalArgumentException.class,
+          () -> interestService.unsubscribeFromInterest(interestId, userId));
 
-      verify(subscriptionRepository, never()).delete(any(UserInterest.class));
+      verify(subscriptionRepository, never()).delete(any(Subscription.class));
     }
 
     @Test
@@ -579,9 +590,10 @@ class InterestServiceTest {
       when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class, () -> interestService.unsubscribeFromInterest(interest.getId(), userId));
+      assertThrows(IllegalArgumentException.class,
+          () -> interestService.unsubscribeFromInterest(interest.getId(), userId));
 
-      verify(subscriptionRepository, never()).delete(any(UserInterest.class));
+      verify(subscriptionRepository, never()).delete(any(Subscription.class));
     }
 
   }

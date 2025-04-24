@@ -32,6 +32,7 @@ public class ChosunArticleClient {
 
   @Getter
   public enum ChosunCategory {
+    ALL(""),
     POLITICS("politics"),
     ECONOMY("economy"),
     NATIONAL("national"),

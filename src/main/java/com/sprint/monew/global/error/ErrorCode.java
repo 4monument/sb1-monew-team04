@@ -1,17 +1,21 @@
 package com.sprint.monew.global.error;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public enum ErrorCode {
-  USER_NOT_FOUND(404, "User Not Found"),
-  ARTICLE_NOT_FOUND(404, "Article Not Found"),
-  ARTICLE_VIEW_ALREADY_EXIST(400, "ArticleView already exist"),
 
-  VALIDATION_ERROR(400, "Validation Error");
+  // User 관련 에러 코드
+  USER_NOT_FOUND("사용자를 찾을 수 없습니다."),
+  DUPLICATE_USER("이미 존재하는 사용자입니다."),
+  INVALID_USER_CREDENTIALS("잘못된 사용자 인증 정보입니다."),
+  ALREADY_DELETED_USER("이미 삭제된 유저입니다."),
 
-  private final int status;
+  ARTICLE_NOT_FOUND("기사를 찾을 수 없습니다."),
+  ARTICLE_VIEW_ALREADY_EXIST("이미 존재하는 기사 뷰 입니다.");
   private final String message;
+
+  ErrorCode(String message) {
+    this.message = message;
+  }
 }
