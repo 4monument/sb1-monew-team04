@@ -53,6 +53,15 @@ public class User {
     this.deleted = deleted;
   }
 
+  public User(String email, String nickname, String password, Instant createdAt,
+      boolean deleted) {
+    this.email = email;
+    this.nickname = nickname;
+    this.password = password;
+    this.createdAt = createdAt;
+    this.deleted = deleted;
+  }
+
   public void updateNickname(String nickname) {
     this.nickname = nickname;
   }
