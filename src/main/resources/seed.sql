@@ -27,16 +27,10 @@ WITH u1 AS (SELECT id AS user_id FROM users WHERE email = 'minji@example.com'),
      i1 AS (SELECT id AS interest_id FROM interests WHERE name = '기술'),
      i2 AS (SELECT id AS interest_id FROM interests WHERE name = '건강')
 
-INSERT INTO "users_interests" ("user_id", "interest_id", "created_at")
-SELECT u1.user_id, i1.interest_id, now() FROM u1, i1
+INSERT INTO "users_interests" ("id", "user_id", "interest_id", "created_at")
+SELECT gen_random_uuid(), u1.user_id, i1.interest_id, now() FROM u1, i1
 UNION
-SELECT u2.user_id, i2.interest_id, now() FROM u2, i2;
-
--- ARTICLES (기사)
-INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date")
-VALUES
-    (gen_random_uuid(), 'NAVER', 'https://site.com/ai', '인공지능의 미래', 'AI가 바꾸는 세상에 대한 이야기', now()),
-    (gen_random_uuid(), 'CHOSUN', 'https://site.com/health', '건강하게 사는 법', '건강을 유지하는 실용적인 팁', now());
+SELECT gen_random_uuid(), u2.user_id, i2.interest_id, now() FROM u2, i2;
 
 -- ARTICLES_INTERESTS (기사-관심사 연결)
 WITH
@@ -46,14 +40,12 @@ WITH
     i2 AS (SELECT id AS interest_id FROM interests WHERE name = '건강')
 
 INSERT
-INTO "articles_interests" ("article_id", "interest_id")
-SELECT a1.article_id, i1.interest_id
-FROM a1,
-     i1
+INTO "articles_interests" ("id", "article_id", "interest_id")
+SELECT gen_random_uuid(), a1.article_id, i1.interest_id
+FROM a1, i1
 UNION
-SELECT a2.article_id, i2.interest_id
-FROM a2,
-     i2;
+SELECT gen_random_uuid(), a2.article_id, i2.interest_id
+FROM a2, i2;
 
 -- COMMENTS (댓글)
 WITH au1 AS (SELECT id FROM users WHERE email = 'minji@example.com'),
