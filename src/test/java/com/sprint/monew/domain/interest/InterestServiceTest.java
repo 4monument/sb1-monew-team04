@@ -18,11 +18,15 @@ import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
+import com.sprint.monew.domain.interest.exception.EmptyKeywordsException;
+import com.sprint.monew.domain.interest.exception.InterestAlreadyExistsException;
+import com.sprint.monew.domain.interest.exception.InterestNotFoundException;
 import com.sprint.monew.domain.interest.subscription.Subscription;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
 import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
+import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -151,7 +155,8 @@ class InterestServiceTest {
       when(interestRepository.findAll()).thenReturn(interests);
 
       //when & then
-      assertThrows(IllegalArgumentException.class, () -> interestService.createInterest(request));
+      assertThrows(InterestAlreadyExistsException.class,
+          () -> interestService.createInterest(request));
 
       verify(interestRepository, times(0)).save(any(Interest.class));
     }
@@ -179,14 +184,14 @@ class InterestServiceTest {
     }
 
     @Test
-    @DisplayName("실패")
+    @DisplayName("실패: 해당 id를 가지는 관심사가 존재하지 않음")
     void deleteInterestFailure() {
       //given
       UUID randomId = UUID.randomUUID();
       when(interestRepository.findById(randomId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(InterestNotFoundException.class,
           () -> interestService.deleteInterest(randomId));
 
       verify(interestRepository, never()).delete(any(Interest.class));
@@ -471,7 +476,7 @@ class InterestServiceTest {
       when(interestRepository.findById(interestId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(InterestNotFoundException.class,
           () -> interestService.updateInterest(userId, interestId, request));
 
       assertNotEquals(keywords, interests.get(1).getKeywords());
@@ -490,7 +495,7 @@ class InterestServiceTest {
       InterestUpdateRequest request = new InterestUpdateRequest(keywords);
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(EmptyKeywordsException.class,
           () -> interestService.updateInterest(userId, interestId, request));
 
       assertNotEquals(keywords, interests.get(1).getKeywords());
@@ -534,7 +539,7 @@ class InterestServiceTest {
       when(interestRepository.findById(interestId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(InterestNotFoundException.class,
           () -> interestService.subscribeToInterest(interestId, userId));
 
       verify(subscriptionRepository, never()).save(any(Subscription.class));
@@ -551,7 +556,7 @@ class InterestServiceTest {
       when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(UserNotFoundException.class,
           () -> interestService.subscribeToInterest(interest.getId(), userId));
 
       verify(subscriptionRepository, never()).save(any(Subscription.class));
@@ -590,7 +595,7 @@ class InterestServiceTest {
       when(interestRepository.findById(interestId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(InterestNotFoundException.class,
           () -> interestService.unsubscribeFromInterest(interestId, userId));
 
       verify(subscriptionRepository, never()).delete(any(Subscription.class));
@@ -607,7 +612,7 @@ class InterestServiceTest {
       when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(UserNotFoundException.class,
           () -> interestService.unsubscribeFromInterest(interest.getId(), userId));
 
       verify(subscriptionRepository, never()).delete(any(Subscription.class));
