@@ -21,7 +21,8 @@ public class NaverArticleClient {
   @Value("${article.api.naver.secret:secret}")
   private String secret;
 
-  public NaverArticleResponse getArticle(String query, int display, int start, String sort) {
+  public NaverArticleResponse getArticle(String query, int display, int start) {
+    String sort = "date";
     String apiURL = url + "?query=" + query + "&display=" + display + "&start=" + start + "&sort=" + sort;
 
     return restClient.get()
