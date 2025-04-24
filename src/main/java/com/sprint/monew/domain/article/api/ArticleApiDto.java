@@ -1,5 +1,6 @@
 package com.sprint.monew.domain.article.api;
 
+import com.sprint.monew.common.batch.util.Keywords;
 import com.sprint.monew.domain.article.Article.Source;
 import java.time.Instant;
 import lombok.Builder;
@@ -13,4 +14,9 @@ public record ArticleApiDto (
     Instant publishDate
 ) {
 
+//  public boolean isRelatedNews(Keywords keywords) {
+//    String lowerCaseSummary = summary.toLowerCase();
+//    return keywords.getKeywords().stream()
+//        .anyMatch(lowerCaseSummary::contains);
+//  }
 }

@@ -1,5 +1,6 @@
 package com.sprint.monew.common.batch.util;
 
+import com.sprint.monew.domain.article.api.ArticleApiDto;
 import java.util.Collections;
 import java.util.List;
 import lombok.Getter;
@@ -13,5 +14,19 @@ public class Keywords {
 
   public Keywords(List<String> keywords) {
     this.keywords = Collections.unmodifiableList(keywords);
+  }
+
+  // O(N2)인데... 나중에 Hash 구조로 다 바꿔야할 것 같네
+  public List<ArticleApiDto> filter(List<ArticleApiDto> articleApiDtos) {
+    return articleApiDtos.stream()
+        .filter(this::isContainsIn)
+        .toList();
+  }
+
+  public boolean isContainsIn(ArticleApiDto articleApiDto) {
+    String summary = articleApiDto.summary();
+    //summary.toLowerCase();
+    return keywords.stream()
+        .anyMatch(summary::contains);
   }
 }

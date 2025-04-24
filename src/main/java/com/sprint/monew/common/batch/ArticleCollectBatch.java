@@ -1,5 +1,8 @@
 package com.sprint.monew.common.batch;
 
+import static com.sprint.monew.common.batch.util.CustomExecutionContextKeys.*;
+
+import com.sprint.monew.common.batch.util.ExecutionContextFinder;
 import com.sprint.monew.common.batch.util.Keywords;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.interest.InterestRepository;
@@ -35,12 +38,16 @@ public class ArticleCollectBatch {
 
   @Bean
   public Job articleCollectJob(
-      @Qualifier("keywordCollectStep") Step articleCollectStep) {
+      @Qualifier("keywordCollectStep") Step articleCollectStep,
+      @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow) {
 
-    new JobBuilder("articleCollectJob", jobRepository)
+    return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
         .start(articleCollectStep)
-        .start(naverArticleCollectFlow(null))
+          .on(null) // 나중
+          .to(naverArticleCollectFlow)
+        //.split( ) 나중에 multi flow 구현
+        .end()
         .build();
   }
 
@@ -51,28 +58,40 @@ public class ArticleCollectBatch {
     return new StepBuilder("KeyWordCollectStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
           Keywords allKeyword = interestRepository.findAllKeyword();
-          ExecutionContext executionContext = contribution.getStepExecution()
-              .getJobExecution()
-              .getExecutionContext();
-          executionContext.put("allKeyword", allKeyword);
+          ExecutionContext jobExecutionContext = ExecutionContextFinder.findJobExecutionContext(
+              contribution);
+          jobExecutionContext.put(KEYWORDS.getKey(), allKeyword);
           return RepeatStatus.FINISHED;
         }, transactionManager)
         .build();
   }
 
-  @Bean
+  // Naver Flow -> API를 호출 + 처리
+  @Bean(name = "naverArticleCollectFlow")
+  @StepScope
   public Flow naverArticleCollectFlow(NaverApiCall naverApiCall) {
+    // 호출
     TaskletStep naverArticleCollectStep = new StepBuilder("naverArticleCollectStep", jobRepository)
         .tasklet(naverApiCall, transactionManager)
         .build();
 
     return new FlowBuilder<Flow>("naverCollectFlow")
         .start(naverArticleCollectStep)
-        .next(articleStepByJpaItemWriter())
+        .next(articleHandlerStep()) // 처리  스텝
         .build();
   }
 
-
+  @Bean
+  @JobScope
+  public Step articleHandlerStep() {
+    // Article을 처리하는 Step
+    return new StepBuilder("articleHandlerStep", jobRepository)
+        .tasklet((contribution, chunkContext) -> {
+          // 나중에 구현
+          return RepeatStatus.FINISHED;
+        }, transactionManager)
+        .build();
+  }
 
   // ItemReader
 
