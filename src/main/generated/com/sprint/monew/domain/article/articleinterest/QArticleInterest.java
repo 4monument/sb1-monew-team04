@@ -24,7 +24,9 @@ public class QArticleInterest extends EntityPathBase<ArticleInterest> {
 
     public final com.sprint.monew.domain.article.QArticle article;
 
-    public final QArticleInterestKey id;
+    public final DateTimePath<java.time.Instant> createdAt = createDateTime("createdAt", java.time.Instant.class);
+
+    public final ComparablePath<java.util.UUID> id = createComparable("id", java.util.UUID.class);
 
     public final com.sprint.monew.domain.interest.QInterest interest;
 
@@ -47,7 +49,6 @@ public class QArticleInterest extends EntityPathBase<ArticleInterest> {
     public QArticleInterest(Class<? extends ArticleInterest> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.article = inits.isInitialized("article") ? new com.sprint.monew.domain.article.QArticle(forProperty("article")) : null;
-        this.id = inits.isInitialized("id") ? new QArticleInterestKey(forProperty("id")) : null;
         this.interest = inits.isInitialized("interest") ? new com.sprint.monew.domain.interest.QInterest(forProperty("interest")) : null;
     }
 

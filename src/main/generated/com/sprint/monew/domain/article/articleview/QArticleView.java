@@ -26,7 +26,7 @@ public class QArticleView extends EntityPathBase<ArticleView> {
 
     public final DateTimePath<java.time.Instant> createdAt = createDateTime("createdAt", java.time.Instant.class);
 
-    public final QArticleViewKey id;
+    public final ComparablePath<java.util.UUID> id = createComparable("id", java.util.UUID.class);
 
     public final com.sprint.monew.domain.user.QUser user;
 
@@ -49,7 +49,6 @@ public class QArticleView extends EntityPathBase<ArticleView> {
     public QArticleView(Class<? extends ArticleView> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.article = inits.isInitialized("article") ? new com.sprint.monew.domain.article.QArticle(forProperty("article")) : null;
-        this.id = inits.isInitialized("id") ? new QArticleViewKey(forProperty("id")) : null;
         this.user = inits.isInitialized("user") ? new com.sprint.monew.domain.user.QUser(forProperty("user")) : null;
     }
 
