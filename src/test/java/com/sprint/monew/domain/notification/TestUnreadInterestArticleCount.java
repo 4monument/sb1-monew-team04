@@ -1,32 +1,33 @@
 package com.sprint.monew.domain.notification;
 
+import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
-import java.util.UUID;
+import com.sprint.monew.domain.user.User;
 
 public class TestUnreadInterestArticleCount implements UnreadInterestArticleCount {
 
-  private UUID interestId;
-  private String interestName;
-  private Long unreadCount;
+  private Interest interest;
+  private User user;
+  private Long totalNewArticles;
 
-  public TestUnreadInterestArticleCount(UUID interestId, String interestName, Long unreadCount) {
-    this.interestId = interestId;
-    this.interestName = interestName;
-    this.unreadCount = unreadCount;
+  public TestUnreadInterestArticleCount(Interest interest, User user, Long totalNewArticles) {
+    this.interest = interest;
+    this.user = user;
+    this.totalNewArticles = totalNewArticles;
+  }
+  
+  @Override
+  public Interest getInterest() {
+    return interest;
   }
 
   @Override
-  public UUID getInterestId() {
-    return interestId;
+  public User getUser() {
+    return user;
   }
 
   @Override
-  public String getInterestName() {
-    return interestName;
-  }
-
-  @Override
-  public Long getUnreadCount() {
-    return unreadCount;
+  public Long getTotalNewArticles() {
+    return totalNewArticles;
   }
 }

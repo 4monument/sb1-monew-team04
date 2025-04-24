@@ -4,16 +4,13 @@ import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
-import com.sprint.monew.domain.interest.dto.SubscriptionDto;
-import com.sprint.monew.domain.interest.userinterest.UserInterest;
-import com.sprint.monew.domain.interest.userinterest.UserInterestKey;
-import com.sprint.monew.domain.interest.userinterest.UserInterestRepository;
+import com.sprint.monew.domain.interest.subscription.Subscription;
+import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
+import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
-
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +21,7 @@ public class InterestService {
 
   private final InterestRepository interestRepository;
   private final UserRepository userRepository;
-  private final UserInterestRepository subscriptionRepository;
+  private final SubscriptionRepository subscriptionRepository;
 
   //관심사 목록 조회
   public CursorPageResponseDto<InterestDto> getInterests(String keyword, String orderBy,
@@ -145,15 +142,10 @@ public class InterestService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-    /* todo
-    - 구독한 관심사와 관련된 뉴스 기사가 등록되면 알림을 받을 수 있습니다.
-     */
-
-    UserInterest subscribe = new UserInterest(user, interest);
+    Subscription subscribe = new Subscription(user, interest);
     subscriptionRepository.save(subscribe);
 
-    return SubscriptionDto.from(
-        subscribe.getInterest(),
+    return SubscriptionDto.from(subscribe,
         subscriptionRepository.countDistinctByInterestId(interestId));
   }
 
@@ -165,11 +157,10 @@ public class InterestService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-    UserInterestKey userInterestId = new UserInterestKey(user.getId(), interest.getId());
-
-    UserInterest subscribe = subscriptionRepository.findById(userInterestId).orElseThrow(
-        () -> new IllegalArgumentException("UserInterest not found")
-    );
+    Subscription subscribe = subscriptionRepository.findByUserAndInterest(user, interest)
+        .orElseThrow(
+            () -> new IllegalArgumentException("UserInterest not found")
+        );
 
     subscriptionRepository.delete(subscribe);
 
@@ -188,9 +179,10 @@ public class InterestService {
   }
 
   //관심사 정보 수정
-  public InterestDto updateInterest(UUID requestUserId, UUID interestId, InterestUpdateRequest request) {
+  public InterestDto updateInterest(UUID requestUserId, UUID interestId,
+      InterestUpdateRequest request) {
 
-    if( request.keywords() == null || request.keywords().isEmpty()) {
+    if (request.keywords() == null || request.keywords().isEmpty()) {
       throw new IllegalArgumentException("keywords is empty");
     }
     User user = userRepository.findById(requestUserId)
