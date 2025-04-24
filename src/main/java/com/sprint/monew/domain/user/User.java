@@ -12,6 +12,7 @@ import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 
 @Entity
@@ -24,16 +25,22 @@ public class User {
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(columnDefinition = "uuid", updatable = false, nullable = false)
   private UUID id;
+
   @Column(length = 255, nullable = false, unique = true)
   private String email;
+
   @Column(length = 255, nullable = false)
   private String nickname;
+
   @Column(length = 255, nullable = false)
   private String password;
+
   @CreatedDate
   @Column(columnDefinition = "timestamp with time zone", updatable = false, nullable = false)
   private Instant createdAt;
+
   @Column(nullable = false)
+  @ColumnDefault("false")
   private boolean deleted;
 
   public User(UUID id, String email, String nickname, String password, Instant createdAt,
