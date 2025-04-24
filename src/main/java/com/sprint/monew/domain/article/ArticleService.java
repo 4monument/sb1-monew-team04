@@ -12,7 +12,7 @@ import com.sprint.monew.domain.comment.CommentRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.global.error.ErrorCode;
-import com.sprint.monew.global.error.exception.article.ArticleViewAlreadyExistException;
+import com.sprint.monew.domain.article.exception.ArticleViewAlreadyExistException;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
