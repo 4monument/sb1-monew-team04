@@ -6,8 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.builder.FlowBuilder;
+import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +44,19 @@ public class ArticleCollectBatch {
          .reader(null) // 나중에 구현
          .writer(articleJpaItemWriter()) //
          .build();
+  }
+
+
+  @Bean
+  public Flow naverArticleCollectFlow(NaverApiCall naverApiCall) {
+
+    TaskletStep naverArticleCollectStep = new StepBuilder("naverArticleCollectStep", jobRepository)
+        .tasklet(naverApiCall, transactionManager)
+        .build();
+    return new FlowBuilder<Flow>("naverCollectFlow")
+        .start(naverArticleCollectStep)
+        .next(articleStepByJpaItemWriter())
+        .build();
   }
 
 
