@@ -57,7 +57,7 @@ public class AricleCollectFlowConfig {
   public Tasklet naverApiCallTasklet() {
     return (contribution, chunkContext) -> {
       // 네이버 호출하는 로직있다고 가정
-      List<ArticleApiDto> articleApiDtos = articleApiClient.getNaverArticle("d");
+      List<ArticleApiDto> articleApiDtos = articleApiClient.getNaverArticle();
 
       // API로 호출한 뉴스를 배치 저장소에 저장
       ExecutionContext jobExecutionContext = ExecutionContextFinder.findJobExecutionContext(
