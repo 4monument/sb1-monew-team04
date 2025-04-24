@@ -1,5 +1,84 @@
 package com.sprint.monew.domain.comment;
 
+import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.comment.dto.CommentDto;
+import com.sprint.monew.domain.comment.dto.CommentLikeDto;
+import com.sprint.monew.domain.comment.dto.request.CommentRegisterRequest;
+import com.sprint.monew.domain.comment.dto.request.CommentUpdateRequest;
+import java.time.Instant;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/comments")
+@RequiredArgsConstructor
 public class CommentController {
 
+  private final CommentService commentService;
+
+  @GetMapping
+  public ResponseEntity<CursorPageResponseDto<CommentDto>> getComments(
+      @RequestParam UUID articleId,
+      @RequestParam String cursor,
+      @RequestParam Instant after,
+      @RequestParam String orderBy,
+      @RequestParam String direction,
+      @RequestParam int limit,
+      @RequestHeader("Monew-Request-User-ID") UUID userId
+  ) {
+    return null;
+  }
+
+  @PostMapping
+  public ResponseEntity<CommentDto> addComment(
+      @RequestBody CommentRegisterRequest commentRegisterRequest
+  ) {
+    return null;
+  }
+
+  @PostMapping("/{commentId}/comment-likes")
+  public ResponseEntity<CommentLikeDto> likeComment(
+      @PathVariable UUID commentId,
+      @RequestHeader("Monew-Request-User-ID") UUID userId
+  ) {
+    return null;
+  }
+
+  @DeleteMapping("/{commentId}/comment-likes")
+  public ResponseEntity<Void> unlikeComment(
+      @PathVariable UUID commentId,
+      @RequestHeader("Monew-Request-User-ID") UUID userId
+  ) {
+    return null;
+  }
+
+  @DeleteMapping("/{commentId}")
+  public ResponseEntity<Void> deleteComment(@PathVariable UUID commentId) {
+    return null;
+  }
+
+  @PatchMapping("/{commentId}")
+  public ResponseEntity<CommentDto> updateComment(
+      @PathVariable UUID commentId,
+      @RequestBody CommentUpdateRequest commentUpdateRequest,
+      @RequestHeader("Monew-Request-User-ID") UUID userId
+  ) {
+    return null;
+  }
+
+  @DeleteMapping("/{commentId}/hard")
+  public ResponseEntity<Void> hardDeleteComment(@PathVariable UUID commentId) {
+    return null;
+  }
 }
