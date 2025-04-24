@@ -13,6 +13,10 @@ spring:
   batch:
       job:
         initialize-schema: never
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE}
 
 logging:
   level:
