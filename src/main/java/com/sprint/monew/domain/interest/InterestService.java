@@ -7,11 +7,15 @@ import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
+import com.sprint.monew.domain.interest.exception.EmptyKeywordsException;
+import com.sprint.monew.domain.interest.exception.InterestAlreadyExistsException;
+import com.sprint.monew.domain.interest.exception.InterestNotFoundException;
 import com.sprint.monew.domain.interest.subscription.Subscription;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
 import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
+import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -131,7 +135,7 @@ public class InterestService {
     boolean existsSimilarName = interestRepository.existsByName(request.name());
 
     if (existsSimilarName) {
-      throw new IllegalArgumentException("동일한 이름의 관심사가 이미 존재합니다.");
+      throw InterestAlreadyExistsException.alreadyExistsException();
     }
 
     Interest interest = new Interest(request.name(), request.keywords());
@@ -147,7 +151,7 @@ public class InterestService {
       }
     }
     if (existsSimilarName) {
-      throw new IllegalArgumentException("유사한 이름의 관심사가 이미 존재합니다.");
+      throw InterestAlreadyExistsException.alreadyExistsException();
     }
 
     Interest savedInterest = interestRepository.save(interest);
@@ -158,9 +162,9 @@ public class InterestService {
   //관심사 구독
   public SubscriptionDto subscribeToInterest(UUID interestId, UUID userId) {
     Interest interest = interestRepository.findById(interestId)
-        .orElseThrow(() -> new IllegalArgumentException("Interest not found"));
+        .orElseThrow(() -> InterestNotFoundException.withId(interestId));
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     Subscription subscribe = new Subscription(user, interest);
     subscriptionRepository.save(subscribe);
@@ -173,9 +177,9 @@ public class InterestService {
   //관심사 구독 취소
   public boolean unsubscribeFromInterest(UUID interestId, UUID userId) {
     Interest interest = interestRepository.findById(interestId)
-        .orElseThrow(() -> new IllegalArgumentException("Interest not found"));
+        .orElseThrow(() -> InterestNotFoundException.withId(interestId));
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     Subscription subscribe = subscriptionRepository.findByUserAndInterest(user, interest)
         .orElseThrow(
@@ -191,7 +195,7 @@ public class InterestService {
   public boolean deleteInterest(UUID interestId) {
 
     Interest interest = interestRepository.findById(interestId)
-        .orElseThrow(() -> new IllegalArgumentException("Interest not found"));
+        .orElseThrow(() -> InterestNotFoundException.withId(interestId));
 
     interestRepository.delete(interest);
 
@@ -203,16 +207,16 @@ public class InterestService {
       InterestUpdateRequest request) {
 
     if (request.keywords() == null || request.keywords().isEmpty()) {
-      throw new IllegalArgumentException("keywords is empty");
+      throw EmptyKeywordsException.emptyKeywords();
     }
     User user = null;
     if (requestUserId != null) {
       user = userRepository.findById(requestUserId)
-          .orElseThrow(() -> new IllegalArgumentException("User not found"));
+          .orElseThrow(() -> UserNotFoundException.withId(requestUserId));
     }
 
     Interest interest = interestRepository.findById(interestId)
-        .orElseThrow(() -> new IllegalArgumentException("Interest not found"));
+        .orElseThrow(() -> InterestNotFoundException.withId(interestId));
 
     interest.updateKeywords(request.keywords());
 

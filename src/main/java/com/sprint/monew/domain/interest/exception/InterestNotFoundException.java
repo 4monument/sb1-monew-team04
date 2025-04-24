@@ -1,15 +1,17 @@
 package com.sprint.monew.domain.interest.exception;
 
 import com.sprint.monew.global.error.ErrorCode;
-import com.sprint.monew.global.error.MonewException;
+import java.util.UUID;
 
-public class InterestNotFoundException extends MonewException {
+public class InterestNotFoundException extends InterestException {
 
   public InterestNotFoundException() {
     super(ErrorCode.INTEREST_NOT_FOUND);
   }
 
-  public static InterestNotFoundException notFound() {
-    return new InterestNotFoundException();
+  public static InterestNotFoundException withId(UUID interestId) {
+    InterestNotFoundException exception = new InterestNotFoundException();
+    exception.addDetail("interestId", interestId);
+    return exception;
   }
 }
