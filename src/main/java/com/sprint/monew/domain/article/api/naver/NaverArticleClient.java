@@ -23,7 +23,8 @@ public class NaverArticleClient {
 
   public NaverArticleResponse getArticle(String query, int display, int start) {
     String sort = "date";
-    String apiURL = url + "?query=" + query + "&display=" + display + "&start=" + start + "&sort=" + sort;
+    String apiURL =
+        url + "?query=" + query + "&display=" + display + "&start=" + start + "&sort=" + sort;
 
     return restClient.get()
         .uri(apiURL)

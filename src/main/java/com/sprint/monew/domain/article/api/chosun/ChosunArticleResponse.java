@@ -13,6 +13,7 @@ public record ChosunArticleResponse(
     @JacksonXmlProperty(localName = "channel")
     ChosunChannel channel
 ) {
+
   public record ChosunChannel(
       @JacksonXmlProperty(localName = "title")
       @JacksonXmlCData
@@ -51,7 +52,9 @@ public record ChosunArticleResponse(
       @JacksonXmlElementWrapper(useWrapping = false)
       @JacksonXmlProperty(localName = "item")
       List<ChosunItem> items
-  ) {}
+  ) {
+
+  }
 
   // <channel><image>…
   public record ChannelImage(
@@ -63,7 +66,9 @@ public record ChosunArticleResponse(
 
       @JacksonXmlProperty(localName = "link")
       String link
-  ) {}
+  ) {
+
+  }
 
   // <item> 하나
   public record ChosunItem(
@@ -95,7 +100,9 @@ public record ChosunArticleResponse(
 
       @JacksonXmlProperty(localName = "media:content")
       MediaContent mediaContent
-  ) {}
+  ) {
+
+  }
 
   // <media:content …> 속성 매핑
   public record MediaContent(
@@ -110,5 +117,7 @@ public record ChosunArticleResponse(
 
       @JacksonXmlProperty(isAttribute = true, localName = "width")
       int width
-  ) {}
+  ) {
+
+  }
 }

@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode
 @AllArgsConstructor
 public class ArticleViewKey implements Serializable {
+
   private UUID userId;
   private UUID articleId;
 }

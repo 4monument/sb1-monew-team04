@@ -56,17 +56,17 @@ public class NotificationDeleteBatch {
   // 어떤 옵션을 쓸지 아직 미정
   @Bean
   public Step notificationChunkDeleteStep() {
-     return new StepBuilder("notificationChunkDeleteStep", jobRepository)
-         .<Instant, Instant>chunk(1, transactionManager)
-         .reader(() -> Instant.now().minusSeconds(7 * 24 * 60 * 60))
-         .writer((instants) -> {
-           Instant sevenDaysAgo = instants.getItems().get(0);
-           doDelete(sevenDaysAgo);
-         })
-         .faultTolerant()
-         .retryLimit(3)
-         .retry(Exception.class)
-         .build();
+    return new StepBuilder("notificationChunkDeleteStep", jobRepository)
+        .<Instant, Instant>chunk(1, transactionManager)
+        .reader(() -> Instant.now().minusSeconds(7 * 24 * 60 * 60))
+        .writer((instants) -> {
+          Instant sevenDaysAgo = instants.getItems().get(0);
+          doDelete(sevenDaysAgo);
+        })
+        .faultTolerant()
+        .retryLimit(3)
+        .retry(Exception.class)
+        .build();
   }
 
   private void doDelete(Instant updatedAt) {

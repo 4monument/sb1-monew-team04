@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode
 @AllArgsConstructor
 public class ArticleInterestKey implements Serializable {
+
   private UUID articleId;
   private UUID interestId;
 }

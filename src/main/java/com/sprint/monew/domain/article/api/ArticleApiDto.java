@@ -6,7 +6,7 @@ import java.time.Instant;
 import lombok.Builder;
 
 @Builder
-public record ArticleApiDto (
+public record ArticleApiDto(
     Source source,
     String sourceUrl,
     String title,
@@ -14,9 +14,5 @@ public record ArticleApiDto (
     Instant publishDate
 ) {
 
-//  public boolean isRelatedNews(Keywords keywords) {
-//    String lowerCaseSummary = summary.toLowerCase();
-//    return keywords.getKeywords().stream()
-//        .anyMatch(lowerCaseSummary::contains);
-//  }
+  // 변환 로직
 }

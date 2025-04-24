@@ -6,4 +6,5 @@ public record InterestRegisterRequest(
     String name,
     List<String> keywords
 ) {
+
 }

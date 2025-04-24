@@ -22,7 +22,7 @@ import org.springframework.data.annotation.CreatedDate;
 @Getter
 @Entity
 @Table(name = "articles_views", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "article_id"})
+    @UniqueConstraint(columnNames = {"user_id", "article_id"})
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ArticleView {

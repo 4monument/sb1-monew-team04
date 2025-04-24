@@ -23,24 +23,25 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class UserActivityDocument {
-    @Id
-    private UUID id;
 
-    private String email;
+  @Id
+  private UUID id;
 
-    private String nickname;
+  private String email;
 
-    private Instant createdAt;
+  private String nickname;
 
-    @Builder.Default
-    private List<SubscriptionDto> subscriptions = new ArrayList<>();
+  private Instant createdAt;
 
-    @Builder.Default
-    private List<CommentDto> comments = new ArrayList<>();
+  @Builder.Default
+  private List<SubscriptionDto> subscriptions = new ArrayList<>();
 
-    @Builder.Default
-    private List<CommentDto> commentLikes = new ArrayList<>();
+  @Builder.Default
+  private List<CommentDto> comments = new ArrayList<>();
 
-    @Builder.Default
-    private List<ArticleViewDto> articleViews = new ArrayList<>();
+  @Builder.Default
+  private List<CommentDto> commentLikes = new ArrayList<>();
+
+  @Builder.Default
+  private List<ArticleViewDto> articleViews = new ArrayList<>();
 }

@@ -12,6 +12,7 @@ public record NaverArticleResponse(
     int display,
     List<ArticleItem> items
 ) {
+
   public record ArticleItem(
       String title,
       String originallink,
@@ -19,5 +20,7 @@ public record NaverArticleResponse(
       String description,
       @JsonFormat(pattern = "EEE, dd MMM yyyy HH:mm:ss Z", locale = "en", timezone = "Asia/Seoul")
       OffsetDateTime pubDate
-  ) {}
+  ) {
+
+  }
 }

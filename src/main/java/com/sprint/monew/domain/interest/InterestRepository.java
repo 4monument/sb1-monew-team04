@@ -5,7 +5,8 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface InterestRepository extends JpaRepository<Interest, UUID>, CustomInterestRepository {
+public interface InterestRepository extends JpaRepository<Interest, UUID>,
+    CustomInterestRepository {
 
   boolean existsByName(String name);
 
@@ -54,7 +55,8 @@ public interface InterestRepository extends JpaRepository<Interest, UUID>, Custo
           "ORDER BY COUNT(ui.user_id) ASC, i.id ASC " +
           "LIMIT :limit",
       nativeQuery = true)
-  List<InterestWithSubscriberCount> findByNameOrKeywordsContainingOrderBySubscriberCountAsc(String keyword,
+  List<InterestWithSubscriberCount> findByNameOrKeywordsContainingOrderBySubscriberCountAsc(
+      String keyword,
       String cursorId,
       String after, int limit);
 
@@ -71,7 +73,8 @@ public interface InterestRepository extends JpaRepository<Interest, UUID>, Custo
           "ORDER BY COUNT(ui.user_id) DESC, i.id DESC " +
           "LIMIT :limit",
       nativeQuery = true)
-  List<InterestWithSubscriberCount> findByNameOrKeywordsContainingOrderBySubscriberCountDesc(String keyword,
+  List<InterestWithSubscriberCount> findByNameOrKeywordsContainingOrderBySubscriberCountDesc(
+      String keyword,
       String cursorId,
       String after, int limit);
 

@@ -6,7 +6,7 @@ import java.util.List;
 import lombok.Getter;
 
 
-// API 4곳에서 공유되는 객체인데 변하면 위험하니 불변 객체로
+// 스레드 4곳에서 공유되는 객체인데 변하면 위험하니 불변 객체로
 @Getter
 public class Keywords {
 
@@ -16,7 +16,7 @@ public class Keywords {
     this.keywords = Collections.unmodifiableList(keywords);
   }
 
-  // O(N2)인데... 나중에 Hash 구조로 다 바꿔야할 것 같네
+  // O(N2)인데... 나중에 Hash 구조로?
   public List<ArticleApiDto> filter(List<ArticleApiDto> articleApiDtos) {
     return articleApiDtos.stream()
         .filter(this::isContainsIn)

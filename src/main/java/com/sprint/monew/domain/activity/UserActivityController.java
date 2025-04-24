@@ -16,29 +16,30 @@ import java.util.UUID;
 @RequestMapping("/api/user-activity")
 @RequiredArgsConstructor
 public class UserActivityController {
-    private final UserActivityService userActivityService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserActivityDto> getUserActivityFromMongo(
-            @PathVariable UUID userId,
-            @RequestHeader(name = "Monew-Request-User-ID", required = false) UUID headerUserId
-    ) {
-        return ResponseEntity.ok(userActivityService.getUserActivityFromMongo(userId));
-    }
+  private final UserActivityService userActivityService;
 
-    @GetMapping("/{userId}/query")
-    public ResponseEntity<UserActivityDto> getUserActivity(
-            @PathVariable UUID userId,
-            @RequestHeader(name = "Monew-Request-User-ID", required = false) UUID headerUserId
-    ) {
-        return ResponseEntity.ok(userActivityService.getUserActivity(userId));
-    }
+  @GetMapping("/{userId}")
+  public ResponseEntity<UserActivityDto> getUserActivityFromMongo(
+      @PathVariable UUID userId,
+      @RequestHeader(name = "Monew-Request-User-ID", required = false) UUID headerUserId
+  ) {
+    return ResponseEntity.ok(userActivityService.getUserActivityFromMongo(userId));
+  }
 
-    @GetMapping("/{userId}/save")
-    public ResponseEntity<UserActivityDto> saveUserActivityToMongo(
-            @PathVariable UUID userId,
-            @RequestHeader(name = "Monew-Request-User-ID", required = false) UUID headerUserId
-    ) {
-        return ResponseEntity.ok(userActivityService.saveUserActivityToMongo(userId));
-    }
+  @GetMapping("/{userId}/query")
+  public ResponseEntity<UserActivityDto> getUserActivity(
+      @PathVariable UUID userId,
+      @RequestHeader(name = "Monew-Request-User-ID", required = false) UUID headerUserId
+  ) {
+    return ResponseEntity.ok(userActivityService.getUserActivity(userId));
+  }
+
+  @GetMapping("/{userId}/save")
+  public ResponseEntity<UserActivityDto> saveUserActivityToMongo(
+      @PathVariable UUID userId,
+      @RequestHeader(name = "Monew-Request-User-ID", required = false) UUID headerUserId
+  ) {
+    return ResponseEntity.ok(userActivityService.saveUserActivityToMongo(userId));
+  }
 }

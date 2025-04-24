@@ -41,7 +41,8 @@ public class InterestController {
 
   //관심사 등록
   @PostMapping
-  public ResponseEntity<InterestDto> addInterest(@RequestBody InterestCreateRequest interestCreateRequest) {
+  public ResponseEntity<InterestDto> addInterest(
+      @RequestBody InterestCreateRequest interestCreateRequest) {
     InterestDto interestDto = interestService.createInterest(interestCreateRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(interestDto);
   }

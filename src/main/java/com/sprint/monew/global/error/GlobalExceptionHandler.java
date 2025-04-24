@@ -26,7 +26,8 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(MonewException.class)
   public ResponseEntity<ErrorResponse> handleMonewException(MonewException exception) {
-    log.error("커스텀 예외 발생: code={}, message={}", exception.getErrorCode(), exception.getMessage(), exception);
+    log.error("커스텀 예외 발생: code={}, message={}", exception.getErrorCode(), exception.getMessage(),
+        exception);
     HttpStatus status = determineHttpStatus(exception);
     ErrorResponse response = new ErrorResponse(exception, status.value());
     return ResponseEntity
@@ -35,25 +36,26 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+  public ResponseEntity<ErrorResponse> handleValidationExceptions(
+      MethodArgumentNotValidException ex) {
     log.error("요청 유효성 검사 실패: {}", ex.getMessage());
-    
+
     Map<String, Object> validationErrors = new HashMap<>();
     ex.getBindingResult().getAllErrors().forEach(error -> {
       String fieldName = ((FieldError) error).getField();
       String errorMessage = error.getDefaultMessage();
       validationErrors.put(fieldName, errorMessage);
     });
-    
+
     ErrorResponse response = new ErrorResponse(
-        Instant.now(), 
+        Instant.now(),
         "VALIDATION_ERROR",
         "요청 데이터 유효성 검사에 실패했습니다",
         validationErrors,
         ex.getClass().getSimpleName(),
         HttpStatus.BAD_REQUEST.value()
     );
-    
+
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
         .body(response);

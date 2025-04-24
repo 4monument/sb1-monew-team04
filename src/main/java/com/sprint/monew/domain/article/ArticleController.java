@@ -34,7 +34,7 @@ public class ArticleController {
   public ResponseEntity<ArticleViewDto> registerArticleView(
       @PathVariable UUID articleId,
       @RequestHeader("Monew-Request-User-ID") UUID userId
-      ) {
+  ) {
     ArticleViewDto articleViewDto = articleService.registerArticleView(articleId, userId);
     return ResponseEntity.ok(articleViewDto);
   }
