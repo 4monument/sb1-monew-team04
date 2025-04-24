@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.UUID;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
@@ -31,12 +30,12 @@ public class ArticleInterest {
   @GeneratedValue
   private UUID id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "article_id")
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "article_id", nullable = false)
   private Article article;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "interest_id")
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "interest_id", nullable = false)
   private Interest interest;
 
   @Column(nullable = false)
