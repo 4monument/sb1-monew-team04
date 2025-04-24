@@ -89,7 +89,6 @@
 ### 🧠 **기술 공유 및 이슈 정리**
 
 - 프로젝트 도중 마주한 **기술적 이슈**, **트러블슈팅 과정**, **공유할 기술 스택**은 GitHub Issue로 문서화하여 기록했습니다.
-- 각자 학습한 내용은 팀원들과 공유하며, 지속적인 성장 기반을 마련했습니다.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/6f95097a-0918-4edc-b4d4-6c07209482c5" width="800"/>
