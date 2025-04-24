@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.List;
@@ -42,7 +41,7 @@ public class Interest {
     this.createdAt = Instant.now();
   }
 
-  public void updateKeywords( List<String> keywords) {
+  public void updateKeywords(List<String> keywords) {
     this.keywords = keywords;
   }
 }
