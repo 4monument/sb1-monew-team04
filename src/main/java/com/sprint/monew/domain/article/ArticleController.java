@@ -11,6 +11,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,10 +48,9 @@ public class ArticleController {
       @RequestParam int limit,
       @RequestHeader("Monew-Request-User-ID") UUID userId
   ) {
-    //임시 코드
-    PageRequest pageRequest = PageRequest.of(0, limit);
+    PageRequest pageRequest = PageRequest.of(0, limit, Direction.fromString(direction), orderBy);
     CursorPageResponseDto<ArticleDto> response = articleService.getArticles(articleRequest,
-        pageRequest);
+        pageRequest, userId);
     return ResponseEntity.ok(response);
   }
 
