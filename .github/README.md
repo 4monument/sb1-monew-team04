@@ -1,19 +1,18 @@
-# 팀이름 : **MonewMonet**
+# 🌟 팀이름 : **MonewMonet**
 
 
 
-##  **팀원 구성**
+## 👨‍💻 **팀원 소개**
 
 
-<div align= "center">
-  
-  |박유진|이요한|장태준|전성삼|허원재|
-  |:---:|:---:|:---:|:---:|:---:|
-  |<img width="160" alt="image" src="https://github.com/user-attachments/assets/fcad6410-bc99-4ca3-80b9-5b259947baf4">|<img width="160" alt="image" src="">|<img width="160" alt="image" src="https://github.com/user-attachments/assets/94d07eb2-9788-40b2-872f-c675c8f99018">|<img width="160" alt="image" src="https://github.com/user-attachments/assets/a856bd02-ab08-4347-83f9-6cfa01b663ea">|<img width="160" alt="image" src="">|
-  |조장<br>dd|조원|조원|조원|조원|
+<div align="center">
+
+| 박유진 | 이요한 | 장태준 | 전성삼 | 허원재 |
+|:---:|:---:|:---:|:---:|:---:|
+| <img width="160" src="https://github.com/user-attachments/assets/fcad6410-bc99-4ca3-80b9-5b259947baf4" alt="yudility"> | <img width="160" src="" alt="arlegro"> | <img width="160" src="https://github.com/user-attachments/assets/94d07eb2-9788-40b2-872f-c675c8f99018" alt="janghoosa"> | <img width="160" src="https://github.com/user-attachments/assets/a856bd02-ab08-4347-83f9-6cfa01b663ea" alt="hodu31"> | <img width="160" src="" alt="oince"> |
+| [Yudility](https://github.com/yudility) | [ARlegro](https://github.com/ARlegro) | [janghoosa](https://github.com/janghoosa) | [hodu31](https://github.com/hodu31) | [Oince](https://github.com/Oince) |
 
 </div>
-
 
 ---
 
