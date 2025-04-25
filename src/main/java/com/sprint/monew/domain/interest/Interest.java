@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Entity
@@ -27,9 +29,8 @@ public class Interest {
   @Column(name = "name", nullable = false)
   private String name;
 
-
-  @Convert(converter = StringListConverter.class) // List <-> JSONB 변환
   @Column(name = "keywords", columnDefinition = "jsonb")
+  @JdbcTypeCode(SqlTypes.JSON)
   private List<String> keywords;
 
   @Column(name = "created_at", nullable = false)
