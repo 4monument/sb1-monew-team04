@@ -75,4 +75,10 @@ public class CommentService {
     return CommentLikeDto.from(like, commentLikeCount);
   }
 
+  public void unlikeComment(UUID commentId, UUID userId) {
+    likeRepository
+        .findByComment_IdAndUser_Id(commentId, userId)
+        .ifPresent(likeRepository::delete);
+  }
+
 }

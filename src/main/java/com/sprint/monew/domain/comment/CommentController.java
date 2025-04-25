@@ -62,7 +62,8 @@ public class CommentController {
       @PathVariable UUID commentId,
       @RequestHeader("Monew-Request-User-ID") UUID userId
   ) {
-    return null;
+    commentService.unlikeComment(commentId, userId);
+    return ResponseEntity.ok().build();
   }
 
   @DeleteMapping("/{commentId}")
