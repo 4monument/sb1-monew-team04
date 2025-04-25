@@ -3,7 +3,7 @@ name: Deploy to ECS
 on:
   push:
     branches:
-      - feature/cicd
+      - release
 
 jobs:
   deploy:
@@ -19,8 +19,8 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: 테스트 및 빌드하기 (일단 테스트 없이 빌드)
-        run: ./gradlew clean build -x test
+      - name: 테스트 및 빌드하기
+        run: ./gradlew clean build
 
       - name: AWS Resource에 접근할 수 있게 AWS credentials 설정
         uses: aws-actions/configure-aws-credentials@v4

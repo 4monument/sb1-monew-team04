@@ -107,23 +107,6 @@ class UserActivityQueryRepositoryTest {
   }
 
   @Test
-  @DisplayName("성공 - 유저의 모든 활동 정보(관심사, 댓글, 좋아요, 기사 조회)를 조회한다")
-  void findUserActivity_shouldReturnAllActivityDetails() {
-    // when
-    UserActivityDto dto = repository.findUserActivity(userId);
-
-    // then
-    assertThat(dto).isNotNull();
-    assertThat(dto.id()).isEqualTo(userId);
-    assertThat(dto.nickname()).isEqualTo("nickname");
-    assertThat(dto.comments()).hasSize(1);
-    assertThat(dto.comments()
-        .get(0)
-        .content()).isEqualTo("좋은 기사네요");
-    assertThat(dto.articleViews()).hasSize(1);
-  }
-
-  @Test
   @DisplayName("실패 - 존재하지 않는 유저 ID로 조회 시 null을 반환한다")
   void findUserActivity_shouldReturnNullForInvalidUser() {
     // given

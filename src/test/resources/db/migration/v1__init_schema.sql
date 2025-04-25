@@ -1,3 +1,13 @@
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS articles;
+DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS interests;
+DROP TABLE IF EXISTS users_interests;
+DROP TABLE IF EXISTS articles_views;
+DROP TABLE IF EXISTS likes;
+DROP TABLE IF EXISTS articles_interests;
+
 CREATE TABLE "users"
 (
     "id"         UUID PRIMARY KEY,
@@ -148,3 +158,6 @@ ALTER TABLE "articles_interests"
         FOREIGN KEY ("interest_id")
             REFERENCES "interests" ("id")
             ON DELETE CASCADE;
+
+
+ALTER TABLE articles_interests ADD COLUMN created_at TIMESTAMP;

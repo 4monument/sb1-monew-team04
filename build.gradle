@@ -40,6 +40,11 @@ dependencies {
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
 	implementation "io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0"
 
+	//fly way 의존성 추가
+	implementation "org.flywaydb:flyway-core:10.10.0"
+	implementation "org.flywaydb:flyway-database-postgresql"
+
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -60,6 +65,7 @@ dependencies {
 	// mongo db 테스트 컨테이너
 	testImplementation 'org.testcontainers:mongodb:1.19.3'
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
 
 	// S3 테스트 컨테이너
 	testImplementation "org.testcontainers:testcontainers:1.20.6"
@@ -101,3 +107,4 @@ tasks.withType(JavaCompile) {
 clean {
 	delete file(querydslDir)
 }
+
