@@ -2,7 +2,6 @@ package com.sprint.monew.common.batch.articlecollect;
 
 import com.sprint.monew.common.batch.util.ArticlesAndArticleInterestsDTO;
 import com.sprint.monew.common.batch.util.Interests;
-import com.sprint.monew.common.batch.util.Keywords;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.article.articleinterest.ArticleInterest;
@@ -18,9 +17,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ArticleProcessorConfig {
 
-  // 키워드 필터링
-  // 원본 기사 링크 중복 없애기
-
   @Bean
   @StepScope
   public ItemProcessor<Object, ArticlesAndArticleInterestsDTO> naverArticleCollectProcessor(
@@ -28,12 +24,7 @@ public class ArticleProcessorConfig {
       @Value("#{JobExecutionContext['interests']}") Interests interests) {
 
     return (item) -> {
-      if (interests == null) {
-        // 변환 및 다른 도메인 생성 로직 넣기
-        return null;
-      }
-
-      // 중복 되는 url 로직 + keyword 필터링
+      // keyword 필터링 + 중복 되는 url 하나로
       List<ArticleApiDto> filteredArticleDtos = interests.filterByKeywordAndUniqueUrl(
           articleApiDtos);
 
@@ -56,10 +47,10 @@ public class ArticleProcessorConfig {
           })
           .flatMap(List::stream)
           .toList();
+
       return new ArticlesAndArticleInterestsDTO(articleList, articleInterestList);
     };
   }
-
 //  @Bean
 //  @StepScope
 //  public ItemProcessor<Object, List<Article>> chosunArticleCollectProcessor(
@@ -83,6 +74,4 @@ public class ArticleProcessorConfig {
 //      return null;
 //    };
 //  }
-
-
 }

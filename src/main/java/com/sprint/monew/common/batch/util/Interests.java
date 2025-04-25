@@ -25,41 +25,7 @@ public class Interests {
         .distinct().toList();
   }
 
-//  public List<ArticleApiDto> filterByKeywords(List<ArticleApiDto> articleApiDtos) {
-//
-//    articleApiDtos.stream()
-//        .map(articleApiDto -> {
-//          if (isContainsIn(articleApiDto)) {
-//            return null;
-//          }
-//          return articleApiDtos;
-//        })
-//        //.filter(this::isContainsIn)
-//        .toList();
-//
-//    return null;
-//  }
-
-//  public boolean isContainsIn(ArticleApiDto articleApiDto) {
-//    String summary = articleApiDto.summary();
-//    //summary.toLowerCase();
-//    return keywords.stream()
-//        .anyMatch(summary::contains);
-//  }
-
-  //
-  public Map<Article, List<Interest>> mapToArticleInterestsMap(List<Article> articles) {
-    return articles.stream()
-        .collect(Collectors.toMap(
-            article -> article,
-            article -> interests.stream()
-                .filter(
-                    interest -> interest.isContainsKeyword(article)) // 해당 뉴스에 해당하지 않는 Keyword 제외시키기
-                .toList()
-        ));
-  }
-
-  // keyword랑 주제가 먼 ArticleAPiDto 필터링
+  // keyword랑 주제가 먼 ArticleAPiDto 필터링 + URL 겹치는거
   public List<ArticleApiDto> filterByKeywordAndUniqueUrl(List<ArticleApiDto> articleApiDtos) {
     Set<String> sourceUrlFilter = new HashSet<>(); // sourceUrl 중복 검사요
     return articleApiDtos.stream()
@@ -72,5 +38,16 @@ public class Interests {
     String summary = articleApiDto.summary();
     return keywords.stream()
         .anyMatch(summary::contains);
+  }
+
+  public Map<Article, List<Interest>> mapToArticleInterestsMap(List<Article> articles) {
+    return articles.stream()
+        .collect(Collectors.toMap(
+            article -> article,
+            article -> interests.stream()
+                .filter(
+                    interest -> interest.isContainsKeyword(article)) // 해당 뉴스에 해당하지 않는 Keyword 제외시키기
+                .toList()
+        ));
   }
 }

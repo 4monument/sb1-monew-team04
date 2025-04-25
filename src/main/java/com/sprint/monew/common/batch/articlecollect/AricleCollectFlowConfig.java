@@ -2,6 +2,7 @@ package com.sprint.monew.common.batch.articlecollect;
 
 import static com.sprint.monew.common.batch.util.CustomExecutionContextKeys.NAVER_ARTICLE_DTOS;
 
+import com.sprint.monew.common.batch.util.ArticlesAndArticleInterestsDTO;
 import com.sprint.monew.common.batch.util.ExecutionContextFinder;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.api.ArticleApiClient;
@@ -67,20 +68,30 @@ public class AricleCollectFlowConfig {
     };
   }
 
-
   @Bean
   @JobScope
   public Step articleHandlerStep(
       @Qualifier("naverArticleCollectReader") ItemReader<Object> naverArticleCollectReader,
-      @Qualifier("naverArticleCollectProcessor") ItemProcessor<Object, Article> naverArticleCollectProcessor,
-      @Qualifier("articleCollectJpaItemWriter") ItemWriter<Article> articleCollectJpaItemWriter) {
+      @Qualifier("naverArticleCollectProcessor") ItemProcessor<Object, ArticlesAndArticleInterestsDTO> naverArticleCollectProcessor,
+      @Qualifier("articleJpaItemWriter") ItemWriter<ArticlesAndArticleInterestsDTO> articleCollectJpaItemWriter) {
 
     return new StepBuilder("articleHandlerStep", jobRepository)
-        .<Object, Article>chunk(100, transactionManager)
+        .<Object, ArticlesAndArticleInterestsDTO>chunk(100, transactionManager)
         .reader(naverArticleCollectReader)
         .processor(naverArticleCollectProcessor)
         .writer(articleCollectJpaItemWriter)
+        .faultTolerant()
+        .retryLimit(3)
+        .retry(Exception.class)
         .build();
   }
+
+
+  // Chosun Flow
+
+
+
+
+  // Hankyung Flow
 }
 

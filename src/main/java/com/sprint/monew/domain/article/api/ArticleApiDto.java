@@ -1,6 +1,5 @@
 package com.sprint.monew.domain.article.api;
 
-import com.sprint.monew.common.batch.util.Keywords;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
 import java.time.Instant;
@@ -24,5 +23,4 @@ public record ArticleApiDto(
         summary
     );
   }
-
 }

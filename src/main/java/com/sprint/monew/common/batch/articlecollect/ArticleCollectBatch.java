@@ -1,28 +1,31 @@
 package com.sprint.monew.common.batch.articlecollect;
 
 import static com.sprint.monew.common.batch.util.CustomExecutionContextKeys.*;
+import static org.springframework.batch.core.ExitStatus.*;
 
 import com.sprint.monew.common.batch.util.ExecutionContextFinder;
 import com.sprint.monew.common.batch.util.Interests;
-import com.sprint.monew.common.batch.util.Keywords;
-import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.InterestRepository;
-import jakarta.persistence.EntityManagerFactory;
-import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.FlowStepBuilder;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -34,24 +37,33 @@ public class ArticleCollectBatch {
 
   @Bean
   public Job articleCollectJob(
-      @Qualifier("fetchKeywordsStep") Step articleCollectStep,
+      @Qualifier("interestsFetchStep") Step interestsFetchStep,
       @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow) {
 
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
-        .start(articleCollectStep)
-        .on(null) // 나중
+        .start(interestsFetchStep)
+        .on(COMPLETED.getExitCode()) // 나중
         .to(naverArticleCollectFlow)
-        //.split( ) 나중에 multi flow 구현
+        .split(taskExecutor()).add(null)
         .end()
         .build();
   }
 
+  @Bean
+  public TaskExecutor taskExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(5);
+    executor.setMaxPoolSize(10);
+    executor.setThreadNamePrefix("article-async-thread-");
+    return executor;
+  }
+
   // keyword들을 전부 가져와서 스텝끼리 공유 가능한 저장소에 저장
-  @Bean(name = "fetchKeywordsStep")
+  @Bean(name = "interestsFetchStep")
   @JobScope
-  public Step KeywordsFetchStep(InterestRepository interestRepository) {
-    return new StepBuilder("KeyWordCollectStep", jobRepository)
+  public Step interestsFetchStep(InterestRepository interestRepository) {
+    return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
 
           ExecutionContext jobExecutionContext = ExecutionContextFinder.findJobExecutionContext(
