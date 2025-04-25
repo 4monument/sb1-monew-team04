@@ -2,7 +2,7 @@ package com.sprint.monew.domain.activity;
 
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
 import com.sprint.monew.domain.comment.dto.CommentDto;
-import com.sprint.monew.domain.interest.dto.SubscriptionDto;
+import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
 import jakarta.persistence.Id;
 import java.time.Instant;
 import java.util.ArrayList;
