@@ -54,8 +54,22 @@ public class ArticleService {
   @Transactional(readOnly = true)
   public CursorPageResponseDto<ArticleDto> getArticles(
       ArticleRequest articleRequest, Pageable pageable, UUID userId) {
-
-    return null;
+    //임시로 모든 article 반환
+    List<ArticleDto> dtos = articleRepository.findAllByDeletedFalse().stream()
+        .map(article -> {
+          long commentCount = commentRepository.countByArticleAndDeletedFalse(article);
+          long viewCount = articleViewRepository.countByArticle(article);
+          return ArticleDto.from(article, commentCount, viewCount, true);
+        })
+        .toList();
+    return new CursorPageResponseDto<>(
+        dtos,
+        null,
+        null,
+        dtos.size(),
+        dtos.size(),
+        false
+    );
   }
 
   public List<ArticleRestoreResultDto> restoreArticle(Instant from, Instant to) {
