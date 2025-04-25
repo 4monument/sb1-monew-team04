@@ -6,7 +6,9 @@ import com.sprint.monew.domain.article.repository.ArticleRepository;
 import com.sprint.monew.domain.comment.dto.CommentDto;
 import com.sprint.monew.domain.comment.dto.CommentLikeDto;
 import com.sprint.monew.domain.comment.dto.request.CommentRegisterRequest;
+import com.sprint.monew.domain.comment.dto.request.CommentUpdateRequest;
 import com.sprint.monew.domain.comment.exception.CommentNotFoundException;
+import com.sprint.monew.domain.comment.exception.CommentNotOwnedException;
 import com.sprint.monew.domain.comment.exception.LikeAlreadyExistException;
 import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.comment.like.LikeRepository;
@@ -17,7 +19,6 @@ import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import jakarta.transaction.Transactional;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class CommentService {
 
     Comment comment = Comment.create(user, article, request.content());
     commentRepository.save(comment);
-    return CommentDto.from(comment, List.of(), false);
+    return CommentDto.from(comment, false);
   }
 
   public CommentLikeDto commentLike(UUID commentId, UUID userId) {
@@ -81,6 +82,22 @@ public class CommentService {
 
   public void deleteComment(UUID commentId) {
     commentRepository.findById(commentId).ifPresent(Comment::logicallyDelete);
+  }
+
+  public CommentDto updateCommentContent(UUID commentId, UUID userId, CommentUpdateRequest commentUpdateRequest) {
+    String content = commentUpdateRequest.content();
+    Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
+        .orElseThrow(() -> CommentNotFoundException.withId(commentId));
+    User user = comment.getUser();
+
+    if (!user.getId().equals(userId)) {
+      throw CommentNotOwnedException.withCommentIdAndUserId(commentId, userId);
+    }
+
+    comment.updateContent(content);
+    boolean likedByMe = likeRepository.existsByCommentAndUser(comment, user);
+
+    return CommentDto.from(comment, likedByMe);
   }
 
 }

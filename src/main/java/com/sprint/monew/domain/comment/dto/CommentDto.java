@@ -1,10 +1,8 @@
 package com.sprint.monew.domain.comment.dto;
 
 import com.sprint.monew.domain.comment.Comment;
-import com.sprint.monew.domain.comment.like.Like;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 public record CommentDto(
@@ -18,7 +16,7 @@ public record CommentDto(
     Instant createdAt
 ) {
 
-  public static CommentDto from(Comment comment, List<Like> likes, boolean likedByMe) {
+  public static CommentDto from(Comment comment, boolean likedByMe) {
     return new CommentDto(
         comment.getId(),
         comment.getArticle().getId(),

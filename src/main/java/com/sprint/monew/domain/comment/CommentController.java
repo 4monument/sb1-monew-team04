@@ -78,7 +78,9 @@ public class CommentController {
       @RequestBody CommentUpdateRequest commentUpdateRequest,
       @RequestHeader("Monew-Request-User-ID") UUID userId
   ) {
-    return null;
+    CommentDto commentDto = commentService
+        .updateCommentContent(commentId, userId, commentUpdateRequest);
+    return ResponseEntity.ok(commentDto);
   }
 
   @DeleteMapping("/{commentId}/hard")
