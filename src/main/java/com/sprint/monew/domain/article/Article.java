@@ -59,7 +59,8 @@ public class Article {
   List<ArticleView> articleViews = new ArrayList<>();
 
   @Builder(access = AccessLevel.PRIVATE)
-  private Article(Source source, String sourceUrl, String title, Instant publishDate, String summary) {
+  private Article(Source source, String sourceUrl, String title, Instant publishDate,
+      String summary) {
     this.source = source;
     this.sourceUrl = sourceUrl;
     this.title = title;

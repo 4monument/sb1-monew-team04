@@ -25,7 +25,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "articles_views", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "article_id"})
+    @UniqueConstraint(columnNames = {"user_id", "article_id"})
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ArticleView {

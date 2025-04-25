@@ -22,7 +22,9 @@ public record InterestDto(
         subscribedByMe
     );
   }
-  public static InterestDto from(InterestWithSubscriberCount interestWithSubscriberCount, boolean subscribedByMe) {
+
+  public static InterestDto from(InterestWithSubscriberCount interestWithSubscriberCount,
+      boolean subscribedByMe) {
     return new InterestDto(
         interestWithSubscriberCount.getId(),
         interestWithSubscriberCount.getName(),

@@ -1,4 +1,4 @@
-package com.sprint.monew.domain.article.articleinterest;
+package com.sprint.monew.domain.article.articleview;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -11,16 +11,16 @@ import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
- * QArticleInterest is a Querydsl query type for ArticleInterest
+ * QArticleView is a Querydsl query type for ArticleView
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QArticleInterest extends EntityPathBase<ArticleInterest> {
+public class QArticleView extends EntityPathBase<ArticleView> {
 
-    private static final long serialVersionUID = -2000536121L;
+    private static final long serialVersionUID = -1207859139L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QArticleInterest articleInterest = new QArticleInterest("articleInterest");
+    public static final QArticleView articleView = new QArticleView("articleView");
 
     public final com.sprint.monew.domain.article.QArticle article;
 
@@ -28,28 +28,28 @@ public class QArticleInterest extends EntityPathBase<ArticleInterest> {
 
     public final ComparablePath<java.util.UUID> id = createComparable("id", java.util.UUID.class);
 
-    public final com.sprint.monew.domain.interest.QInterest interest;
+    public final com.sprint.monew.domain.user.QUser user;
 
-    public QArticleInterest(String variable) {
-        this(ArticleInterest.class, forVariable(variable), INITS);
+    public QArticleView(String variable) {
+        this(ArticleView.class, forVariable(variable), INITS);
     }
 
-    public QArticleInterest(Path<? extends ArticleInterest> path) {
+    public QArticleView(Path<? extends ArticleView> path) {
         this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QArticleInterest(PathMetadata metadata) {
+    public QArticleView(PathMetadata metadata) {
         this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QArticleInterest(PathMetadata metadata, PathInits inits) {
-        this(ArticleInterest.class, metadata, inits);
+    public QArticleView(PathMetadata metadata, PathInits inits) {
+        this(ArticleView.class, metadata, inits);
     }
 
-    public QArticleInterest(Class<? extends ArticleInterest> type, PathMetadata metadata, PathInits inits) {
+    public QArticleView(Class<? extends ArticleView> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.article = inits.isInitialized("article") ? new com.sprint.monew.domain.article.QArticle(forProperty("article")) : null;
-        this.interest = inits.isInitialized("interest") ? new com.sprint.monew.domain.interest.QInterest(forProperty("interest")) : null;
+        this.user = inits.isInitialized("user") ? new com.sprint.monew.domain.user.QUser(forProperty("user")) : null;
     }
 
 }
