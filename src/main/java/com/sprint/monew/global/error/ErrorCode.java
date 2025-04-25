@@ -16,8 +16,15 @@ public enum ErrorCode {
   INTEREST_NOT_FOUND("관심사 정보를 찾을 수 없습니다."),
   EMPTY_KEYWORDS_NOT_ALLOWED("키워드는 한 개 이상 포함되어야 합니다."),
 
+  // Article 관련 에러코드
   ARTICLE_NOT_FOUND("기사를 찾을 수 없습니다."),
-  ARTICLE_VIEW_ALREADY_EXIST("이미 존재하는 기사 뷰 입니다.");
+  ARTICLE_VIEW_ALREADY_EXIST("이미 존재하는 기사 뷰 입니다."),
+
+  // Comment 관련 에러코드
+  COMMENT_NOT_FOUND("댓글을 찾을 수 없습니다."),
+
+  LIKE_ALREADY_EXIST("이미 좋아요를 누른 댓글입니다.");
+
   private final String message;
 
   ErrorCode(String message) {
