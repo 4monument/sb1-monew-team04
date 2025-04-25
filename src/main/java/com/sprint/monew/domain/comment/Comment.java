@@ -1,6 +1,7 @@
 package com.sprint.monew.domain.comment;
 
 import com.sprint.monew.domain.article.Article;
+import com.sprint.monew.domain.comment.exception.CommentNotFoundException;
 import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.user.User;
 import jakarta.persistence.CascadeType;
@@ -77,7 +78,7 @@ public class Comment {
 
   public void updateContent(String content) {
     if (this.deleted) {
-      // 삭제된 메세지인 경우 예외 발생. 추후 커스텀 예외 추가 예정
+      throw CommentNotFoundException.withId(this.id);
     }
     this.content = content;
   }
