@@ -1,7 +1,7 @@
 package com.sprint.monew.domain.comment;
 
 import com.sprint.monew.domain.article.Article;
-import com.sprint.monew.domain.like.Like;
+import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

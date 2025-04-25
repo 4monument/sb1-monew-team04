@@ -1,7 +1,7 @@
 package com.sprint.monew.domain.comment.dto;
 
 import com.sprint.monew.domain.comment.Comment;
-import com.sprint.monew.domain.like.Like;
+import com.sprint.monew.domain.comment.like.Like;
 
 import java.time.Instant;
 import java.util.List;
