@@ -27,8 +27,7 @@ public record UserActivityDto(
         document.getSubscriptions(),
         document.getComments(),
         document.getCommentLikes(),
-        document.getArticleViews()
-    );
+        document.getArticleViews());
   }
 
   public static UserActivityDocument toDocument(UserActivityDto dto) {

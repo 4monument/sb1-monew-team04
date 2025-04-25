@@ -1,10 +1,8 @@
 package com.sprint.monew.domain.activity;
 
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,9 +24,7 @@ public class UserActivityService {
 
   public UserActivityDto saveUserActivityToMongo(UUID userId) {
     UserActivityDto dto = userActivityQueryRepository.findUserActivity(userId);
-
     UserActivityDocument document = UserActivityDto.toDocument(dto);
-
     userActivityMongoRepository.save(document);
 
     return dto;

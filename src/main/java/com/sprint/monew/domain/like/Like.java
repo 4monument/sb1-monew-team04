@@ -16,6 +16,7 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.util.UUID;
+import org.springframework.data.annotation.CreatedDate;
 
 @Getter
 @Setter
@@ -32,9 +33,14 @@ public class Like {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "comment_id", nullable = false)
-  private Comment comment;
-
+  @CreatedDate
+  @JoinColumn(name = "created_at", nullable = false, updatable = false)
   private Instant createdAt;
+
+  public Like(User user, Comment comment) {
+      this.user = user;
+      this.comment = comment;
+      this.createdAt = Instant.now();
+  }
+
 }
