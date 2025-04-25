@@ -71,12 +71,12 @@ public class AricleCollectFlowConfig {
   @Bean
   @JobScope
   public Step articleHandlerStep(
-      @Qualifier("naverArticleCollectReader") ItemReader<Object> naverArticleCollectReader,
-      @Qualifier("naverArticleCollectProcessor") ItemProcessor<Object, ArticlesAndArticleInterestsDTO> naverArticleCollectProcessor,
-      @Qualifier("articleJpaItemWriter") ItemWriter<ArticlesAndArticleInterestsDTO> articleCollectJpaItemWriter) {
+      @Qualifier("naverArticleCollectReader") ItemReader<ArticleApiDto> naverArticleCollectReader,
+      @Qualifier("naverArticleCollectProcessor") ItemProcessor<ArticleApiDto, Article> naverArticleCollectProcessor,
+      @Qualifier("articleJpaItemWriter") ItemWriter<Article> articleCollectJpaItemWriter) {
 
     return new StepBuilder("articleHandlerStep", jobRepository)
-        .<Object, ArticlesAndArticleInterestsDTO>chunk(100, transactionManager)
+        .<ArticleApiDto, Article>chunk(30, transactionManager)
         .reader(naverArticleCollectReader)
         .processor(naverArticleCollectProcessor)
         .writer(articleCollectJpaItemWriter)

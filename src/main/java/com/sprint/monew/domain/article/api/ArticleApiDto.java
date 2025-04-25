@@ -2,6 +2,7 @@ package com.sprint.monew.domain.article.api;
 
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
+import java.io.Serializable;
 import java.time.Instant;
 import lombok.Builder;
 
@@ -12,7 +13,8 @@ public record ArticleApiDto(
     String title,
     String summary,
     Instant publishDate
-) {
+) implements Serializable {
+  private static final long serialVersionUID = 1L;
 
   public Article toEntity() {
     return Article.create(
@@ -23,4 +25,5 @@ public record ArticleApiDto(
         summary
     );
   }
+
 }

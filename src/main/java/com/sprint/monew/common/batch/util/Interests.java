@@ -4,6 +4,7 @@ package com.sprint.monew.common.batch.util;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.interest.Interest;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -11,11 +12,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Interests {
+public class Interests implements Serializable {
+  private static final long serialVersionUID = 1L;
 
   //private final Map<Article, Interest> articleInterestsMap;
   private final List<Interest> interests;
   private final List<String> keywords;
+  Set<String> sourceUrlFilterSet = new HashSet<>();
 
   public Interests(List<Interest> interests) {
     this.interests = Collections.unmodifiableList(interests);
@@ -29,16 +32,25 @@ public class Interests {
   public List<ArticleApiDto> filterByKeywordAndUniqueUrl(List<ArticleApiDto> articleApiDtos) {
     Set<String> sourceUrlFilter = new HashSet<>(); // sourceUrl 중복 검사요
     return articleApiDtos.stream()
-        .filter(this::isContainsIn)
+        .filter(this::isContainKeywords)
         .filter(dto -> sourceUrlFilter.add(dto.sourceUrl()))
         .toList();
   }
 
-  private Boolean isContainsIn(ArticleApiDto articleApiDto) {
+  public Boolean validateKeywordContainingAndUniqueUrl(ArticleApiDto articleApiDto) {
+    return isContainKeywords(articleApiDto) && isDuplicateUrl(articleApiDto);
+  }
+
+  public Boolean isContainKeywords(ArticleApiDto articleApiDto) {
     String summary = articleApiDto.summary();
     return keywords.stream()
         .anyMatch(summary::contains);
   }
+
+  public boolean isDuplicateUrl(ArticleApiDto articleApiDto) {
+    return sourceUrlFilterSet.add(articleApiDto.sourceUrl());
+  }
+
 
   public Map<Article, List<Interest>> mapToArticleInterestsMap(List<Article> articles) {
     return articles.stream()

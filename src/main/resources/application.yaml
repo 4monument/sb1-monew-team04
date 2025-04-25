@@ -18,6 +18,10 @@ spring:
   profiles:
     active:
       - ${SPRING_PROFILES_ACTIVE}
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:seed.sql
 management:
   endpoints:
     web:
@@ -26,6 +30,14 @@ management:
   endpoint:
     health:
       show-details: always
+
+article:
+  api:
+    naver:
+      id: ${ARTICLE_API_NAVER_ID}
+      secret: ${ARTICLE_API_NAVER_SECRET}
+  #article.api.naver.id:test
+
 
 logging:
   level:

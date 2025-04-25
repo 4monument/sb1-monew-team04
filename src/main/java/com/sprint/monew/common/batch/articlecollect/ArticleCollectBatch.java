@@ -35,7 +35,7 @@ public class ArticleCollectBatch {
   private final PlatformTransactionManager transactionManager;
   private final JobRepository jobRepository;
 
-  @Bean
+  @Bean(name = "articleCollectJob")
   public Job articleCollectJob(
       @Qualifier("interestsFetchStep") Step interestsFetchStep,
       @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow) {
@@ -43,9 +43,9 @@ public class ArticleCollectBatch {
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
         .start(interestsFetchStep)
-        .on(COMPLETED.getExitCode()) // 나중
+        .on(COMPLETED.getExitCode())
         .to(naverArticleCollectFlow)
-        .split(taskExecutor()).add(null)
+        //.split(taskExecutor()).add(null) // 나중
         .end()
         .build();
   }
