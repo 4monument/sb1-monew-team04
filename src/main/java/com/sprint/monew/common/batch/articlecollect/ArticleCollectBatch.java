@@ -3,9 +3,12 @@ package com.sprint.monew.common.batch.articlecollect;
 import static com.sprint.monew.common.batch.util.CustomExecutionContextKeys.*;
 
 import com.sprint.monew.common.batch.util.ExecutionContextFinder;
+import com.sprint.monew.common.batch.util.Interests;
 import com.sprint.monew.common.batch.util.Keywords;
+import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.InterestRepository;
 import jakarta.persistence.EntityManagerFactory;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -50,10 +53,13 @@ public class ArticleCollectBatch {
   public Step KeywordsFetchStep(InterestRepository interestRepository) {
     return new StepBuilder("KeyWordCollectStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
-          Keywords allKeyword = interestRepository.findAllKeyword();
+
           ExecutionContext jobExecutionContext = ExecutionContextFinder.findJobExecutionContext(
               contribution);
-          jobExecutionContext.put(KEYWORDS.getKey(), allKeyword);
+          //Keywords allKeyword = interestRepository.findAllKeyword();
+          //jobExecutionContext.put(KEYWORDS.getKey(), allKeyword);
+          Interests interests = new Interests(interestRepository.findAll());
+          jobExecutionContext.put(INTERESTS.getKey(), interests);
           return RepeatStatus.FINISHED;
         }, transactionManager)
         .build();
