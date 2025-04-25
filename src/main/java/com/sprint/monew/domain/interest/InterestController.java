@@ -72,6 +72,6 @@ public class InterestController {
       @RequestBody InterestUpdateRequest interestUpdateRequest,
       @RequestHeader(name = "Monew-Request-User-ID", required = false) UUID userId) {
     return ResponseEntity.ok(
-        interestService.updateInterest(interestId, userId, interestUpdateRequest));
+        interestService.updateInterest(userId, interestId, interestUpdateRequest));
   }
 }
