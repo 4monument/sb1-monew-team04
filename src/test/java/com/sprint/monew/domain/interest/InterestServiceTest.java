@@ -16,12 +16,17 @@ import static org.mockito.Mockito.when;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
+import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
+import com.sprint.monew.domain.interest.exception.EmptyKeywordsException;
+import com.sprint.monew.domain.interest.exception.InterestAlreadyExistsException;
+import com.sprint.monew.domain.interest.exception.InterestNotFoundException;
 import com.sprint.monew.domain.interest.subscription.Subscription;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
 import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
+import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -150,7 +155,8 @@ class InterestServiceTest {
       when(interestRepository.findAll()).thenReturn(interests);
 
       //when & then
-      assertThrows(IllegalArgumentException.class, () -> interestService.createInterest(request));
+      assertThrows(InterestAlreadyExistsException.class,
+          () -> interestService.createInterest(request));
 
       verify(interestRepository, times(0)).save(any(Interest.class));
     }
@@ -169,7 +175,7 @@ class InterestServiceTest {
           Optional.ofNullable(interests.get(0)));
 
       //when
-      boolean isDeleted = interestService.deleteInterest(testData1Id.toString());
+      boolean isDeleted = interestService.deleteInterest(testData1Id);
 
       //then
       assertTrue(isDeleted);
@@ -178,15 +184,15 @@ class InterestServiceTest {
     }
 
     @Test
-    @DisplayName("실패")
+    @DisplayName("실패: 해당 id를 가지는 관심사가 존재하지 않음")
     void deleteInterestFailure() {
       //given
       UUID randomId = UUID.randomUUID();
       when(interestRepository.findById(randomId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
-          () -> interestService.deleteInterest(randomId.toString()));
+      assertThrows(InterestNotFoundException.class,
+          () -> interestService.deleteInterest(randomId));
 
       verify(interestRepository, never()).delete(any(Interest.class));
     }
@@ -203,9 +209,13 @@ class InterestServiceTest {
       String keyword = "프로그래";
       String orderBy = "name";
       String direction = "asc";
-      String cursor = null;
-      String after = null;
+      UUID cursor = null;
+      Instant after = null;
       int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
       UUID userId = UUID.randomUUID();
 
       List<Interest> searchResult = new ArrayList<>();
@@ -224,8 +234,7 @@ class InterestServiceTest {
 
       // when
       CursorPageResponseDto<InterestDto> result = interestService.getInterests(
-          keyword, orderBy, direction, cursor, after, limit, userId
-      );
+          interestSearchRequest, userId);
 
       //then
       assertNotNull(result);
@@ -241,12 +250,17 @@ class InterestServiceTest {
       String keyword = "개발";
       String orderBy = "name";
       String direction = "desc";
-      String cursor = null;
-      String after = null;
+      UUID cursor = null;
+      Instant after = null;
       int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
       UUID userId = UUID.randomUUID();
 
       List<Interest> searchResult = new ArrayList<>();
+
       searchResult.add(interests.get(0));
       searchResult.add(interests.get(3));
 
@@ -268,8 +282,7 @@ class InterestServiceTest {
 
       // when
       CursorPageResponseDto<InterestDto> result = interestService.getInterests(
-          keyword, orderBy, direction, cursor, after, limit, userId
-      );
+          interestSearchRequest, userId);
 
       //then
       assertNotNull(result);
@@ -285,9 +298,13 @@ class InterestServiceTest {
       String keyword = "프로그래";
       String orderBy = "subscriberCount";
       String direction = "desc";
-      String cursor = null;
-      String after = null;
+      UUID cursor = null;
+      Instant after = null;
       int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
       UUID userId = UUID.randomUUID();
 
       List<InterestWithSubscriberCount> searchResult = new ArrayList<>();
@@ -312,8 +329,7 @@ class InterestServiceTest {
 
       // when
       CursorPageResponseDto<InterestDto> result = interestService.getInterests(
-          keyword, orderBy, direction, cursor, after, limit, userId
-      );
+          interestSearchRequest, userId);
 
       //then
       assertNotNull(result);
@@ -329,9 +345,13 @@ class InterestServiceTest {
       String keyword = "개발";
       String orderBy = "subscriberCount";
       String direction = "asc";
-      String cursor = null;
-      String after = null;
+      UUID cursor = null;
+      Instant after = null;
       int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
       UUID userId = UUID.randomUUID();
 
       List<InterestWithSubscriberCount> searchResult = new ArrayList<>();
@@ -351,7 +371,7 @@ class InterestServiceTest {
           interests.get(3).getName(),
           interests.get(3).getKeywords(),
           interests.get(3).getCreatedAt(),
-          0L
+          1L
       ));
 
       when(interestRepository
@@ -369,8 +389,7 @@ class InterestServiceTest {
 
       // when
       CursorPageResponseDto<InterestDto> result = interestService.getInterests(
-          keyword, orderBy, direction, cursor, after, limit, userId
-      );
+          interestSearchRequest, userId);
 
       //then
       assertNotNull(result);
@@ -386,17 +405,20 @@ class InterestServiceTest {
       String keyword = "뷰티";
       String orderBy = "name";
       String direction = "asc";
-      String cursor = null;
-      String after = null;
+      UUID cursor = null;
+      Instant after = null;
       int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
       UUID userId = UUID.randomUUID();
 
       when(interestRepository.countByKeyword(keyword)).thenReturn(0);
 
       // when
       CursorPageResponseDto<InterestDto> result = interestService.getInterests(
-          keyword, orderBy, direction, cursor, after, limit, userId
-      );
+          interestSearchRequest, userId);
 
       //then
       assertNotNull(result);
@@ -454,7 +476,7 @@ class InterestServiceTest {
       when(interestRepository.findById(interestId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(InterestNotFoundException.class,
           () -> interestService.updateInterest(userId, interestId, request));
 
       assertNotEquals(keywords, interests.get(1).getKeywords());
@@ -473,7 +495,7 @@ class InterestServiceTest {
       InterestUpdateRequest request = new InterestUpdateRequest(keywords);
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(EmptyKeywordsException.class,
           () -> interestService.updateInterest(userId, interestId, request));
 
       assertNotEquals(keywords, interests.get(1).getKeywords());
@@ -517,7 +539,7 @@ class InterestServiceTest {
       when(interestRepository.findById(interestId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(InterestNotFoundException.class,
           () -> interestService.subscribeToInterest(interestId, userId));
 
       verify(subscriptionRepository, never()).save(any(Subscription.class));
@@ -534,7 +556,7 @@ class InterestServiceTest {
       when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(UserNotFoundException.class,
           () -> interestService.subscribeToInterest(interest.getId(), userId));
 
       verify(subscriptionRepository, never()).save(any(Subscription.class));
@@ -555,7 +577,7 @@ class InterestServiceTest {
 
       when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
       when(interestRepository.findById(interest.getId())).thenReturn(Optional.of(interest));
-      when(subscriptionRepository.findById(any(UUID.class))).thenReturn(
+      when(subscriptionRepository.findByUserAndInterest(user, interest)).thenReturn(
           Optional.of(subscribe));
 
       //when & then
@@ -573,7 +595,7 @@ class InterestServiceTest {
       when(interestRepository.findById(interestId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(InterestNotFoundException.class,
           () -> interestService.unsubscribeFromInterest(interestId, userId));
 
       verify(subscriptionRepository, never()).delete(any(Subscription.class));
@@ -590,7 +612,7 @@ class InterestServiceTest {
       when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
       //when & then
-      assertThrows(IllegalArgumentException.class,
+      assertThrows(UserNotFoundException.class,
           () -> interestService.unsubscribeFromInterest(interest.getId(), userId));
 
       verify(subscriptionRepository, never()).delete(any(Subscription.class));

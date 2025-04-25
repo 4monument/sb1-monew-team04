@@ -7,13 +7,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Entity
@@ -28,9 +29,8 @@ public class Interest {
   @Column(name = "name", nullable = false)
   private String name;
 
-
-  @Convert(converter = StringListConverter.class) // List <-> JSONB 변환
   @Column(name = "keywords", columnDefinition = "jsonb")
+  @JdbcTypeCode(SqlTypes.JSON)
   private List<String> keywords;
 
   @Column(name = "created_at", nullable = false)
@@ -42,7 +42,7 @@ public class Interest {
     this.createdAt = Instant.now();
   }
 
-  public void updateKeywords( List<String> keywords) {
+  public void updateKeywords(List<String> keywords) {
     this.keywords = keywords;
   }
 }
