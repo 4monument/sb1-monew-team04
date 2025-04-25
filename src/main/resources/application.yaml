@@ -12,7 +12,7 @@ spring:
       force: true
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
     show-sql: true
     open-in-view: false
   #배치
