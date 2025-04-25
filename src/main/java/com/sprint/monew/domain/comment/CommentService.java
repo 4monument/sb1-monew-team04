@@ -76,9 +76,11 @@ public class CommentService {
   }
 
   public void unlikeComment(UUID commentId, UUID userId) {
-    likeRepository
-        .findByComment_IdAndUser_Id(commentId, userId)
-        .ifPresent(likeRepository::delete);
+    likeRepository.findByComment_IdAndUser_Id(commentId, userId).ifPresent(likeRepository::delete);
+  }
+
+  public void deleteComment(UUID commentId) {
+    commentRepository.findById(commentId).ifPresent(Comment::logicallyDelete);
   }
 
 }
