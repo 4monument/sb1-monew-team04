@@ -10,10 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      AWS_S3_ACCESS_KEY: ${{ secrets.AWS_S3_ACCESS_KEY }}
-      AWS_S3_SECRET_KEY: ${{ secrets.AWS_S3_SECRET_KEY }}
-      AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
-      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+      SPRING_PROFILES_ACTIVE: test
+      APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICAITON_TEST_PROPERTIES }}
 
     steps:
       - name: Github Repository 파일 불러오기
@@ -24,6 +22,10 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+
+      - name: application-test.yml 파일 생성
+        run: |
+          echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" | sed 's/\\n/\n/g' > src/main/resources/application-test.yml
 
       - name: 테스트 및 빌드하기
         run: ./gradlew clean build
