@@ -27,7 +27,9 @@ public record HankyungArticleResponse(
       @JacksonXmlElementWrapper(useWrapping = false)
       @JacksonXmlProperty(localName = "item")
       List<Item> items
-  ) {}
+  ) {
+
+  }
 
   public record Item(
       String title,
@@ -36,5 +38,7 @@ public record HankyungArticleResponse(
 
       @JsonFormat(pattern = "EEE, dd MMM yyyy HH:mm:ss Z", locale = "en", timezone = "Asia/Seoul")
       OffsetDateTime pubDate
-  ) {}
+  ) {
+
+  }
 }

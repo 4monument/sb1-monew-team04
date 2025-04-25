@@ -41,7 +41,6 @@ public class NotificationService {
           interest.getId(),
           ResourceType.INTEREST,
           interest.getName() + "와/과 관련된 기사가 " + totalNewArticles + "건 등록되었습니다.");
-
       newNotifications.add(notification);
 
       //아래 save는 배치로 한번에 하는건지, 아니면 메소드 내부에서 해야하는건지?

@@ -16,4 +16,5 @@ public record S3ConfigProperties(
     String bucket,
     @NotBlank(message = "AWS S3 region을 지정해주세요")
     String region) {
+
 }

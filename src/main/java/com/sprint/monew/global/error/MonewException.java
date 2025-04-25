@@ -7,6 +7,7 @@ import lombok.Getter;
 
 @Getter
 public class MonewException extends RuntimeException {
+
   private final Instant timestamp;
   private final ErrorCode errorCode;
   private final Map<String, Object> details;

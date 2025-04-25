@@ -27,25 +27,37 @@ WITH u1 AS (SELECT id AS user_id FROM users WHERE email = 'minji@example.com'),
      i1 AS (SELECT id AS interest_id FROM interests WHERE name = '기술'),
      i2 AS (SELECT id AS interest_id FROM interests WHERE name = '건강')
 
-INSERT INTO "users_interests" ("id", "user_id", "interest_id", "created_at")
-SELECT gen_random_uuid(), u1.user_id, i1.interest_id, now() FROM u1, i1
+INSERT
+INTO "users_interests" ("id", "user_id", "interest_id", "created_at")
+SELECT gen_random_uuid(), u1.user_id, i1.interest_id, now()
+FROM u1,
+     i1
 UNION
-SELECT gen_random_uuid(), u2.user_id, i2.interest_id, now() FROM u2, i2;
+SELECT gen_random_uuid(), u2.user_id, i2.interest_id, now()
+FROM u2,
+     i2;
+
+-- ARTICLES (기사)
+INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date")
+VALUES (gen_random_uuid(), 'NAVER', 'https://site.com/ai', '인공지능의 미래', 'AI가 바꾸는 세상에 대한 이야기', now()),
+       (gen_random_uuid(), 'CHOSUN', 'https://site.com/health', '건강하게 사는 법', '건강을 유지하는 실용적인 팁',
+        now());
 
 -- ARTICLES_INTERESTS (기사-관심사 연결)
-WITH
-    a1 AS (SELECT id AS article_id FROM articles WHERE title = '인공지능의 미래'),
-    a2 AS (SELECT id AS article_id FROM articles WHERE title = '건강하게 사는 법'),
-    i1 AS (SELECT id AS interest_id FROM interests WHERE name = '기술'),
-    i2 AS (SELECT id AS interest_id FROM interests WHERE name = '건강')
+WITH a1 AS (SELECT id AS article_id FROM articles WHERE title = '인공지능의 미래'),
+     a2 AS (SELECT id AS article_id FROM articles WHERE title = '건강하게 사는 법'),
+     i1 AS (SELECT id AS interest_id FROM interests WHERE name = '기술'),
+     i2 AS (SELECT id AS interest_id FROM interests WHERE name = '건강')
 
 INSERT
-INTO "articles_interests" ("id", "article_id", "interest_id")
-SELECT gen_random_uuid(), a1.article_id, i1.interest_id
-FROM a1, i1
+INTO "articles_interests" ("id", "article_id", "interest_id", "created_at")
+SELECT gen_random_uuid(), a1.article_id, i1.interest_id, now()
+FROM a1,
+     i1
 UNION
-SELECT gen_random_uuid(), a2.article_id, i2.interest_id
-FROM a2, i2;
+SELECT gen_random_uuid(), a2.article_id, i2.interest_id, now()
+FROM a2,
+     i2;
 
 -- COMMENTS (댓글)
 WITH au1 AS (SELECT id FROM users WHERE email = 'minji@example.com'),
@@ -79,10 +91,15 @@ WITH u1 AS (SELECT id AS user_id FROM users WHERE email = 'minji@example.com'),
      a1 AS (SELECT id AS article_id FROM articles WHERE title = '인공지능의 미래'),
      a2 AS (SELECT id AS article_id FROM articles WHERE title = '건강하게 사는 법')
 
-INSERT INTO "articles_views" ("user_id", "article_id", "created_at")
-SELECT u1.user_id, a1.article_id, now() FROM u1, a1
+INSERT
+INTO "articles_views" ("id", "user_id", "article_id", "created_at")
+SELECT gen_random_uuid(), u1.user_id, a1.article_id, now()
+FROM u1,
+     a1
 UNION
-SELECT u2.user_id, a2.article_id, now() FROM u2, a2;
+SELECT gen_random_uuid(), u2.user_id, a2.article_id, now()
+FROM u2,
+     a2;
 
 -- NOTIFICATIONS (알림)
 WITH u1 AS (SELECT id AS user_id FROM users WHERE email = 'minji@example.com'),
@@ -90,10 +107,30 @@ WITH u1 AS (SELECT id AS user_id FROM users WHERE email = 'minji@example.com'),
      c1 AS (SELECT id AS resource_id FROM comments WHERE content = '정말 흥미로운 기사네요!'),
      c2 AS (SELECT id AS resource_id FROM comments WHERE content = '도움이 많이 됐어요!')
 
-INSERT INTO "notifications" ("id", "user_id", "resource_id", "resource_type", "content", "confirmed", "created_at", "updated_at")
-SELECT gen_random_uuid(), u1.user_id, c1.resource_id, 'COMMENT', '누군가 내 댓글에 좋아요를 눌렀어요.', false, now(), now() FROM u1, c1
+INSERT
+INTO "notifications" ("id", "user_id", "resource_id", "resource_type", "content", "confirmed",
+                      "created_at", "updated_at")
+SELECT gen_random_uuid(),
+       u1.user_id,
+       c1.resource_id,
+       'COMMENT',
+       '누군가 내 댓글에 좋아요를 눌렀어요.',
+       false,
+       now(),
+       now()
+FROM u1,
+     c1
 UNION
-SELECT gen_random_uuid(), u2.user_id, c2.resource_id, 'COMMENT', '새로운 댓글이 달렸어요.', false, now(), now() FROM u2, c2;
+SELECT gen_random_uuid(),
+       u2.user_id,
+       c2.resource_id,
+       'COMMENT',
+       '새로운 댓글이 달렸어요.',
+       false,
+       now(),
+       now()
+FROM u2,
+     c2;
 
 SELECT conname, pg_get_constraintdef(c.oid)
 FROM pg_constraint c

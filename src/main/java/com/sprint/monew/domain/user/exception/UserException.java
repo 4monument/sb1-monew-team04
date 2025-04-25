@@ -4,6 +4,7 @@ import com.sprint.monew.global.error.ErrorCode;
 import com.sprint.monew.global.error.MonewException;
 
 public class UserException extends MonewException {
+
   public UserException(ErrorCode errorCode) {
     super(errorCode);
   }

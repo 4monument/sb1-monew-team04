@@ -24,25 +24,23 @@ import org.springframework.data.annotation.CreatedDate;
 @Entity
 @NoArgsConstructor
 public class Like {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id", nullable = false)
-    private Comment comment;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
-    @CreatedDate
-    @JoinColumn(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+  @CreatedDate
+  @JoinColumn(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
 
-    public Like(User user, Comment comment) {
-        this.user = user;
-        this.comment = comment;
-        this.createdAt = Instant.now();
-    }
+  public Like(User user, Comment comment) {
+      this.user = user;
+      this.comment = comment;
+      this.createdAt = Instant.now();
+  }
+
 }
