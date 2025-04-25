@@ -44,7 +44,9 @@ public class CommentController {
   public ResponseEntity<CommentDto> addComment(
       @RequestBody CommentRegisterRequest commentRegisterRequest
   ) {
-    return null;
+    return ResponseEntity
+        .status(201)
+        .body(commentService.registerComment(commentRegisterRequest));
   }
 
   @PostMapping("/{commentId}/comment-likes")
