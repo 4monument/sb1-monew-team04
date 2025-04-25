@@ -73,13 +73,13 @@ public class AricleCollectFlowConfig {
   public Step articleHandlerStep(
       @Qualifier("naverArticleCollectReader") ItemReader<Object> naverArticleCollectReader,
       @Qualifier("naverArticleCollectProcessor") ItemProcessor<Object, Article> naverArticleCollectProcessor,
-      @Qualifier("naverArticleCollectWriter") ItemWriter<Article> naverArticleCollectWriter) {
+      @Qualifier("articleCollectJpaItemWriter") ItemWriter<Article> articleCollectJpaItemWriter) {
 
     return new StepBuilder("articleHandlerStep", jobRepository)
         .<Object, Article>chunk(100, transactionManager)
         .reader(naverArticleCollectReader)
         .processor(naverArticleCollectProcessor)
-        .writer(naverArticleCollectWriter)
+        .writer(articleCollectJpaItemWriter)
         .build();
   }
 }

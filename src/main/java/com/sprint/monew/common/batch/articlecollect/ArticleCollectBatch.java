@@ -26,7 +26,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 @RequiredArgsConstructor
 public class ArticleCollectBatch {
 
-  private final EntityManagerFactory emf;
   private final PlatformTransactionManager transactionManager;
   private final JobRepository jobRepository;
 

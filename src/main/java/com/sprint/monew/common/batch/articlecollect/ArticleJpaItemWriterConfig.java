@@ -16,9 +16,10 @@ public class ArticleJpaItemWriterConfig {
 
   private final EntityManagerFactory emf;
 
-  @Bean(name = "naverArticleCollectWriter")
-  public ItemWriter<Article> naverArticleCollectWriter(List<? extends Article> items) {
+  @Bean(name = "articleCollectJpaItemWriter")
+  public ItemWriter<Article> articleCollectJpaItemWriter(List<? extends Article> items) {
     return new JpaItemWriterBuilder<Article>()
+
         .usePersist(true)
         .entityManagerFactory(emf)
         .build();
