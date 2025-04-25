@@ -11,7 +11,7 @@ jobs:
 
     env:
       SPRING_PROFILES_ACTIVE: test
-      APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICAITON_TEST_PROPERTIES }}
+      APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
 
     steps:
       - name: Github Repository 파일 불러오기
