@@ -1,5 +1,6 @@
 package com.sprint.monew.domain.comment;
 
+import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.exception.ArticleNotFoundException;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
@@ -19,6 +20,7 @@ import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +37,21 @@ public class CommentService {
   private final ArticleRepository articleRepository;
   private final LikeRepository likeRepository;
   private final NotificationRepository notificationRepository;
+
+  public CursorPageResponseDto<CommentDto> getComments(UUID articleId) {
+    //임시로 모든 comment 반환
+    List<CommentDto> dtos = commentRepository.findByArticle_Id(articleId).stream()
+        .map(comment -> CommentDto.from(comment, false))
+        .toList();
+    return new CursorPageResponseDto<>(
+        dtos,
+        null,
+        null,
+        dtos.size(),
+        dtos.size(),
+        false
+    );
+  }
 
   public CommentDto registerComment(CommentRegisterRequest request) {
     UUID articleId = request.articleId();
