@@ -13,9 +13,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ArticleProcessorConfig {
 
+
+  // 키워드 필터링
+  // 원본 기사 링크 중복 없애기
+
   @Bean
   @StepScope
-  public ItemProcessor<Object, Article> naverArticleCollectProcessor(
+  public ItemProcessor<Object,List<Article>> naverArticleCollectProcessor(
       @Value("#{JobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> articleApiDtos,
       @Value("#{JobExecutionContext['keywords']}") Keywords keywords) {
 
@@ -34,14 +38,19 @@ public class ArticleProcessorConfig {
 
   @Bean
   @StepScope
-  public ItemProcessor<Object, Article> chosunArticleCollectProcessor(
+  public ItemProcessor<Object, List<Article>> chosunArticleCollectProcessor(
       @Value("#{JobExecutionContext['chosunArticleDtos']}") List<ArticleApiDto> articleApiDtos,
       @Value("#{JobExecutionContext['keywords']}") Keywords keywords) {
 
     return (item) -> {
       if (keywords == null) {
         // 변환 로직 넣기
-        return null;
+        // ARTICLE 말고 ArticleView랑 알림 기능 ???
+        List<Article> articleList = articleApiDtos.stream()
+            .map(ArticleApiDto::toEntity)
+            .toList();
+
+        return articleList;
       }
 
       List<ArticleApiDto> filteredArticleDtos = keywords.filter(articleApiDtos);

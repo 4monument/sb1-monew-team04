@@ -47,7 +47,7 @@ public class ArticleCollectBatch {
   // keyword들을 전부 가져와서 스텝끼리 공유 가능한 저장소에 저장
   @Bean(name = "fetchKeywordsStep")
   @JobScope
-  public Step fetchKeywordsStep(InterestRepository interestRepository) {
+  public Step KeywordsFetchStep(InterestRepository interestRepository) {
     return new StepBuilder("KeyWordCollectStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
           Keywords allKeyword = interestRepository.findAllKeyword();
