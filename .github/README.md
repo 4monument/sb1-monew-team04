@@ -7,7 +7,7 @@
 
 | 박유진 | 이요한 | 장태준 | 전성삼 | 허원재 |
 |:---:|:---:|:---:|:---:|:---:|
-| <img width="160" src="https://github.com/user-attachments/assets/fcad6410-bc99-4ca3-80b9-5b259947baf4" alt="yudility"> | <img width="160" src="" alt="arlegro"> | <img width="160" src="https://github.com/user-attachments/assets/94d07eb2-9788-40b2-872f-c675c8f99018" alt="janghoosa"> | <img width="160" src="https://github.com/user-attachments/assets/a856bd02-ab08-4347-83f9-6cfa01b663ea" alt="hodu31"> | <img width="160" src="" alt="oince"> |
+| <img width="160" src="https://github.com/user-attachments/assets/fcad6410-bc99-4ca3-80b9-5b259947baf4" alt="yudility"> | <img width="160" src="" alt="arlegro"> | <img width="160" src="https://github.com/user-attachments/assets/94d07eb2-9788-40b2-872f-c675c8f99018" alt="janghoosa"> | <img width="160" src="https://github.com/user-attachments/assets/a856bd02-ab08-4347-83f9-6cfa01b663ea" alt="hodu31"> | <img width="160" src="https://github.com/user-attachments/assets/e9326fb1-94a7-40d9-a04f-dc081d93866d" alt="oince"> |
 | [Yudility](https://github.com/yudility) | [ARlegro](https://github.com/ARlegro) | [janghoosa](https://github.com/janghoosa) | [hodu31](https://github.com/hodu31) | [Oince](https://github.com/Oince) |
 
 </div>
