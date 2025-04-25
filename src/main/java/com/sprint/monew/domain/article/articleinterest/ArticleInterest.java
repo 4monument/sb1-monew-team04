@@ -5,10 +5,12 @@ import com.sprint.monew.domain.interest.Interest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.UUID;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
@@ -26,6 +28,7 @@ import lombok.NoArgsConstructor;
 public class ArticleInterest {
 
   @Id
+  @GeneratedValue
   private UUID id;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -41,7 +44,6 @@ public class ArticleInterest {
 
   @Builder(access = AccessLevel.PRIVATE)
   private ArticleInterest(Article article, Interest interest) {
-    this.id = UUID.randomUUID();
     this.article = article;
     this.interest = interest;
     this.createdAt = Instant.now();

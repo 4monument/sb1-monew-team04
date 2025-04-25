@@ -1,6 +1,6 @@
 package com.sprint.monew.domain.comment;
 
-import java.util.List;
+import com.sprint.monew.domain.article.Article;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -8,7 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
-  void deleteByArticle_Id(UUID articleId);
-
-  List<Comment> findByArticle_Id(UUID articleId);
+  long countByArticleAndDeletedFalse(Article article);
 }
