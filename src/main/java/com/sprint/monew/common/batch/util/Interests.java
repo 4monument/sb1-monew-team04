@@ -10,31 +10,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Interests implements Serializable {
   private static final long serialVersionUID = 1L;
-
-  //private final Map<Article, Interest> articleInterestsMap;
   private final List<Interest> interests;
-  private final List<String> keywords;
-  Set<String> sourceUrlFilterSet = new HashSet<>();
-
+  private final List<String> keywords; // keyword 요청할때 마다 만드는 것보다 미리 만드는게 성능 좋을 것 같아서
+  private final Set<String> sourceUrlFilterSet = ConcurrentHashMap.newKeySet();
   public Interests(List<Interest> interests) {
     this.interests = Collections.unmodifiableList(interests);
     this.keywords = interests.stream()
         .map(Interest::getKeywords)
         .flatMap(List::stream)
         .distinct().toList();
-  }
-
-  // keyword랑 주제가 먼 ArticleAPiDto 필터링 + URL 겹치는거
-  public List<ArticleApiDto> filterByKeywordAndUniqueUrl(List<ArticleApiDto> articleApiDtos) {
-    Set<String> sourceUrlFilter = new HashSet<>(); // sourceUrl 중복 검사요
-    return articleApiDtos.stream()
-        .filter(this::isContainKeywords)
-        .filter(dto -> sourceUrlFilter.add(dto.sourceUrl()))
-        .toList();
   }
 
   public Boolean validateKeywordContainingAndUniqueUrl(ArticleApiDto articleApiDto) {
@@ -62,4 +51,14 @@ public class Interests implements Serializable {
                 .toList()
         ));
   }
+
+  //  // keyword랑 주제가 먼 ArticleAPiDto 필터링 + URL 겹치는거
+//  public List<ArticleApiDto> filterByKeywordAndUniqueUrl(List<ArticleApiDto> articleApiDtos) {
+//    Set<String> sourceUrlFilter = new HashSet<>(); // sourceUrl 중복 검사요
+//    return articleApiDtos.stream()
+//        .filter(this::isContainKeywords)
+//        .filter(dto -> sourceUrlFilter.add(dto.sourceUrl()))
+//        .toList();
+//  }
+
 }
