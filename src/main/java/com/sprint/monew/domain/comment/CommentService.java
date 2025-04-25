@@ -7,9 +7,12 @@ import com.sprint.monew.domain.comment.dto.CommentDto;
 import com.sprint.monew.domain.comment.dto.CommentLikeDto;
 import com.sprint.monew.domain.comment.dto.request.CommentRegisterRequest;
 import com.sprint.monew.domain.comment.exception.CommentNotFoundException;
+import com.sprint.monew.domain.comment.exception.LikeAlreadyExistException;
 import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.comment.like.LikeRepository;
-import com.sprint.monew.domain.comment.exception.LikeAlreadyExistException;
+import com.sprint.monew.domain.notification.Notification;
+import com.sprint.monew.domain.notification.NotificationRepository;
+import com.sprint.monew.domain.notification.ResourceType;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.domain.user.exception.UserNotFoundException;
@@ -30,6 +33,7 @@ public class CommentService {
   private final UserRepository userRepository;
   private final ArticleRepository articleRepository;
   private final LikeRepository likeRepository;
+  private final NotificationRepository notificationRepository;
 
   public CommentDto registerComment(CommentRegisterRequest request) {
     UUID articleId = request.articleId();
@@ -57,6 +61,15 @@ public class CommentService {
 
     Like like = new Like(user, comment);
     likeRepository.save(like);
+
+    Notification notification = new Notification(
+        user,
+        commentId,
+        ResourceType.COMMENT,
+        //알림 내용은 어떻게 하는게 좋을까요?
+        "댓글이 등록되었습니다."
+    );
+    notificationRepository.save(notification);
 
     long commentLikeCount = likeRepository.countByComment(comment);
     return CommentLikeDto.from(like, commentLikeCount);
