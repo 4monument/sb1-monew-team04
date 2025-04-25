@@ -3,11 +3,8 @@ package com.sprint.monew.common.batch.util;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import java.util.Collections;
 import java.util.List;
-import lombok.Getter;
-
 
 // 스레드 4곳에서 공유되는 객체인데 변하면 위험하니 불변 객체로
-@Getter
 public class Keywords {
 
   private final List<String> keywords;
