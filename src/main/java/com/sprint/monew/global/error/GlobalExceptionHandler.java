@@ -65,10 +65,10 @@ public class GlobalExceptionHandler {
   private HttpStatus determineHttpStatus(MonewException exception) {
     ErrorCode errorCode = exception.getErrorCode();
     return switch (errorCode) {
-      case USER_NOT_FOUND, ARTICLE_NOT_FOUND -> HttpStatus.NOT_FOUND;
-      case DUPLICATE_USER, ARTICLE_VIEW_ALREADY_EXIST -> HttpStatus.CONFLICT;
+      case USER_NOT_FOUND, ARTICLE_NOT_FOUND, INTEREST_NOT_FOUND -> HttpStatus.NOT_FOUND;
+      case DUPLICATE_USER, ARTICLE_VIEW_ALREADY_EXIST, INTEREST_ALREADY_EXISTS -> HttpStatus.CONFLICT;
       case INVALID_USER_CREDENTIALS -> HttpStatus.UNAUTHORIZED;
-      case ALREADY_DELETED_USER -> HttpStatus.BAD_REQUEST;
+      case ALREADY_DELETED_USER, EMPTY_KEYWORDS_NOT_ALLOWED -> HttpStatus.BAD_REQUEST;
     };
   }
 }

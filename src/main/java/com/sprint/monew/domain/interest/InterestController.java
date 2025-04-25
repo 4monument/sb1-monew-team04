@@ -3,7 +3,10 @@ package com.sprint.monew.domain.interest;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
-import java.time.Instant;
+import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
+import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
+import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -28,15 +30,9 @@ public class InterestController {
   //관심사 목록 조회
   @GetMapping
   public ResponseEntity<CursorPageResponseDto> getInterests(
-      @RequestHeader("Monew-Request-User-ID") String userId,
-      @RequestParam String keyword,
-      @RequestParam(required = false) String orderBy,
-      @RequestParam(required = false) String direction,
-      @RequestParam(required = false) String cursor,
-      @RequestParam Instant after,
-      @RequestParam int limit
-  ) {
-    return null;
+      @RequestHeader("Monew-Request-User-ID") UUID userId, InterestSearchRequest request) {
+    return ResponseEntity.ok(
+        interestService.getInterests(request, userId));
   }
 
   //관심사 등록
@@ -49,29 +45,33 @@ public class InterestController {
 
   //관심사 구독
   @PostMapping("/{interestId}/subscriptions")
-  public ResponseEntity<InterestDto> subscribeInterest(@PathVariable String interestId,
-      @RequestHeader("Monew-Request-User-ID") String userId) {
-    //헤더 - 요청자 id
-    return null;
+  public ResponseEntity<SubscriptionDto> subscribeInterest(@PathVariable UUID interestId,
+      @RequestHeader("Monew-Request-User-ID") UUID userId) {
+    return ResponseEntity.ok(
+        interestService.subscribeToInterest(interestId, userId));
   }
 
   //관심사 구독 취소
   @DeleteMapping("/{interestId}/subscriptions")
-  public ResponseEntity<?> unsubscribeInterest(@PathVariable String interestId,
-      @RequestHeader("Monew-Request-User-ID") String userId) {
-    return null;
+  public ResponseEntity<Void> unsubscribeInterest(@PathVariable UUID interestId,
+      @RequestHeader("Monew-Request-User-ID") UUID userId) {
+    interestService.unsubscribeFromInterest(interestId, userId);
+    return ResponseEntity.status(HttpStatus.OK).build();
   }
 
   //관심사 물리 삭제
   @DeleteMapping("/{interestId}")
-  public ResponseEntity<?> deleteInterest(@PathVariable String interestId) {
-    return null;
+  public ResponseEntity<Void> deleteInterest(@PathVariable UUID interestId) {
+    interestService.deleteInterest(interestId);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  //관심사 물리 삭제
+  //관심사 정보 수정
   @PatchMapping("/{interestId}")
-  public ResponseEntity<InterestDto> updateInterest(@PathVariable String interestId) {
-    return null;
+  public ResponseEntity<InterestDto> updateInterest(@PathVariable UUID interestId,
+      @RequestBody InterestUpdateRequest interestUpdateRequest,
+      @RequestHeader(name = "Monew-Request-User-ID", required = false) UUID userId) {
+    return ResponseEntity.ok(
+        interestService.updateInterest(interestId, userId, interestUpdateRequest));
   }
-
 }
