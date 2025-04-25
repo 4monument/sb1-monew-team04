@@ -80,10 +80,6 @@ public class CommentService {
     likeRepository.findByComment_IdAndUser_Id(commentId, userId).ifPresent(likeRepository::delete);
   }
 
-  public void deleteComment(UUID commentId) {
-    commentRepository.findById(commentId).ifPresent(Comment::logicallyDelete);
-  }
-
   public CommentDto updateCommentContent(UUID commentId, UUID userId, CommentUpdateRequest commentUpdateRequest) {
     String content = commentUpdateRequest.content();
     Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
@@ -100,4 +96,11 @@ public class CommentService {
     return CommentDto.from(comment, likedByMe);
   }
 
+  public void deleteComment(UUID commentId) {
+    commentRepository.findById(commentId).ifPresent(Comment::logicallyDelete);
+  }
+
+  public void hardDeleteComment(UUID commentId) {
+    commentRepository.findById(commentId).ifPresent(commentRepository::delete);
+  }
 }
