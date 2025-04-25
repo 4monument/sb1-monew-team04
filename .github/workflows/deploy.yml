@@ -12,8 +12,6 @@ jobs:
     env:
       SPRING_PROFILES_ACTIVE: test
       APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
-      AWS_S3_ACCESS_KEY: ${{ secrets.AWS_S3_ACCESS_KEY }}
-      AWS_S3_SECRET_KEY: ${{ secrets.AWS_S3_SECRET_KEY }}
 
     steps:
       - name: Github Repository 파일 불러오기
