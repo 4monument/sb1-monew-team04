@@ -19,7 +19,7 @@ public interface InterestRepository extends JpaRepository<Interest, UUID>,
           "WHERE LOWER(k) LIKE LOWER(CONCAT('%', :keyword, '%')))) " +
           "AND (:cursorId IS NULL OR "
           + " (cast(:after as timestamptz) IS NOT NULL AND i.created_at > :after) OR"
-          + " (cast(:after as timestamptz) IS NOT NULL AND i.created_at > :after AND i.id >: cursorId)) "
+          + " (cast(:after as timestamptz) IS NOT NULL AND i.created_at > :after AND i.id > :cursorId)) "
           + "ORDER BY i.name ASC, i.id ASC "
           + "LIMIT :limit",
       nativeQuery = true)
@@ -34,7 +34,7 @@ public interface InterestRepository extends JpaRepository<Interest, UUID>,
           "WHERE LOWER(k) LIKE LOWER(CONCAT('%', :keyword, '%')))) " +
           "AND (:cursorId IS NULL OR "
           + " (cast(:after as timestamptz) IS NOT NULL AND i.created_at < :after) OR"
-          + " (cast(:after as timestamptz) IS NOT NULL AND i.created_at < :after AND i.id <: cursorId)) "
+          + " (cast(:after as timestamptz) IS NOT NULL AND i.created_at < :after AND i.id < :cursorId)) "
           + "ORDER BY i.name DESC, i.id DESC "
           + "LIMIT :limit",
       nativeQuery = true)
