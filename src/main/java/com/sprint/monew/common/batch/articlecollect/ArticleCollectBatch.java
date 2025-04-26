@@ -10,6 +10,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.FlowBuilder;
@@ -38,7 +39,8 @@ public class ArticleCollectBatch {
   @Bean(name = "articleCollectJob")
   public Job articleCollectJob(
       @Qualifier("interestsFetchStep") Step interestsFetchStep,
-      @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow) {
+      @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow,
+      @Qualifier("jobExecutionContextCleanupListener") JobExecutionListener jobExecutionCleanupListener){
 
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
@@ -47,6 +49,7 @@ public class ArticleCollectBatch {
         .to(naverArticleCollectFlow)
         //.split(taskExecutor()).add(null) // 나중
         .end()
+        .listener(jobExecutionCleanupListener)
         .build();
   }
 

@@ -23,7 +23,7 @@ public class Interests implements Serializable {
     return sourceUrlFilterSet.add(articleApiDto.sourceUrl());
   }
 
-  public ArticleWithInterestList toArticleAndRelevantInterests(ArticleApiDto articleApiDto) {
+  public ArticleWithInterestList toArticleWithRelevantInterests(ArticleApiDto articleApiDto) {
     String summary = articleApiDto.summary();
     List<Interest> interestList = interests.stream()
         .filter(interest ->
@@ -31,6 +31,7 @@ public class Interests implements Serializable {
             .anyMatch(summary::contains))
         .toList();
 
+    // 관련된 키워드가 없는 Aritcle은 필터링
     if (interestList.isEmpty()) {
       return null;
     }

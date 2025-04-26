@@ -21,7 +21,7 @@ public class ArticleProcessorConfig {
       if (interests.isDuplicateUrl(dto)) {
         return null; // null 반환하면 배치에서는 Writer에 skilp
       }
-      return interests.toArticleAndRelevantInterests(dto);
+      return interests.toArticleWithRelevantInterests(dto);
     };
   }
 }

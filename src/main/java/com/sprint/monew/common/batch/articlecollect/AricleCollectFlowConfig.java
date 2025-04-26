@@ -78,8 +78,6 @@ public class AricleCollectFlowConfig {
   @JobScope
   public Step articleHandlerStep(
       @Qualifier("naverArticleCollectReader") ItemReader<ArticleApiDto> naverArticleCollectReader,
-      //@Qualifier("basicArticleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor,
-      //@Qualifier("articleJpaItemWriter") ItemWriter<ArticleWithInterestList> articleCollectJpaItemWriter
       @Qualifier("asyncItemProcessor") AsyncItemProcessor<ArticleApiDto, ArticleWithInterestList> asyncItemProcessor,
       @Qualifier("asyncItemWriter") AsyncItemWriter<ArticleWithInterestList> asyncItemWriter,
       @Qualifier("naverExecutionContextCleanupListener") StepExecutionListener naverExecutionContextCleanupListener) {
@@ -102,6 +100,7 @@ public class AricleCollectFlowConfig {
       @Qualifier("basicArticleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> basicArticleCollectProcessor,
       @Qualifier("articleCollectThreadPoolTaskExecutor") ThreadPoolTaskExecutor articleCollectThreadPoolTaskExecutor)
       throws Exception {
+
     AsyncItemProcessor<ArticleApiDto, ArticleWithInterestList> asyncItemProcessor = new AsyncItemProcessor<>();
     asyncItemProcessor.setDelegate(basicArticleCollectProcessor);
     asyncItemProcessor.setTaskExecutor(articleCollectThreadPoolTaskExecutor);
@@ -112,14 +111,17 @@ public class AricleCollectFlowConfig {
   @Bean
   @StepScope
   public ThreadPoolTaskExecutor articleCollectThreadPoolTaskExecutor() {
+
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
     int properCorePoolSize = Runtime.getRuntime().availableProcessors() - 1;
     int chunkSize = 200;
+
     executor.setCorePoolSize(properCorePoolSize);
     executor.setMaxPoolSize((int) (properCorePoolSize * 1.5));
     executor.setQueueCapacity(chunkSize - properCorePoolSize);
     executor.setThreadNamePrefix("article-collect-processor-async-");
     executor.initialize();
+
     return executor;
   }
 
@@ -128,6 +130,7 @@ public class AricleCollectFlowConfig {
   public AsyncItemWriter<ArticleWithInterestList> asyncItemWriter(
       @Qualifier("articleJpaItemWriter") ItemWriter<ArticleWithInterestList> articleCollectJpaItemWriter)
       throws Exception {
+
     AsyncItemWriter<ArticleWithInterestList> asyncItemWriter = new AsyncItemWriter<>();
     asyncItemWriter.setDelegate(articleCollectJpaItemWriter);
     asyncItemWriter.afterPropertiesSet();
