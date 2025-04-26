@@ -76,67 +76,67 @@ public class ArticleCollectFlowConfig {
   @JobScope
   public Step articleHandlerStep(
       @Qualifier("naverArticleCollectReader") ItemReader<ArticleApiDto> naverArticleCollectReader,
-      @Qualifier("asyncItemProcessor") AsyncItemProcessor<ArticleApiDto, ArticleWithInterestList> asyncItemProcessor,
-      @Qualifier("asyncItemWriter") AsyncItemWriter<ArticleWithInterestList> asyncItemWriter,
+      @Qualifier("basicArticleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor,
+      @Qualifier("articleJpaItemWriter") ItemWriter<ArticleWithInterestList> articleJpaItemWriter,
       @Qualifier("naverExecutionContextCleanupListener") StepExecutionListener naverExecutionContextCleanupListener) {
 
     return new StepBuilder("articleHandlerStep", jobRepository)
-        .<ArticleApiDto, Future<ArticleWithInterestList>>chunk(200, transactionManager)
+        .<ArticleApiDto, ArticleWithInterestList>chunk(200, transactionManager)
         .reader(naverArticleCollectReader)
-        .processor(asyncItemProcessor)
-        .writer(asyncItemWriter)
+        .processor(naverArticleCollectProcessor)
+        .writer(articleJpaItemWriter)
         .faultTolerant()
         .retryLimit(3)
         .retry(Exception.class)
         .listener(naverExecutionContextCleanupListener)
         .build();
   }
-
-  @Bean(name = "asyncItemProcessor")
-  @StepScope
-  public AsyncItemProcessor<ArticleApiDto, ArticleWithInterestList> asyncItemProcessor(
-      @Qualifier("basicArticleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> basicArticleCollectProcessor,
-      @Qualifier("articleCollectThreadPoolTaskExecutor") ThreadPoolTaskExecutor articleCollectThreadPoolTaskExecutor)
-      throws Exception {
-
-    AsyncItemProcessor<ArticleApiDto, ArticleWithInterestList> asyncItemProcessor = new AsyncItemProcessor<>();
-    asyncItemProcessor.setDelegate(basicArticleCollectProcessor);
-    asyncItemProcessor.setTaskExecutor(articleCollectThreadPoolTaskExecutor);
-    asyncItemProcessor.afterPropertiesSet();
-    return asyncItemProcessor;
-  }
-
-  @Bean
-  @StepScope
-  public ThreadPoolTaskExecutor articleCollectThreadPoolTaskExecutor() {
-
-    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    int properCorePoolSize = (int) (Runtime.getRuntime().availableProcessors() / 4); // 거의 0 될라나
-    int chunkSize = 200;
-
-    executor.setCorePoolSize(properCorePoolSize);
-    executor.setMaxPoolSize((int) (properCorePoolSize * 1.5));
-    executor.setQueueCapacity(chunkSize - properCorePoolSize);
-    executor.setThreadNamePrefix("article-collect-processor-async-");
-    executor.initialize();
-
-    return executor;
-  }
-
-  @Bean
-  @StepScope
-  public AsyncItemWriter<ArticleWithInterestList> asyncItemWriter(
-      @Qualifier("articleJpaItemWriter") ItemWriter<ArticleWithInterestList> articleCollectJpaItemWriter)
-      throws Exception {
-
-    AsyncItemWriter<ArticleWithInterestList> asyncItemWriter = new AsyncItemWriter<>();
-    asyncItemWriter.setDelegate(articleCollectJpaItemWriter);
-    asyncItemWriter.afterPropertiesSet();
-    return asyncItemWriter;
-  }
-
-  // Chosun Flow
-
-  // Hankyung Flow
 }
+// Chosun Flow
+
+// Hankyung Flow
+
+//  @Bean(name = "asyncItemProcessor")
+//  @StepScope
+//  public AsyncItemProcessor<ArticleApiDto, ArticleWithInterestList> asyncItemProcessor(
+//      @Qualifier("basicArticleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> basicArticleCollectProcessor,
+//      @Qualifier("articleCollectThreadPoolTaskExecutor") ThreadPoolTaskExecutor articleCollectThreadPoolTaskExecutor)
+//      throws Exception {
+//
+//    AsyncItemProcessor<ArticleApiDto, ArticleWithInterestList> asyncItemProcessor = new AsyncItemProcessor<>();
+//    asyncItemProcessor.setDelegate(basicArticleCollectProcessor);
+//    asyncItemProcessor.setTaskExecutor(articleCollectThreadPoolTaskExecutor);
+//    asyncItemProcessor.afterPropertiesSet();
+//    return asyncItemProcessor;
+//  }
+//
+//  @Bean
+//  @StepScope
+//  public ThreadPoolTaskExecutor articleCollectThreadPoolTaskExecutor() {
+//
+//    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+//    int properCorePoolSize = (int) (Runtime.getRuntime().availableProcessors() / 4); // 거의 0 될라나
+//    int chunkSize = 200;
+//
+//    executor.setCorePoolSize(properCorePoolSize);
+//    executor.setMaxPoolSize((int) (properCorePoolSize * 1.5));
+//    executor.setQueueCapacity(chunkSize - properCorePoolSize);
+//    executor.setThreadNamePrefix("article-collect-processor-async-");
+//    executor.initialize();
+//
+//    return executor;
+//  }
+//
+//  @Bean
+//  @StepScope
+//  public AsyncItemWriter<ArticleWithInterestList> asyncItemWriter(
+//      @Qualifier("articleJpaItemWriter") ItemWriter<ArticleWithInterestList> articleCollectJpaItemWriter)
+//      throws Exception {
+//
+//    AsyncItemWriter<ArticleWithInterestList> asyncItemWriter = new AsyncItemWriter<>();
+//    asyncItemWriter.setDelegate(articleCollectJpaItemWriter);
+//    asyncItemWriter.afterPropertiesSet();
+//    return asyncItemWriter;
+//  }
+//}
 

@@ -40,7 +40,7 @@ public class NotificationCreateBatch {
   }
 
   public ItemReader<Object> notificationCreateReader() {
-    // 유진님이 Notification에 쓰일 재료 가져오는 로직
+    // 유진님 Notification create관련에 쓰일 재료 가져오는 로직
     List<String> temp = List.of("재료1", "재료2", "재료3");
     ListItemReader<String> tempReader = new ListItemReader<>(temp);
     return null;
@@ -52,7 +52,7 @@ public class NotificationCreateBatch {
   }
 
   public ItemWriter<Object> notificationCreateWriter() {
-    // 유진님이 저장
+    // 만든거 저장하는 로직
     return null;
   }
 }
