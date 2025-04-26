@@ -43,6 +43,7 @@ public class ExecutionContextCleanupListenerConfig {
       this.key = key;
     }
 
+    @AfterStep
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
       ExecutionContext jobExecutionContext = stepExecution.getJobExecution()
