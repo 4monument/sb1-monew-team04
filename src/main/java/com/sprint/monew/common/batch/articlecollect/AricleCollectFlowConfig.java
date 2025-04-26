@@ -2,9 +2,8 @@ package com.sprint.monew.common.batch.articlecollect;
 
 import static com.sprint.monew.common.batch.util.CustomExecutionContextKeys.NAVER_ARTICLE_DTOS;
 
-import com.sprint.monew.common.batch.util.ArticlesAndArticleInterestsDTO;
+import com.sprint.monew.common.batch.util.ArticleWithInterestList;
 import com.sprint.monew.common.batch.util.ExecutionContextFinder;
-import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.api.ArticleApiClient;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import java.util.List;
@@ -72,11 +71,11 @@ public class AricleCollectFlowConfig {
   @JobScope
   public Step articleHandlerStep(
       @Qualifier("naverArticleCollectReader") ItemReader<ArticleApiDto> naverArticleCollectReader,
-      @Qualifier("naverArticleCollectProcessor") ItemProcessor<ArticleApiDto, Article> naverArticleCollectProcessor,
-      @Qualifier("articleJpaItemWriter") ItemWriter<Article> articleCollectJpaItemWriter) {
+      @Qualifier("naverArticleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor,
+      @Qualifier("articleJpaItemWriter") ItemWriter<ArticleWithInterestList> articleCollectJpaItemWriter) {
 
     return new StepBuilder("articleHandlerStep", jobRepository)
-        .<ArticleApiDto, Article>chunk(30, transactionManager)
+        .<ArticleApiDto, ArticleWithInterestList>chunk(30, transactionManager)
         .reader(naverArticleCollectReader)
         .processor(naverArticleCollectProcessor)
         .writer(articleCollectJpaItemWriter)

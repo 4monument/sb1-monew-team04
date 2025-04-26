@@ -25,5 +25,15 @@ public record ArticleApiDto(
         summary
     );
   }
-
+//
+//  public ArticleAndInterestsDTO toArticleAndInterestsDTO(List<Interest> interests) {
+//    return new ArticleAndInterestsDTO(
+//        this.source,
+//        this.sourceUrl,
+//        this.title,
+//        this.publishDate,
+//        this.summary,
+//        interests
+//    );
+//  }
 }
