@@ -8,7 +8,6 @@ import com.sprint.monew.domain.article.api.ArticleApiClient;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
@@ -29,14 +28,13 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Component
 @RequiredArgsConstructor
-public class AricleCollectFlowConfig {
+public class ArticleCollectFlowConfig {
 
   private final JobRepository jobRepository;
   private final PlatformTransactionManager transactionManager;
@@ -113,7 +111,7 @@ public class AricleCollectFlowConfig {
   public ThreadPoolTaskExecutor articleCollectThreadPoolTaskExecutor() {
 
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    int properCorePoolSize = Runtime.getRuntime().availableProcessors() - 1;
+    int properCorePoolSize = (int) (Runtime.getRuntime().availableProcessors() / 4); // 거의 0 될라나
     int chunkSize = 200;
 
     executor.setCorePoolSize(properCorePoolSize);
