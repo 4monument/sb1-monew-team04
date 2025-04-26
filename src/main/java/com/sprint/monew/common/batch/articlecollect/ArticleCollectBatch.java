@@ -65,11 +65,8 @@ public class ArticleCollectBatch {
   public Step interestsFetchStep(InterestRepository interestRepository) {
     return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
-
           ExecutionContext jobExecutionContext = ExecutionContextFinder.findJobExecutionContext(
               contribution);
-          //Keywords allKeyword = interestRepository.findAllKeyword();
-          //jobExecutionContext.put(KEYWORDS.getKey(), allKeyword);
           Interests interests = new Interests(interestRepository.findAll());
           jobExecutionContext.put(INTERESTS.getKey(), interests);
           return RepeatStatus.FINISHED;

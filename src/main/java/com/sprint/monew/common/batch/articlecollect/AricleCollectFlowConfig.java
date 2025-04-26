@@ -83,7 +83,7 @@ public class AricleCollectFlowConfig {
       @Qualifier("asyncItemWriter") AsyncItemWriter<ArticleWithInterestList> asyncItemWriter) {
 
     return new StepBuilder("articleHandlerStep", jobRepository)
-        .<ArticleApiDto, Future<ArticleWithInterestList>>chunk(30, transactionManager)
+        .<ArticleApiDto, Future<ArticleWithInterestList>>chunk(200, transactionManager)
         .reader(naverArticleCollectReader)
         .processor(asyncItemProcessor)
         .writer(asyncItemWriter)
@@ -110,9 +110,11 @@ public class AricleCollectFlowConfig {
   @StepScope
   public ThreadPoolTaskExecutor articleCollectThreadPoolTaskExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    executor.setCorePoolSize(5);
-    executor.setMaxPoolSize(10);
-    executor.setQueueCapacity(20);
+    int properCorePoolSize = Runtime.getRuntime().availableProcessors() - 1;
+    int chunkSize = 200;
+    executor.setCorePoolSize(properCorePoolSize);
+    executor.setMaxPoolSize((int) (properCorePoolSize * 1.5));
+    executor.setQueueCapacity(chunkSize - properCorePoolSize);
     executor.setThreadNamePrefix("article-collect-processor-async-");
     executor.initialize();
     return executor;
@@ -128,7 +130,6 @@ public class AricleCollectFlowConfig {
     asyncItemWriter.afterPropertiesSet();
     return asyncItemWriter;
   }
-
 
   // Chosun Flow
 
