@@ -5,6 +5,7 @@ import com.sprint.monew.domain.article.Article.Source;
 import java.io.Serializable;
 import java.time.Instant;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 
 @Builder
 public record ArticleApiDto(

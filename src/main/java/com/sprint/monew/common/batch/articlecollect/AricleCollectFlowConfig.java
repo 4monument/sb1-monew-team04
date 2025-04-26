@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowBuilder;
@@ -80,7 +81,8 @@ public class AricleCollectFlowConfig {
       //@Qualifier("basicArticleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor,
       //@Qualifier("articleJpaItemWriter") ItemWriter<ArticleWithInterestList> articleCollectJpaItemWriter
       @Qualifier("asyncItemProcessor") AsyncItemProcessor<ArticleApiDto, ArticleWithInterestList> asyncItemProcessor,
-      @Qualifier("asyncItemWriter") AsyncItemWriter<ArticleWithInterestList> asyncItemWriter) {
+      @Qualifier("asyncItemWriter") AsyncItemWriter<ArticleWithInterestList> asyncItemWriter,
+      @Qualifier("naverExecutionContextCleanupListener") StepExecutionListener naverExecutionContextCleanupListener) {
 
     return new StepBuilder("articleHandlerStep", jobRepository)
         .<ArticleApiDto, Future<ArticleWithInterestList>>chunk(200, transactionManager)
@@ -90,6 +92,7 @@ public class AricleCollectFlowConfig {
         .faultTolerant()
         .retryLimit(3)
         .retry(Exception.class)
+        .listener(naverExecutionContextCleanupListener)
         .build();
   }
 
