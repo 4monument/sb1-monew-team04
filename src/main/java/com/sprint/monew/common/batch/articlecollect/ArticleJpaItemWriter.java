@@ -25,13 +25,13 @@ public class ArticleJpaItemWriter implements ItemWriter<ArticleWithInterestList>
   @Override
   public void write(Chunk<? extends ArticleWithInterestList> items) throws Exception {
 
-    List<ArticleWithInterestList> articleAndInterestsDTOList = (List<ArticleWithInterestList>) items.getItems();
+    List<ArticleWithInterestList> articleAndInterestsList = (List<ArticleWithInterestList>) items.getItems();
 
-    List<Article> articleList = articleAndInterestsDTOList.stream()
+    List<Article> articleList = articleAndInterestsList.stream()
         .map(ArticleWithInterestList::toArticle)
         .toList();
 
-    List<ArticleInterest> articleInterestList = articleAndInterestsDTOList.stream()
+    List<ArticleInterest> articleInterestList = articleAndInterestsList.stream()
         .map(ArticleWithInterestList::toArticleInterests)
         .flatMap(List::stream)
         .toList();
