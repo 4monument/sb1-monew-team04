@@ -14,7 +14,7 @@ public class ArticleProcessorConfig {
 
   @Bean
   @StepScope
-  public ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor(
+  public ItemProcessor<ArticleApiDto, ArticleWithInterestList> basicArticleCollectProcessor(
       @Value("#{JobExecutionContext['interests']}") Interests interests) {
     return (dto) -> {
       // 중복 되는 url은 패스

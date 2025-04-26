@@ -1,8 +1,10 @@
 package com.sprint.monew.common.batch.util;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public enum CustomExecutionContextKeys {
   KEYWORDS("keywords"),
   INTERESTS("interests"),
@@ -11,8 +13,4 @@ public enum CustomExecutionContextKeys {
   HANKYUNG_ARTICLE_DTOS("hanyungArticleDtos");
 
   private final String key;
-
-  CustomExecutionContextKeys(String key) {
-    this.key = key;
-  }
 }

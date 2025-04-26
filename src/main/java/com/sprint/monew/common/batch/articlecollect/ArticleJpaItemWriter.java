@@ -23,7 +23,7 @@ public class ArticleJpaItemWriter implements ItemWriter<ArticleWithInterestList>
   private final EntityManagerFactory emf;
 
   @Override
-  public void write(Chunk<? extends ArticleWithInterestList> items) throws Exception {
+  public void write(Chunk<? extends ArticleWithInterestList> items) {
 
     List<ArticleWithInterestList> articleAndInterestsList = (List<ArticleWithInterestList>) items.getItems();
 
