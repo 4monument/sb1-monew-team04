@@ -3,12 +3,9 @@ package com.sprint.monew.common.batch.articlecollect;
 import static com.sprint.monew.common.batch.util.CustomExecutionContextKeys.*;
 import static org.springframework.batch.core.ExitStatus.*;
 
-import com.sprint.monew.common.batch.util.ExecutionContextFinder;
 import com.sprint.monew.common.batch.util.Interests;
 import com.sprint.monew.domain.interest.InterestRepository;
-import java.util.concurrent.ThreadPoolExecutor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
@@ -16,6 +13,7 @@ import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ExecutionContext;
@@ -38,7 +36,7 @@ public class ArticleCollectBatch {
   public Job articleCollectJob(
       @Qualifier("interestsFetchStep") Step interestsFetchStep,
       @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow,
-      @Qualifier("jobExecutionContextCleanupListener") JobExecutionListener jobExecutionCleanupListener){
+      @Qualifier("jobExecutionContextCleanupListener") JobExecutionListener jobExecutionCleanupListener) {
 
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
@@ -63,15 +61,18 @@ public class ArticleCollectBatch {
   // keyword들을 전부 가져와서 스텝끼리 공유 가능한 저장소에 저장
   @Bean(name = "interestsFetchStep")
   @JobScope
-  public Step interestsFetchStep(InterestRepository interestRepository) {
+  public Step interestsFetchStep(InterestRepository interestRepository,
+      @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener) {
     return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
-          ExecutionContext jobExecutionContext = ExecutionContextFinder.findJobExecutionContext(
-              contribution);
+
+          ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
           Interests interests = new Interests(interestRepository.findAll());
-          jobExecutionContext.put(INTERESTS.getKey(), interests);
+          stepContext.put(INTERESTS.getKey(), interests);
+
           return RepeatStatus.FINISHED;
         }, transactionManager)
+        .listener(promotionListener)
         .build();
   }
 }

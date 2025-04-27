@@ -3,11 +3,9 @@ package com.sprint.monew.common.batch.articlecollect;
 import static com.sprint.monew.common.batch.util.CustomExecutionContextKeys.NAVER_ARTICLE_DTOS;
 
 import com.sprint.monew.common.batch.util.ArticleWithInterestList;
-import com.sprint.monew.common.batch.util.ExecutionContextFinder;
 import com.sprint.monew.domain.article.api.ArticleApiClient;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import java.util.List;
-import java.util.concurrent.Future;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
@@ -15,12 +13,11 @@ import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
+import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
-import org.springframework.batch.integration.async.AsyncItemProcessor;
-import org.springframework.batch.integration.async.AsyncItemWriter;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
@@ -28,7 +25,6 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -45,10 +41,12 @@ public class ArticleCollectFlowConfig {
   @JobScope
   public Flow naverArticleCollectFlow(
       @Qualifier("naverApiCallTasklet") Tasklet naverApiCallTasklet,
-      @Qualifier("articleHandlerStep") Step articleHandlerStep) {
+      @Qualifier("articleHandlerStep") Step articleHandlerStep,
+      @Qualifier("naverPromotionListener") ExecutionContextPromotionListener promotionListener) {
     // 호출
     TaskletStep naverArticleCollectStep = new StepBuilder("naverArticleCollectStep", jobRepository)
         .tasklet(naverApiCallTasklet, transactionManager)
+        .listener(promotionListener)
         .build();
 
     return new FlowBuilder<Flow>("naverCollectFlow")
@@ -63,11 +61,9 @@ public class ArticleCollectFlowConfig {
     return (contribution, chunkContext) -> {
       // 네이버 호출하는 로직있다고 가정
       List<ArticleApiDto> articleApiDtos = articleApiClient.getNaverArticle();
-
+      ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
+      stepContext.put(NAVER_ARTICLE_DTOS.getKey(), articleApiDtos);
       // API로 호출한 뉴스를 배치 저장소에 저장
-      ExecutionContext jobExecutionContext = ExecutionContextFinder.findJobExecutionContext(
-          contribution);
-      jobExecutionContext.put(NAVER_ARTICLE_DTOS.getKey(), articleApiDtos);
       return RepeatStatus.FINISHED;
     };
   }
