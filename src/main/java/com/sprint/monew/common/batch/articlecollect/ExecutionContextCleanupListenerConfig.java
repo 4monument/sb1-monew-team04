@@ -23,19 +23,19 @@ public class ExecutionContextCleanupListenerConfig {
   @Bean(name = "naverExecutionContextCleanupListener")
   @StepScope
   public StepExecutionListener naverExecutionContextCleanupListener() {
-    return new ExecutionContextCleanupListener(NAVER_ARTICLE_DTOS_KEY);
+    return new stepExecutionContextCleanupListener(NAVER_ARTICLE_DTOS_KEY);
   }
 
   @Bean(name = "chosunExecutionContextCleanupListener")
   @StepScope
   public StepExecutionListener chosunExecutionContextCleanupListener() {
-    return new ExecutionContextCleanupListener(CHOSUN_ARTICLE_DTOS_KEY);
+    return new stepExecutionContextCleanupListener(CHOSUN_ARTICLE_DTOS_KEY);
   }
 
   @Bean(name = "hankyungExecutionContextCleanupListener")
   @StepScope
   public StepExecutionListener hankyungExecutionContextCleanupListener() {
-    return new ExecutionContextCleanupListener(HANKYUNG_ARTICLE_DTOS_KEY);
+    return new stepExecutionContextCleanupListener(HANKYUNG_ARTICLE_DTOS_KEY);
   }
 
   @Bean(name = "jobExecutionContextCleanupListener")
@@ -44,11 +44,11 @@ public class ExecutionContextCleanupListenerConfig {
     return new jobExecutionContextCleanupListener();
   }
 
-  public static class ExecutionContextCleanupListener implements StepExecutionListener {
+  public static class stepExecutionContextCleanupListener implements StepExecutionListener {
 
     private final String key;
 
-    public ExecutionContextCleanupListener(String key) {
+    public stepExecutionContextCleanupListener(String key) {
       this.key = key;
     }
 

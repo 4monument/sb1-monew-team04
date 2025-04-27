@@ -19,7 +19,7 @@ public class TestArticleCollect {
   private final JobLauncher jobLauncher;
 
   // 삭제할 파일 : 로컬 테스트 용
-  @PostConstruct
+  //@PostConstruct
   public void testInit() throws Exception {
     JobParameters jobParameters = new JobParametersBuilder()
         //.addString("runDate", Instant.now().toString())
