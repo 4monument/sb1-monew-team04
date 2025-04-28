@@ -11,7 +11,7 @@ import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.comment.Comment;
 import com.sprint.monew.domain.interest.Interest;
-import com.sprint.monew.domain.like.Like;
+import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.user.User;

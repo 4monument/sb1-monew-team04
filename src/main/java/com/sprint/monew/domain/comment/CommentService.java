@@ -1,0 +1,134 @@
+package com.sprint.monew.domain.comment;
+
+import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.article.Article;
+import com.sprint.monew.domain.article.exception.ArticleNotFoundException;
+import com.sprint.monew.domain.article.repository.ArticleRepository;
+import com.sprint.monew.domain.comment.dto.CommentDto;
+import com.sprint.monew.domain.comment.dto.CommentLikeDto;
+import com.sprint.monew.domain.comment.dto.request.CommentRegisterRequest;
+import com.sprint.monew.domain.comment.dto.request.CommentUpdateRequest;
+import com.sprint.monew.domain.comment.exception.CommentNotFoundException;
+import com.sprint.monew.domain.comment.exception.CommentNotOwnedException;
+import com.sprint.monew.domain.comment.exception.LikeAlreadyExistException;
+import com.sprint.monew.domain.comment.like.Like;
+import com.sprint.monew.domain.comment.like.LikeRepository;
+import com.sprint.monew.domain.notification.Notification;
+import com.sprint.monew.domain.notification.NotificationRepository;
+import com.sprint.monew.domain.notification.ResourceType;
+import com.sprint.monew.domain.user.User;
+import com.sprint.monew.domain.user.UserRepository;
+import com.sprint.monew.domain.user.exception.UserNotFoundException;
+import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class CommentService {
+
+  private final CommentRepository commentRepository;
+  private final UserRepository userRepository;
+  private final ArticleRepository articleRepository;
+  private final LikeRepository likeRepository;
+  private final NotificationRepository notificationRepository;
+
+  //댓글 조회 메서드
+  public CursorPageResponseDto<CommentDto> getComments(UUID articleId) {
+    //임시로 모든 comment 반환. 추후에 queryDSL 적용 예정입니다.
+    List<CommentDto> dtos = commentRepository.findByArticle_Id(articleId).stream()
+        .map(comment -> CommentDto.from(comment, false))
+        .toList();
+    return new CursorPageResponseDto<>(
+        dtos,
+        null,
+        null,
+        dtos.size(),
+        dtos.size(),
+        false
+    );
+  }
+
+  //댓글 생성 메서드
+  public CommentDto registerComment(CommentRegisterRequest request) {
+    UUID articleId = request.articleId();
+    UUID userId = request.userId();
+
+    User user = userRepository.findByIdAndDeletedFalse(userId)
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
+    Article article = articleRepository.findByIdAndDeletedFalse(articleId)
+        .orElseThrow(() -> ArticleNotFoundException.withId(articleId));
+
+    Comment comment = Comment.create(user, article, request.content());
+    commentRepository.save(comment);
+    return CommentDto.from(comment, false);
+  }
+
+  //좋아요 생성 메서드
+  public CommentLikeDto commentLike(UUID commentId, UUID userId) {
+    Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
+        .orElseThrow(() -> CommentNotFoundException.withId(commentId));
+    User user = userRepository.findByIdAndDeletedFalse(userId)
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
+
+    //좋아요를 이미 누른 상태면 예외 발생
+    if (likeRepository.existsByCommentAndUser(comment, user)) {
+      throw LikeAlreadyExistException.withCommentIdAndUserId(commentId, userId);
+    }
+
+    Like like = new Like(user, comment);
+    likeRepository.save(like);
+
+    // 알림 생성 후 저장
+    // 알림 내용은 어떻게 하는게 좋을까요? 우선 아무거나 임시로 넣었습니다.
+    String notificationMessage = "댓글이 등록되었습니다.";
+    Notification notification = new Notification(
+        user,
+        commentId,
+        ResourceType.COMMENT,
+        notificationMessage
+    );
+    notificationRepository.save(notification);
+
+    long commentLikeCount = likeRepository.countByComment(comment);
+    return CommentLikeDto.from(like, commentLikeCount);
+  }
+
+  //좋아요 취소 메서드
+  public void unlikeComment(UUID commentId, UUID userId) {
+    likeRepository.findByComment_IdAndUser_Id(commentId, userId).ifPresent(likeRepository::delete);
+  }
+
+  //댓글 내용 수정 메서드
+  public CommentDto updateCommentContent(UUID commentId, UUID userId, CommentUpdateRequest commentUpdateRequest) {
+    String content = commentUpdateRequest.content();
+    Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
+        .orElseThrow(() -> CommentNotFoundException.withId(commentId));
+    User user = comment.getUser();
+
+    //댓글 쓴 사용자가 일치하지 않으면 예외 발생
+    if (!user.getId().equals(userId)) {
+      throw CommentNotOwnedException.withCommentIdAndUserId(commentId, userId);
+    }
+
+    comment.updateContent(content);
+    boolean likedByMe = likeRepository.existsByCommentAndUser(comment, user);
+
+    return CommentDto.from(comment, likedByMe);
+  }
+
+  //댓글 논리 삭제
+  public void deleteComment(UUID commentId) {
+    commentRepository.findById(commentId).ifPresent(Comment::logicallyDelete);
+  }
+
+  //댓글 물리 삭제
+  public void hardDeleteComment(UUID commentId) {
+    commentRepository.findById(commentId).ifPresent(commentRepository::delete);
+  }
+}
