@@ -37,6 +37,9 @@ import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 @Configuration
 @RequiredArgsConstructor
@@ -55,6 +58,18 @@ public class ArticleRestoreBatch {
       @Value("#{jobParameters['to']}") LocalDate to) throws IOException {
     // 날짜
     List<LocalDate> dateRange  = from.datesUntil(to).toList();
+
+    for (LocalDate localDate : dateRange) {
+      ListObjectsV2Request lovr = ListObjectsV2Request.builder()
+          .bucket(s3Properties.bucket())
+          .prefix(localDate + "/")
+          .build();
+
+      ListObjectsV2Response response = s3Client.listObjectsV2(lovr);
+
+      List<S3Object> contents = response.contents();
+
+    }
 
 
     LocalDate tempDate = LocalDate.now();
@@ -100,11 +115,4 @@ public class ArticleRestoreBatch {
   public String getKey(LocalDate localDate) {
     return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
   }
-
-//  public ItemReader<ArticleApiDto> articleRestoreReader(
-//      @Value("#{jobParameters['from']}") LocalDate from,
-//      @Value("#{jobParameters['to']}") LocalDate to) {
-//    // 날짜
-//    return null;
-//  }
 }
