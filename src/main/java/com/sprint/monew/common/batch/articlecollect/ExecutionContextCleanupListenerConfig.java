@@ -34,9 +34,9 @@ public class ExecutionContextCleanupListenerConfig {
     return new stepExecutionContextCleanupListener(HANKYUNG_ARTICLE_DTOS.getKey());
   }
 
-  @Bean(name = "jobExecutionContextCleanupListener")
+  @Bean(name = "articleCollectJobContextCleanupListener")
   @StepScope
-  public JobExecutionListener jobExecutionContextCleanupListener() {
+  public JobExecutionListener articleCollectJobContextCleanupListener() {
     return new jobExecutionContextCleanupListener();
   }
 

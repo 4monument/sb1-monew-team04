@@ -60,7 +60,7 @@ public class ArticleCollectBatch {
   public Job articleCollectJob(
       @Qualifier("interestsFetchStep") Step interestsFetchStep,
       @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow,
-      @Qualifier("jobExecutionContextCleanupListener") JobExecutionListener jobExecutionCleanupListener) {
+      @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener) {
 
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
@@ -69,7 +69,7 @@ public class ArticleCollectBatch {
         .to(naverArticleCollectFlow)
         //.split(taskExecutor()).add(null) // 나중
         .end()
-        .listener(jobExecutionCleanupListener)
+        .listener(jobContextCleanupListener)
         .build();
   }
 
