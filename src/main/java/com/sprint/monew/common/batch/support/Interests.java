@@ -4,13 +4,10 @@ package com.sprint.monew.common.batch.support;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.interest.Interest;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class Interests implements Serializable {
 
@@ -60,6 +57,12 @@ public class Interests implements Serializable {
     );
   }
 
+  public List<ArticleApiDto> filterArticleDtos(List<ArticleApiDto> articleApiDtos) {
+    return articleApiDtos.stream()
+        .filter(articleApiDto -> isDuplicateUrl(articleApiDto) && isContainKeywords(articleApiDto))
+        .toList();
+  }
+
 //  public Boolean isContainKeywords(ArticleApiDto articleApiDto) {
 //    String summary = articleApiDto.summary();
 //    return keywords.stream()
@@ -76,7 +79,7 @@ public class Interests implements Serializable {
 //        ));
 //  }
 //
-//  public Boolean validateKeywordContainingAndUniqueUrl(ArticleApiDto articleApiDto) {
-//    return isContainKeywords(articleApiDto) && isDuplicateUrl(articleApiDto);
-//  }
+  public Boolean validateKeywordContainingAndUniqueUrl(ArticleApiDto articleApiDto) {
+    return isContainKeywords(articleApiDto) && isDuplicateUrl(articleApiDto);
+  }
 }

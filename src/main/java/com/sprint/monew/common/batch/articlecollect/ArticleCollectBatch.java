@@ -14,7 +14,6 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +105,8 @@ public class ArticleCollectBatch {
   public Flow naverArticleCollectFlow(
       @Qualifier("naverApiCallTasklet") Tasklet naverApiCallTasklet,
       @Qualifier("naverArticleHandlerStep") Step articleHandlerStep,
-      @Qualifier("naverPromotionListener") ExecutionContextPromotionListener promotionListener) {
+      @Qualifier("naverPromotionListener") ExecutionContextPromotionListener promotionListener,
+      @Qualifier("backupNaverArticlesToS3Step") Step backupNaverArticlesToS3Step) {
 
     // 호출
     TaskletStep naverArticleCollectStep = new StepBuilder("naverArticleCollectStep", jobRepository)
@@ -116,21 +116,19 @@ public class ArticleCollectBatch {
 
     return new FlowBuilder<Flow>("naverCollectFlow")
         .start(naverArticleCollectStep)
-        .next(backupNaverArticlesToS3Step())
+        .next(backupNaverArticlesToS3Step)
         .next(articleHandlerStep) // 처리  스텝
         .build();
   }
 
   @Bean
   @StepScope // 기사 수집한 거 백업
-  public Step backupNaverArticlesToS3Step() {
+  public Step backupNaverArticlesToS3Step(@Qualifier("naverPromotionListener") ExecutionContextPromotionListener promotionListener) {
     return new StepBuilder("s3BackupStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
 
           ExecutionContext jobContext = contribution.getStepExecution().getJobExecution()
               .getExecutionContext();
-
-          ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
 
           Interests interests = (Interests) jobContext.get(INTERESTS.getKey());
           if (interests == null) {
@@ -142,17 +140,16 @@ public class ArticleCollectBatch {
             throw new RuntimeException("ExecutionContext로부터 ArticleApiDto를 가져오는 데 실패했습니다.");
           }
 
-          List<ArticleApiDto> filteredArticleApiDtoList = articleApiDtos.stream()
-              .filter(articleApiDto ->
-                  interests.isDuplicateUrl(articleApiDto) && !interests.isContainKeywords(articleApiDto)
-              )
-              .toList();
+          List<ArticleApiDto> filteredArticleApiDtos = interests.filterArticleDtos(articleApiDtos);
 
           backupArticlesToS3File(articleApiDtos);
-          stepContext.put(NAVER_ARTICLE_DTOS.getKey(), filteredArticleApiDtoList);
+
+          ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
+          stepContext.put(NAVER_ARTICLE_DTOS.getKey(), filteredArticleApiDtos);
 
           return RepeatStatus.FINISHED;
         }, transactionManager)
+        .listener(promotionListener)
         .build();
   }
 
@@ -176,7 +173,6 @@ public class ArticleCollectBatch {
         .listener(naverExecutionContextCleanupListener)
         .build();
   }
-
 
   /**
    * API Multi-threading TaskExecutor

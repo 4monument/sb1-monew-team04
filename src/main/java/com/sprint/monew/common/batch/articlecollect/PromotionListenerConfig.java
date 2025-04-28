@@ -18,7 +18,6 @@ public class PromotionListenerConfig {
   private static final String CHOSUN_ARTICLE_DTOS_KEY = CHOSUN_ARTICLE_DTOS.getKey();
   private static final String HANKYUNG_ARTICLE_DTOS_KEY = HANKYUNG_ARTICLE_DTOS.getKey();
 
-
   @Bean
   public ExecutionContextPromotionListener interestsFetchPromotionListener(){
     ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
