@@ -14,6 +14,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -129,14 +130,26 @@ public class ArticleCollectBatch {
           ExecutionContext jobContext = contribution.getStepExecution().getJobExecution()
               .getExecutionContext();
 
-          List<ArticleApiDto> articleApiDtos;
-          try {
-            articleApiDtos = (List<ArticleApiDto>) jobContext.get(NAVER_ARTICLE_DTOS.getKey());
-          } catch (ClassCastException e) {
-            throw new RuntimeException("ExecutionContext로부터 ArticleApiDto를 Casting하는데 실패했습니다.");
+          ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
+
+          Interests interests = (Interests) jobContext.get(INTERESTS.getKey());
+          if (interests == null) {
+            throw new RuntimeException("ExecutionContext로부터 Interests를 가져오는 데 실패했습니다.");
           }
 
+          List<ArticleApiDto> articleApiDtos = (List<ArticleApiDto>) jobContext.get(NAVER_ARTICLE_DTOS.getKey());
+          if (articleApiDtos == null || articleApiDtos.isEmpty()) {
+            throw new RuntimeException("ExecutionContext로부터 ArticleApiDto를 가져오는 데 실패했습니다.");
+          }
+
+          List<ArticleApiDto> filteredArticleApiDtoList = articleApiDtos.stream()
+              .filter(articleApiDto ->
+                  interests.isDuplicateUrl(articleApiDto) && !interests.isContainKeywords(articleApiDto)
+              )
+              .toList();
+
           backupArticlesToS3File(articleApiDtos);
+          stepContext.put(NAVER_ARTICLE_DTOS.getKey(), filteredArticleApiDtoList);
 
           return RepeatStatus.FINISHED;
         }, transactionManager)

@@ -6,6 +6,7 @@ import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.I
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.NAVER_ARTICLE_DTOS;
 
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
+import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,6 +28,7 @@ public class PromotionListenerConfig {
 
   @Bean
   public ExecutionContextPromotionListener naverPromotionListener() {
+    //new RepositoryItemReader<>()
     ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
     listener.setKeys(new String[] {NAVER_ARTICLE_DTOS_KEY});
     return listener;

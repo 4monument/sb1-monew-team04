@@ -16,12 +16,6 @@ public class ArticleProcessorConfig {
   @StepScope
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> basicArticleCollectProcessor(
       @Value("#{JobExecutionContext['interests']}") Interests interests) {
-    return (dto) -> {
-      // 중복 되는 url은 패스
-      if (interests.isDuplicateUrl(dto)) {
-        return null; // null 반환하면 배치에서는 Writer에 skilp
-      }
-      return interests.toArticleWithRelevantInterests(dto);
-    };
+    return interests::toArticleWithRelevantInterests;
   }
 }
