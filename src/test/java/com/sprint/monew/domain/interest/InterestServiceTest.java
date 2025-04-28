@@ -76,7 +76,7 @@ class InterestServiceTest {
     interests.add(programming);
 
     // 두 번째 테스트 데이터 - 음악 관심사
-    Interest music = new Interest("음악", Arrays.asList("클래식", "재즈", "힙합"));
+    Interest music = new Interest("음악/예술", Arrays.asList("클래식", "재즈", "힙합"));
     setPrivateField(music, "id", UUID.fromString("b2c3d4e5-f6a7-5b6c-9d0e-1f2a3b4c5d6"));
     interests.add(music);
 
@@ -148,7 +148,7 @@ class InterestServiceTest {
     void createInterestFailure() {
       //given
       InterestCreateRequest request = new InterestCreateRequest(
-          "프로그래밍1", List.of("개발자", "기술", "개발", "AI")
+          "예술/음악", List.of("클래식", "재즈", "힙합")
       );
       Interest mockInterest = new Interest(request.name(), request.keywords());
 
