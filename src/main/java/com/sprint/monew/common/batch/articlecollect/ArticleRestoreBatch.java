@@ -1,46 +1,29 @@
 package com.sprint.monew.common.batch.articlecollect;
 
-import static org.springframework.web.servlet.function.RequestPredicates.contentType;
-
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
-import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.global.config.S3ConfigProperties;
-import jakarta.persistence.criteria.CriteriaBuilder.In;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.file.MultiResourceItemReader;
 import org.springframework.batch.item.file.ResourceAwareItemReaderItemStream;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.builder.MultiResourceItemReaderBuilder;
-import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.Local;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.transaction.PlatformTransactionManager;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -63,7 +46,7 @@ public class ArticleRestoreBatch {
 
   @Bean
   public Step articleRestoreStep(
-      @Qualifier("articleRestoreItemReader") MultiResourceItemReader<ArticleApiDto> mrir
+      @Qualifier("articleRestoreS3ItemReader") MultiResourceItemReader<ArticleApiDto> mrir
   ) {
     return new StepBuilder("articleRestoreStep", jobRepository)
         .<ArticleApiDto, ArticleWithInterestList>chunk(500, transactionManager)
@@ -72,10 +55,9 @@ public class ArticleRestoreBatch {
         .build();
   }
 
-
   // 일단 s3
   @Bean
-  public MultiResourceItemReader<ArticleApiDto> articleRestoreItemReader(
+  public MultiResourceItemReader<ArticleApiDto> articleRestoreS3ItemReader(
       @Value("#{jobParameters['from']}") LocalDate from,
       @Value("#{jobParameters['to']}") LocalDate to) throws IOException {
     // 날짜
@@ -118,11 +100,22 @@ public class ArticleRestoreBatch {
         .delimited()
         .delimiter(",")
         .names(fieldNames)
-        .fieldSetMapper(new BeanWrapperFieldSetMapper<>(){
-          {
-            setTargetType(ArticleApiDto.class);
-          }
-        })
+        .fieldSetMapper(fs -> {
+              Source source = Source.valueOf(fs.readString("source"));
+              String sourceUrl = fs.readString("sourceUrl");
+              String title = fs.readString("title");
+              Instant publishAt = Instant.parse(fs.readString("publishDate"));
+              String summary = fs.readString("summary");
+
+              return new ArticleApiDto(
+                  source,
+                  sourceUrl,
+                  title,
+                  publishAt,
+                  summary
+              );
+            }
+        )
         .build();
   }
 //
@@ -142,7 +135,6 @@ public class ArticleRestoreBatch {
 //    };
 //  }
 //
-
 
   public String getKey(LocalDate localDate) {
     return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
