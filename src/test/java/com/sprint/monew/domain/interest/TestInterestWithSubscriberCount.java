@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 class TestInterestWithSubscriberCount implements InterestWithSubscriberCount {
+
   private UUID id;
   private String name;
   private List<String> keywords;
@@ -31,8 +32,8 @@ class TestInterestWithSubscriberCount implements InterestWithSubscriberCount {
   }
 
   @Override
-  public List<String> getKeywords() {
-    return keywords;
+  public String getKeywords() {
+    return String.join(",", keywords);
   }
 
   @Override
