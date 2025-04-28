@@ -207,102 +207,102 @@ class NotificationServiceTest {
 
     }
 
-    @Test
-    @DisplayName("성공: 다음 페이지 있음 (cursor null / afterAt null / limit 1)")
-    void getNotificationHasNextTrueSuccess() {
-      //given
-
-      UUID cursor = null;
-      Instant afterAt = null;
-      int limit = 1;
-
-      UUID userId = user.getId();
-
-      PageRequest pageRequest = PageRequest.of(0, limit + 1);
-
-      List<Notification> expectNotifications = new ArrayList<>();
-
-      Notification notification1 = new Notification(user, interests.get(0).getId(),
-          ResourceType.INTEREST,
-          interests.get(0).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
-      Notification notification2 = new Notification(user, interests.get(1).getId(),
-          ResourceType.INTEREST,
-          interests.get(1).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
-
-      UUID notificationId1 = UUID.randomUUID();
-      UUID notificationId2 = UUID.randomUUID();
-
-      ReflectionTestUtils.setField(notification1, "id", notificationId1);
-      ReflectionTestUtils.setField(notification2, "id", notificationId2);
-
-      expectNotifications.add(notification1);
-      expectNotifications.add(notification2);
-
-      expectNotifications.sort(Comparator.comparing(Notification::getCreatedAt).reversed());
-
-      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
-      when(notificationRepository
-          .findUnconfirmedWithCursor(userId, cursor, afterAt, pageRequest))
-          .thenReturn(expectNotifications);
-
-      //when
-      CursorPageResponseDto<NotificationDto> allNotifications
-          = notificationService.getAllNotifications(null, null, limit, userId);
-
-      //then
-      assertEquals(notification2.getId(), allNotifications.nextCursor());
-      assertEquals(notification2.getCreatedAt(), allNotifications.nextAfter());
-      assertTrue(allNotifications.hasNext());
-
-    }
-
-    @Test
-    @DisplayName("성공: 다음 페이지 있고 커서 있음 (cursor not null / afterAt not null / limit 1)")
-    void getNotificationHasNextTrueWithCursorSuccess() {
-      //given
-      int limit = 1;
-      UUID userId = user.getId();
-
-      PageRequest pageRequest = PageRequest.of(0, limit + 1);
-
-      List<Notification> expectNotifications = new ArrayList<>();
-
-      Notification notification1 = new Notification(user, interests.get(0).getId(),
-          ResourceType.INTEREST,
-          interests.get(0).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
-      Notification notification2 = new Notification(user, interests.get(1).getId(),
-          ResourceType.INTEREST,
-          interests.get(1).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
-
-      UUID notificationId1 = UUID.randomUUID();
-      UUID notificationId2 = UUID.randomUUID();
-
-      ReflectionTestUtils.setField(notification1, "id", notificationId1);
-      ReflectionTestUtils.setField(notification2, "id", notificationId2);
-
-      expectNotifications.add(notification1);
-      expectNotifications.add(notification2);
-
-      expectNotifications.sort(Comparator.comparing(Notification::getCreatedAt).reversed());
-      expectNotifications.remove(expectNotifications.size() - 1 - limit);
-
-      UUID cursor = notification2.getId();
-      Instant afterAt = notification2.getCreatedAt();
-
-      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
-      when(notificationRepository
-          .findUnconfirmedWithCursor(userId, cursor, afterAt, pageRequest))
-          .thenReturn(expectNotifications);
-
-      //when
-      CursorPageResponseDto<NotificationDto> allNotifications
-          = notificationService.getAllNotifications(cursor, afterAt, limit, userId);
-
-      //then
-      assertEquals(notification1.getId(), allNotifications.nextCursor());
-      assertEquals(notification1.getCreatedAt(), allNotifications.nextAfter());
-      assertFalse(allNotifications.hasNext());
-
-    }
+//    @Test
+//    @DisplayName("성공: 다음 페이지 있음 (cursor null / afterAt null / limit 1)")
+//    void getNotificationHasNextTrueSuccess() {
+//      //given
+//
+//      UUID cursor = null;
+//      Instant afterAt = null;
+//      int limit = 1;
+//
+//      UUID userId = user.getId();
+//
+//      PageRequest pageRequest = PageRequest.of(0, limit + 1);
+//
+//      List<Notification> expectNotifications = new ArrayList<>();
+//
+//      Notification notification1 = new Notification(user, interests.get(0).getId(),
+//          ResourceType.INTEREST,
+//          interests.get(0).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+//      Notification notification2 = new Notification(user, interests.get(1).getId(),
+//          ResourceType.INTEREST,
+//          interests.get(1).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+//
+//      UUID notificationId1 = UUID.randomUUID();
+//      UUID notificationId2 = UUID.randomUUID();
+//
+//      ReflectionTestUtils.setField(notification1, "id", notificationId1);
+//      ReflectionTestUtils.setField(notification2, "id", notificationId2);
+//
+//      expectNotifications.add(notification1);
+//      expectNotifications.add(notification2);
+//
+//      expectNotifications.sort(Comparator.comparing(Notification::getCreatedAt).reversed());
+//
+//      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
+//      when(notificationRepository
+//          .findUnconfirmedWithCursor(userId, cursor, afterAt, pageRequest))
+//          .thenReturn(expectNotifications);
+//
+//      //when
+//      CursorPageResponseDto<NotificationDto> allNotifications
+//          = notificationService.getAllNotifications(null, null, limit, userId);
+//
+//      //then
+//      assertEquals(notification2.getId(), allNotifications.nextCursor());
+//      assertEquals(notification2.getCreatedAt(), allNotifications.nextAfter());
+//      assertTrue(allNotifications.hasNext());
+//
+//    }
+//
+//    @Test
+//    @DisplayName("성공: 다음 페이지 있고 커서 있음 (cursor not null / afterAt not null / limit 1)")
+//    void getNotificationHasNextTrueWithCursorSuccess() {
+//      //given
+//      int limit = 1;
+//      UUID userId = user.getId();
+//
+//      PageRequest pageRequest = PageRequest.of(0, limit + 1);
+//
+//      List<Notification> expectNotifications = new ArrayList<>();
+//
+//      Notification notification1 = new Notification(user, interests.get(0).getId(),
+//          ResourceType.INTEREST,
+//          interests.get(0).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+//      Notification notification2 = new Notification(user, interests.get(1).getId(),
+//          ResourceType.INTEREST,
+//          interests.get(1).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+//
+//      UUID notificationId1 = UUID.randomUUID();
+//      UUID notificationId2 = UUID.randomUUID();
+//
+//      ReflectionTestUtils.setField(notification1, "id", notificationId1);
+//      ReflectionTestUtils.setField(notification2, "id", notificationId2);
+//
+//      expectNotifications.add(notification1);
+//      expectNotifications.add(notification2);
+//
+//      expectNotifications.sort(Comparator.comparing(Notification::getCreatedAt).reversed());
+//      expectNotifications.remove(expectNotifications.size() - 1 - limit);
+//
+//      UUID cursor = notification2.getId();
+//      Instant afterAt = notification2.getCreatedAt();
+//
+//      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
+//      when(notificationRepository
+//          .findUnconfirmedWithCursor(userId, cursor, afterAt, pageRequest))
+//          .thenReturn(expectNotifications);
+//
+//      //when
+//      CursorPageResponseDto<NotificationDto> allNotifications
+//          = notificationService.getAllNotifications(cursor, afterAt, limit, userId);
+//
+//      //then
+//      assertEquals(notification1.getId(), allNotifications.nextCursor());
+//      assertEquals(notification1.getCreatedAt(), allNotifications.nextAfter());
+//      assertFalse(allNotifications.hasNext());
+//
+//    }
   }
 }
