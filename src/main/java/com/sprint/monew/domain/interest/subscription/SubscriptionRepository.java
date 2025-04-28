@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface SubscriptionRepository extends JpaRepository<Subscription, UUID> {
 
@@ -37,12 +38,12 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
   //관심사-유저와 위 테이블 조인
   //유저-관심사-기사수를 구한다. -> 해당 엔티티마다 notification 전부 만들어야한다.
   @Query(
-      "SELECT ui.interest AS interest, ui.user AS user, COUNT(ai) AS articleCount " +
-          "FROM Subscription ui " +
-          "JOIN ArticleInterest ai ON ui.interest = ai.interest " +
+      "SELECT s.interest AS interest, s.user AS user, COUNT(ai) AS articleCount " +
+          "FROM Subscription as s " +
+          "JOIN ArticleInterest ai ON s.interest = ai.interest " +
           "WHERE ai.createdAt > :afterAt " +
-          "GROUP BY ui.interest, ui.user"
+          "GROUP BY s.interest, s.user"
   )
-  List<UnreadInterestArticleCount> findNewArticleCountWithUserInterest(Instant afterAt);
+  List<UnreadInterestArticleCount> findNewArticleCountWithUserInterest(@Param("afterAt") Instant afterAt);
 
 }
