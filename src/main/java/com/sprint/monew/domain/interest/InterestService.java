@@ -1,6 +1,6 @@
 package com.sprint.monew.domain.interest;
 
-import static com.sprint.monew.common.util.SimilarityCalculator.calculateSimilarity;
+import static com.sprint.monew.domain.interest.util.SimilarityCalculator.calculateSimilarity;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
