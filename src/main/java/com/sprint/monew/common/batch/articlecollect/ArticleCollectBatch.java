@@ -5,7 +5,6 @@ import static org.springframework.batch.core.ExitStatus.*;
 
 import com.sprint.monew.common.batch.util.ArticleWithInterestList;
 import com.sprint.monew.common.batch.util.Interests;
-import com.sprint.monew.domain.article.api.ArticleApiClient;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.interest.InterestRepository;
 import com.sprint.monew.global.config.S3ConfigProperties;
@@ -51,10 +50,8 @@ import software.amazon.awssdk.services.s3.S3Client;
 @RequiredArgsConstructor
 public class ArticleCollectBatch {
 
-  private static final String NAVER_ARTICLE_DTOS_KEY = NAVER_ARTICLE_DTOS.getKey();
   private final PlatformTransactionManager transactionManager;
   private final JobRepository jobRepository;
-  private final ArticleApiClient articleApiClient;
   private final S3ConfigProperties s3Properties;
   private final S3Client s3Client;
   private S3Resource articleS3Resource; // 매일 변하는 변수(백업 하는 날마다 PATH가 달라짐)
@@ -78,9 +75,11 @@ public class ArticleCollectBatch {
 
   @Bean(name = "interestsFetchStep")
   @JobScope
-  public Step interestsFetchStep(InterestRepository interestRepository,
-      @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener,
-      S3OutputStreamProvider s3OutputStreamProvider) {
+  public Step interestsFetchStep(
+      InterestRepository interestRepository,
+      S3OutputStreamProvider s3OutputStreamProvider,
+      @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener) {
+
     return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
 
@@ -129,7 +128,13 @@ public class ArticleCollectBatch {
 
           ExecutionContext jobContext = contribution.getStepExecution().getJobExecution()
               .getExecutionContext();
-          List<ArticleApiDto> articleApiDtos = (List<ArticleApiDto>) jobContext.get(NAVER_ARTICLE_DTOS_KEY);
+
+          List<ArticleApiDto> articleApiDtos;
+          try {
+            articleApiDtos = (List<ArticleApiDto>) jobContext.get(NAVER_ARTICLE_DTOS.getKey());
+          } catch (ClassCastException e) {
+            throw new RuntimeException("ExecutionContext로부터 ArticleApiDto를 Casting하는데 실패했습니다.");
+          }
 
           backupArticlesToS3File(articleApiDtos);
 

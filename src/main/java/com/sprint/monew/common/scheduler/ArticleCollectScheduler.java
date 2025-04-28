@@ -39,6 +39,6 @@ public class ArticleCollectScheduler {
         .addLong("time", System.currentTimeMillis())
         .toJobParameters();
 
-    jobLauncher.run()
+    //jobLauncher.run()
   }
 }

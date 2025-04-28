@@ -50,10 +50,4 @@ public class Interest {
   public void updateKeywords(List<String> keywords) {
     this.keywords = keywords;
   }
-
-  public boolean isContainsKeyword(Article article) {
-    String summary = article.getSummary();
-    return keywords.stream()
-        .anyMatch(summary::contains);
-  }
 }

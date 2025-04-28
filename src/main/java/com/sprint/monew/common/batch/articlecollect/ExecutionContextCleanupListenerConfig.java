@@ -16,26 +16,22 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ExecutionContextCleanupListenerConfig {
 
-  private static final String NAVER_ARTICLE_DTOS_KEY = NAVER_ARTICLE_DTOS.getKey();
-  private static final String CHOSUN_ARTICLE_DTOS_KEY = CHOSUN_ARTICLE_DTOS.getKey();
-  private static final String HANKYUNG_ARTICLE_DTOS_KEY = HANKYUNG_ARTICLE_DTOS.getKey();
-
   @Bean(name = "naverExecutionContextCleanupListener")
   @StepScope
   public StepExecutionListener naverExecutionContextCleanupListener() {
-    return new stepExecutionContextCleanupListener(NAVER_ARTICLE_DTOS_KEY);
+    return new stepExecutionContextCleanupListener(NAVER_ARTICLE_DTOS.getKey());
   }
 
   @Bean(name = "chosunExecutionContextCleanupListener")
   @StepScope
   public StepExecutionListener chosunExecutionContextCleanupListener() {
-    return new stepExecutionContextCleanupListener(CHOSUN_ARTICLE_DTOS_KEY);
+    return new stepExecutionContextCleanupListener(CHOSUN_ARTICLE_DTOS.getKey());
   }
 
   @Bean(name = "hankyungExecutionContextCleanupListener")
   @StepScope
   public StepExecutionListener hankyungExecutionContextCleanupListener() {
-    return new stepExecutionContextCleanupListener(HANKYUNG_ARTICLE_DTOS_KEY);
+    return new stepExecutionContextCleanupListener(HANKYUNG_ARTICLE_DTOS.getKey());
   }
 
   @Bean(name = "jobExecutionContextCleanupListener")
