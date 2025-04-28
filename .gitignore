@@ -236,3 +236,7 @@ gradle-app.setting
 
 ### else ###
 .env
+
+
+# QueryDSL generated sources
+/src/main/generated/
