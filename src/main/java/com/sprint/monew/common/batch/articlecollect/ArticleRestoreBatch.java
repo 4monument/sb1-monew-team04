@@ -2,6 +2,8 @@ package com.sprint.monew.common.batch.articlecollect;
 
 import static org.springframework.web.servlet.function.RequestPredicates.contentType;
 
+import com.sprint.monew.common.batch.support.ArticleWithInterestList;
+import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.global.config.S3ConfigProperties;
@@ -25,6 +27,13 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.file.MultiResourceItemReader;
+import org.springframework.batch.item.file.ResourceAwareItemReaderItemStream;
+import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.item.file.builder.MultiResourceItemReaderBuilder;
+import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cglib.core.Local;
 import org.springframework.context.annotation.Bean;
@@ -51,14 +60,28 @@ public class ArticleRestoreBatch {
   private final S3Client s3Client;
   private final S3ConfigProperties s3Properties;
 
+
+  @Bean
+  public Step articleRestoreStep(
+      @Qualifier("articleRestoreItemReader") MultiResourceItemReader<ArticleApiDto> mrir
+  ) {
+    return new StepBuilder("articleRestoreStep", jobRepository)
+        .<ArticleApiDto, ArticleWithInterestList>chunk(500, transactionManager)
+        .reader(mrir)
+        //.tasklet(articleRestoreTasklet(), transactionManager)
+        .build();
+  }
+
+
   // 일단 s3
   @Bean
-  public Tasklet articleRestoreTasklet(
+  public MultiResourceItemReader<ArticleApiDto> articleRestoreItemReader(
       @Value("#{jobParameters['from']}") LocalDate from,
       @Value("#{jobParameters['to']}") LocalDate to) throws IOException {
     // 날짜
-    List<LocalDate> dateRange  = from.datesUntil(to).toList();
+    List<LocalDate> dateRange = from.datesUntil(to).toList();
 
+    List<S3Object> s3Objects = new ArrayList<>();
     for (LocalDate localDate : dateRange) {
       ListObjectsV2Request lovr = ListObjectsV2Request.builder()
           .bucket(s3Properties.bucket())
@@ -66,51 +89,60 @@ public class ArticleRestoreBatch {
           .build();
 
       ListObjectsV2Response response = s3Client.listObjectsV2(lovr);
-
-      List<S3Object> contents = response.contents();
-
+      s3Objects.addAll(response.contents());
     }
 
+    List<Resource> resources = new ArrayList<>();
+    for (S3Object s3Object : s3Objects) {
 
-    LocalDate tempDate = LocalDate.now();
-    String fileName = tempDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
-
-    List<ArticleApiDto> restoringArticleApiDtos = new ArrayList<>();
-    for (LocalDate localDate : dateRange) {
-      String key = getKey(localDate);
-
-      GetObjectRequest objectRequest = GetObjectRequest.builder()
-          .key(key)
-          .responseContentType("text/csv")
+      GetObjectRequest getObjectRequest = GetObjectRequest.builder()
           .bucket(s3Properties.bucket())
+          .key(s3Object.key())
           .build();
 
-      ResponseInputStream<GetObjectResponse> inputStream = s3Client.getObject(objectRequest);
-
-      List<ArticleApiDto> dtos = new ArrayList<>();
-      try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))){
-        dtos = br.lines()
-            .map(line -> {
-              String[] cols = line.split(",");
-              Source source = Source.valueOf(cols[0]);
-              String sourceUrl = cols[1];
-              String title = cols[2];
-              Instant publishDate = Instant.parse(cols[3]);
-              String summary = cols[4];
-              return new ArticleApiDto(
-                  source,
-                  sourceUrl,
-                  title,
-                  summary,
-                  publishDate
-              );
-            }).toList();
-      }
-      restoringArticleApiDtos.addAll(dtos);
+      ResponseInputStream<GetObjectResponse> ri = s3Client.getObject(getObjectRequest);
+      resources.add(new InputStreamResource(ri));
     }
 
-    return null;
+    Resource[] resourcesArray = resources.toArray(Resource[]::new);
+    return new MultiResourceItemReaderBuilder<ArticleApiDto>()
+        .resources(resourcesArray)
+        .delegate(csvReader())
+        .build();
   }
+
+  @Bean
+  public ResourceAwareItemReaderItemStream<ArticleApiDto> csvReader() {
+    String[] fieldNames = new String[]{"source", "sourceUrl", "title", "publishDate", "summary"};
+    return new FlatFileItemReaderBuilder<ArticleApiDto>()
+        .delimited()
+        .delimiter(",")
+        .names(fieldNames)
+        .fieldSetMapper(new BeanWrapperFieldSetMapper<>(){
+          {
+            setTargetType(ArticleApiDto.class);
+          }
+        })
+        .build();
+  }
+//
+//  @Bean
+//  public ItemProcessor<ArticleApiDto, ArticleWithInterestList> articleRestoreProcessor() {
+//    return item -> {
+//
+//      Article article = Article.builder()
+//          .source(Source.valueOf(item.getSource()))
+//          .sourceUrl(item.getSourceUrl())
+//          .title(item.getTitle())
+//          .publishDate(Instant.parse(item.getPublishDate()))
+//          .summary(item.getSummary())
+//          .build();
+//
+//      return new ArticleWithInterestList(article, null);
+//    };
+//  }
+//
+
 
   public String getKey(LocalDate localDate) {
     return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
