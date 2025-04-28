@@ -24,6 +24,14 @@ public record InterestDto(
     );
   }
 
+  public static InterestDto from(InterestSubscriptionInfoDto interestSubscriptionInfoDto,
+      boolean subscribedByMe) {
+    return from(interestSubscriptionInfoDto.getInterest(),
+        interestSubscriptionInfoDto.getSubscriberCount(),
+        subscribedByMe
+    );
+  }
+
   //임시 파싱 메서드
   //todo - queryDsl 적용 시 삭제 또는 리팩토링
   public static InterestDto from(InterestWithSubscriberCount interestWithSubscriberCount,

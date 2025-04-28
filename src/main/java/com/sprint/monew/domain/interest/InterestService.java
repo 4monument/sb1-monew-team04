@@ -6,6 +6,7 @@ import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
+import com.sprint.monew.domain.interest.dto.InterestSubscriptionInfoDto;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
 import com.sprint.monew.domain.interest.exception.EmptyKeywordsException;
 import com.sprint.monew.domain.interest.exception.InterestAlreadyExistsException;
@@ -20,6 +21,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,7 +32,51 @@ public class InterestService {
   private final UserRepository userRepository;
   private final SubscriptionRepository subscriptionRepository;
 
-  //관심사 목록 조회
+  //관심사 목록 조회 - queryDsl 사용
+  public CursorPageResponseDto<InterestDto> getInterestsWithSubscriberInfo(
+      InterestSearchRequest request, UUID requestUserId) {
+
+    PageRequest pageRequest = PageRequest.of(0, request.limit() + 1);
+
+    List<InterestSubscriptionInfoDto> result = interestRepository.getByNameOrKeywordsContaining(
+        request.keyword(), request.cursor(),
+        request.after(), request.direction(), request.orderBy(), pageRequest);
+
+    boolean hasNext = result.size() > request.limit();
+    if (hasNext) {
+      result = result.subList(0, request.limit());
+    }
+
+    UUID nextCursor = null;
+    Instant nextAfter = null;
+
+    if (!result.isEmpty()) {
+      nextCursor = result.get(result.size() - 1).getInterest().getId();
+      nextAfter = interestRepository.findById(nextCursor)
+          .map(Interest::getCreatedAt)
+          .orElse(null);
+    }
+
+    int size = result.size();
+    long totalElements = interestRepository.countByKeyword(request.keyword());
+
+    List<InterestDto> interestDtos = result.stream()
+        .map(i -> InterestDto.from(i,
+            subscriptionRepository.existsByUserIdAndInterestId(requestUserId,
+                i.getInterest().getId())))
+        .toList();
+
+    return new CursorPageResponseDto<>(
+        interestDtos,
+        nextCursor,
+        nextAfter,
+        size,
+        totalElements,
+        hasNext
+    );
+  }
+
+  //관심사 목록 조회 - deprecated
   public CursorPageResponseDto<InterestDto> getInterests(InterestSearchRequest request,
       UUID requestUserid) {
 
