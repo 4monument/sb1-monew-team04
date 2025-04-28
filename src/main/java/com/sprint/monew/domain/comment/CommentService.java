@@ -1,6 +1,7 @@
 package com.sprint.monew.domain.comment;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.activity.UserActivityService;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.exception.ArticleNotFoundException;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
@@ -37,6 +38,7 @@ public class CommentService {
   private final ArticleRepository articleRepository;
   private final LikeRepository likeRepository;
   private final NotificationRepository notificationRepository;
+  private final UserActivityService userActivityService;
 
   //댓글 조회 메서드
   public CursorPageResponseDto<CommentDto> getComments(UUID articleId) {
@@ -66,6 +68,10 @@ public class CommentService {
 
     Comment comment = Comment.create(user, article, request.content());
     commentRepository.save(comment);
+
+    // 활동 내역 저장
+    userActivityService.updateUserActivity(userId);
+
     return CommentDto.from(comment, false);
   }
 
@@ -93,6 +99,9 @@ public class CommentService {
         notificationMessage
     );
     notificationRepository.save(notification);
+
+    //활동 내역 저장
+    userActivityService.updateUserActivity(userId);
 
     long commentLikeCount = likeRepository.countByComment(comment);
     return CommentLikeDto.from(like, commentLikeCount);
