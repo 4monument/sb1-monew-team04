@@ -2,8 +2,6 @@ package com.sprint.monew.common.batch.temp;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
@@ -14,10 +12,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @RequiredArgsConstructor
-public class TestS3BackUpBatch {
+public class TestArticleCollect {
 
-  @Resource(name = "s3BackupJob")
-  private Job s3BackupJob;
+  @Resource(name = "articleCollectJob")
+  private Job articleCollectJob;
   private final JobLauncher jobLauncher;
 
   // 삭제할 파일 : 로컬 테스트 용
@@ -25,8 +23,8 @@ public class TestS3BackUpBatch {
   public void testInit() throws Exception {
     JobParameters jobParameters = new JobParametersBuilder()
         //.addString("runDate", Instant.now().toString())
-        .addLocalDateTime("dateTime", LocalDateTime.now())
+        .addLong("dateTime", System.currentTimeMillis())
         .toJobParameters();
-    jobLauncher.run(s3BackupJob, jobParameters);
+    jobLauncher.run(articleCollectJob, jobParameters);
   }
 }

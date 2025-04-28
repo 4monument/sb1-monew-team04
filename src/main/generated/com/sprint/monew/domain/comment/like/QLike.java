@@ -1,4 +1,4 @@
-package com.sprint.monew.domain.like;
+package com.sprint.monew.domain.comment.like;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -16,7 +16,7 @@ import com.querydsl.core.types.dsl.PathInits;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QLike extends EntityPathBase<Like> {
 
-    private static final long serialVersionUID = 583842011L;
+    private static final long serialVersionUID = -1144761588L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

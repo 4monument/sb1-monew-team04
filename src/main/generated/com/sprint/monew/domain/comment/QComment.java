@@ -32,7 +32,7 @@ public class QComment extends EntityPathBase<Comment> {
 
     public final ComparablePath<java.util.UUID> id = createComparable("id", java.util.UUID.class);
 
-    public final ListPath<com.sprint.monew.domain.like.Like, com.sprint.monew.domain.like.QLike> likes = this.<com.sprint.monew.domain.like.Like, com.sprint.monew.domain.like.QLike>createList("likes", com.sprint.monew.domain.like.Like.class, com.sprint.monew.domain.like.QLike.class, PathInits.DIRECT2);
+    public final ListPath<com.sprint.monew.domain.comment.like.Like, com.sprint.monew.domain.comment.like.QLike> likes = this.<com.sprint.monew.domain.comment.like.Like, com.sprint.monew.domain.comment.like.QLike>createList("likes", com.sprint.monew.domain.comment.like.Like.class, com.sprint.monew.domain.comment.like.QLike.class, PathInits.DIRECT2);
 
     public final com.sprint.monew.domain.user.QUser user;
 

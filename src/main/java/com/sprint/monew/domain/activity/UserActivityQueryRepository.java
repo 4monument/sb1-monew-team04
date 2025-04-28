@@ -12,7 +12,7 @@ import com.sprint.monew.domain.comment.dto.CommentDto;
 import com.sprint.monew.domain.interest.QInterest;
 import com.sprint.monew.domain.interest.subscription.QSubscription;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
-import com.sprint.monew.domain.like.QLike;
+import com.sprint.monew.domain.comment.like.QLike;
 import com.sprint.monew.domain.user.QUser;
 import com.sprint.monew.domain.user.User;
 import jakarta.persistence.EntityNotFoundException;

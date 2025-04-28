@@ -10,7 +10,7 @@ import com.sprint.monew.domain.article.articleview.ArticleView;
 import com.sprint.monew.domain.comment.Comment;
 import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.subscription.Subscription;
-import com.sprint.monew.domain.like.Like;
+import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.user.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
