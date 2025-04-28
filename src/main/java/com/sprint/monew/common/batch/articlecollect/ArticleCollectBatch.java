@@ -22,7 +22,6 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.JobScope;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
@@ -60,14 +59,16 @@ public class ArticleCollectBatch {
   public Job articleCollectJob(
       @Qualifier("interestsFetchStep") Step interestsFetchStep,
       @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow,
-      @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener) {
+      @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener,
+      @Qualifier("backupArticleJobStep") Step backupArticleJobStep) {
 
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
         .start(interestsFetchStep)
         .on(COMPLETED.getExitCode())
-        .to(naverArticleCollectFlow)
+        .to(naverArticleCollectFlow)// 1. Article 자료 수집
         //.split(taskExecutor()).add(null) // 나중
+        .next(backupArticleJobStep) // 2. backup + 필터링
         .end()
         .listener(jobContextCleanupListener)
         .build();
@@ -118,38 +119,6 @@ public class ArticleCollectBatch {
         .start(naverArticleCollectStep)
         .next(backupNaverArticlesToS3Step)
         .next(articleHandlerStep) // 처리  스텝
-        .build();
-  }
-
-  @Bean
-  @StepScope // 기사 수집한 거 백업
-  public Step backupNaverArticlesToS3Step(@Qualifier("naverPromotionListener") ExecutionContextPromotionListener promotionListener) {
-    return new StepBuilder("s3BackupStep", jobRepository)
-        .tasklet((contribution, chunkContext) -> {
-
-          ExecutionContext jobContext = contribution.getStepExecution().getJobExecution()
-              .getExecutionContext();
-
-          Interests interests = (Interests) jobContext.get(INTERESTS.getKey());
-          if (interests == null) {
-            throw new RuntimeException("ExecutionContext로부터 Interests를 가져오는 데 실패했습니다.");
-          }
-
-          List<ArticleApiDto> articleApiDtos = (List<ArticleApiDto>) jobContext.get(NAVER_ARTICLE_DTOS.getKey());
-          if (articleApiDtos == null || articleApiDtos.isEmpty()) {
-            throw new RuntimeException("ExecutionContext로부터 ArticleApiDto를 가져오는 데 실패했습니다.");
-          }
-
-          List<ArticleApiDto> filteredArticleApiDtos = interests.filterArticleDtos(articleApiDtos);
-
-          backupArticlesToS3File(articleApiDtos);
-
-          ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
-          stepContext.put(NAVER_ARTICLE_DTOS.getKey(), filteredArticleApiDtos);
-
-          return RepeatStatus.FINISHED;
-        }, transactionManager)
-        .listener(promotionListener)
         .build();
   }
 
@@ -205,7 +174,7 @@ public class ArticleCollectBatch {
         new BufferedOutputStream(articleS3Resource.getOutputStream())) {
       log.info("S3 Backup Writer Run");
       for (ArticleApiDto item : articleApiDtos) {
-        writer.write(String.format("%s|%s|%s|%s|%s\n",
+        writer.write(String.format("%s,%s,%s,%s,%s\n",
             item.source(),
             item.sourceUrl(),
             item.title(),

@@ -26,7 +26,6 @@ public class NotificationService {
 
   //알림 등록 - 일괄 등록
   public List<Notification> createArticleInterestNotifications(Instant afterAt) {
-
     List<UnreadInterestArticleCount> unreadInterestArticleCounts
         = subscriberRepository.findNewArticleCountWithUserInterest(afterAt);
 

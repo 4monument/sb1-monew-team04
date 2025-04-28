@@ -24,11 +24,19 @@ public class Interests implements Serializable {
         .forEach(keywords::add);
   }
 
-  public boolean isDuplicateUrl(ArticleApiDto articleApiDto) {
+
+  public ArticleApiDto filter(ArticleApiDto articleApiDto){
+    if (isContainKeywords(articleApiDto) && isDuplicateUrl(articleApiDto)) {
+      return articleApiDto;
+    }
+    return null;
+  }
+
+  private boolean isDuplicateUrl(ArticleApiDto articleApiDto) {
     return sourceUrlFilterSet.add(articleApiDto.sourceUrl());
   }
 
-  public Boolean isContainKeywords(ArticleApiDto articleApiDto) {
+  private boolean isContainKeywords(ArticleApiDto articleApiDto) {
     String summary = articleApiDto.summary();
     return keywords.stream()
         .anyMatch(summary::contains);
@@ -55,31 +63,5 @@ public class Interests implements Serializable {
         articleApiDto.summary(),
         interestList
     );
-  }
-
-  public List<ArticleApiDto> filterArticleDtos(List<ArticleApiDto> articleApiDtos) {
-    return articleApiDtos.stream()
-        .filter(articleApiDto -> isDuplicateUrl(articleApiDto) && isContainKeywords(articleApiDto))
-        .toList();
-  }
-
-//  public Boolean isContainKeywords(ArticleApiDto articleApiDto) {
-//    String summary = articleApiDto.summary();
-//    return keywords.stream()
-//        .anyMatch(summary::contains);
-//  }
-//  public Map<Article, List<Interest>> mapToArticleInterestsMap(List<Article> articles) {
-//    return articles.stream()
-//        .collect(Collectors.toMap(
-//            article -> article,
-//            article -> interests.stream()
-//                .filter(
-//                    interest -> interest.isContainsKeyword(article)) // 해당 뉴스에 해당하지 않는 Keyword 제외시키기
-//                .toList()
-//        ));
-//  }
-//
-  public Boolean validateKeywordContainingAndUniqueUrl(ArticleApiDto articleApiDto) {
-    return isContainKeywords(articleApiDto) && isDuplicateUrl(articleApiDto);
   }
 }
