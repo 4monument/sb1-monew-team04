@@ -1,7 +1,7 @@
 package com.sprint.monew.common.batch.articlecollect;
 
-import com.sprint.monew.common.batch.util.ArticleWithInterestList;
-import com.sprint.monew.common.batch.util.Interests;
+import com.sprint.monew.common.batch.support.ArticleWithInterestList;
+import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;

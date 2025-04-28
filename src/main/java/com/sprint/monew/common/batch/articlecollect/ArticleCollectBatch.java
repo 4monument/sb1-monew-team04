@@ -1,10 +1,10 @@
 package com.sprint.monew.common.batch.articlecollect;
 
-import static com.sprint.monew.common.batch.util.CustomExecutionContextKeys.*;
+import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.*;
 import static org.springframework.batch.core.ExitStatus.*;
 
-import com.sprint.monew.common.batch.util.ArticleWithInterestList;
-import com.sprint.monew.common.batch.util.Interests;
+import com.sprint.monew.common.batch.support.ArticleWithInterestList;
+import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.interest.InterestRepository;
 import com.sprint.monew.global.config.S3ConfigProperties;

@@ -1,6 +1,6 @@
 package com.sprint.monew.common.batch.articlecollect;
 
-import static com.sprint.monew.common.batch.util.CustomExecutionContextKeys.*;
+import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.*;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;

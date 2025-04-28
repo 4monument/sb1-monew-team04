@@ -1,6 +1,6 @@
 package com.sprint.monew.common.batch.articlecollect;
 
-import com.sprint.monew.common.batch.util.ArticleWithInterestList;
+import com.sprint.monew.common.batch.support.ArticleWithInterestList;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.articleinterest.ArticleInterest;
 import jakarta.persistence.EntityManagerFactory;

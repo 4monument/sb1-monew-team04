@@ -1,4 +1,4 @@
-package com.sprint.monew.common.batch.util;
+package com.sprint.monew.common.batch.support;
 
 
 import com.sprint.monew.domain.article.api.ArticleApiDto;

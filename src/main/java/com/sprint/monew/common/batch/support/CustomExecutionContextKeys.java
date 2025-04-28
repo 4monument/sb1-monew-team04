@@ -1,4 +1,4 @@
-package com.sprint.monew.common.batch.util;
+package com.sprint.monew.common.batch.support;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
