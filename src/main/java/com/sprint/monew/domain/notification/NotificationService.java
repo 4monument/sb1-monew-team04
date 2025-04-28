@@ -35,7 +35,7 @@ public class NotificationService {
     for (UnreadInterestArticleCount unreadInterestArticleCount : unreadInterestArticleCounts) {
       User user = unreadInterestArticleCount.getUser();
       Interest interest = unreadInterestArticleCount.getInterest();
-      long totalNewArticles = unreadInterestArticleCount.getTotalNewArticles();
+      long totalNewArticles = unreadInterestArticleCount.getArticleCount();
       Notification notification = new Notification(
           user,
           interest.getId(),
@@ -45,17 +45,10 @@ public class NotificationService {
 
       //아래 save는 배치로 한번에 하는건지, 아니면 메소드 내부에서 해야하는건지?
       //전자라면 주석 해제, 후자라면 save 코드 지우고 만들어진 알림 리스트로 보내주기만 하면된다.
-      //notificationRepository.save(notification);
+      notificationRepository.save(notification);
     }
     return newNotifications;
   }
-
-  //알림 등록 - 좋아요
-  public List<Notification> createLikeNotification(User userId) {
-    List<Notification> notifications = new ArrayList<>();
-    return notifications;
-  }
-
 
   //알림 수정 - 전체 알림 확인
   public void checkAllNotifications(UUID userId) {
