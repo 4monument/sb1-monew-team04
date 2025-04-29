@@ -86,7 +86,7 @@ class UserActivityMVCIntegrationTest {
   @Test
   @DisplayName("성공 - 유저의 모든 활동 정보를 RDB에서 조회한다")
   void testGetUserActivityFromQueryDb() throws Exception {
-    mockMvc.perform(get("/api/user-activity/{userId}/query", testUserId)
+    mockMvc.perform(get("/api/user-activities/{userId}/query", testUserId)
             .header("Monew-Request-User-ID", testUserId))
         .andExpect(status().isOk());
   }
@@ -95,7 +95,7 @@ class UserActivityMVCIntegrationTest {
   @DisplayName("실패 - 존재하지 않는 유저의 정보를 RDB에서 조회한다")
   void testGetNonExistsUserActivityFromQueryDb() throws Exception {
     UUID nonExistentUserId = UUID.randomUUID();
-    mockMvc.perform(get("/api/user-activity/{userId}/query", nonExistentUserId)
+    mockMvc.perform(get("/api/user-activities/{userId}/query", nonExistentUserId)
             .header("Monew-Request-User-ID", nonExistentUserId))
         .andExpect(status().is5xxServerError());
   }
@@ -103,7 +103,7 @@ class UserActivityMVCIntegrationTest {
   @Test
   @DisplayName("성공 - 유저의 모든 활동 정보를 MongoDB에 저장한다")
   void testSaveUserActivityToMongo() throws Exception {
-    mockMvc.perform(get("/api/user-activity/{userId}/save", testUserId)
+    mockMvc.perform(get("/api/user-activities/{userId}/save", testUserId)
             .header("Monew-Request-User-ID", testUserId))
         .andExpect(status().isOk());
   }
@@ -112,7 +112,7 @@ class UserActivityMVCIntegrationTest {
   @DisplayName("실패 - 존재하지 않는 유저의 정보를 MongoDB에 저장한다")
   void testSaveNonExistsUserActivityToMongo() throws Exception {
     UUID nonExistentUserId = UUID.randomUUID();
-    mockMvc.perform(get("/api/user-activity/{userId}/save", nonExistentUserId)
+    mockMvc.perform(get("/api/user-activities/{userId}/save", nonExistentUserId)
             .header("Monew-Request-User-ID", nonExistentUserId))
         .andExpect(status().is5xxServerError());
   }
@@ -120,7 +120,7 @@ class UserActivityMVCIntegrationTest {
   @Test
   @DisplayName("실패 - mongoDB엔 유저가 존재하지 않지만 조회한다")
   void testGetNonExistUserActivityFromMongo() throws Exception {
-    mockMvc.perform(get("/api/user-activity/{userId}", testUserId)
+    mockMvc.perform(get("/api/user-activities/{userId}", testUserId)
             .header("Monew-Request-User-ID", testUserId))
         .andExpect(status().is5xxServerError());
 //        .andExpect(jsonPath("$.userId").value(testUserId.toString()));
@@ -129,10 +129,10 @@ class UserActivityMVCIntegrationTest {
   @Test
   @DisplayName("성공 - 유저의 모든 활동 정보를 MongoDB에서 조회한다")
   void testGetUserActivityFromMongo() throws Exception {
-    mockMvc.perform(get("/api/user-activity/{userId}/save", testUserId)
+    mockMvc.perform(get("/api/user-activities/{userId}/save", testUserId)
             .header("Monew-Request-User-ID", testUserId))
         .andExpect(status().isOk());
-    mockMvc.perform(get("/api/user-activity/{userId}", testUserId)
+    mockMvc.perform(get("/api/user-activities/{userId}", testUserId)
             .header("Monew-Request-User-ID", testUserId))
         .andExpect(status().isOk());
   }
