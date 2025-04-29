@@ -101,7 +101,7 @@ public class NotificationService {
         .map(NotificationDto::from)
         .toList();
 
-    return new CursorPageResponseDto(
+    return new CursorPageResponseDto<>(
         notificationDtos,
         nextCursor,
         nextAfter,
