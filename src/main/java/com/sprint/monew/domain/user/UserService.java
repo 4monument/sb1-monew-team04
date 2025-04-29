@@ -1,5 +1,6 @@
 package com.sprint.monew.domain.user;
 
+import com.sprint.monew.domain.activity.UserActivityMongoRepository;
 import com.sprint.monew.domain.activity.UserActivityService;
 import com.sprint.monew.domain.user.exception.EmailAlreadyExistsException;
 import com.sprint.monew.domain.user.exception.InvalidCredentialsException;
@@ -18,6 +19,7 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final UserActivityService userActivityService;
+  private final UserActivityMongoRepository userActivityMongoRepository;
 
   @Transactional
   public UserDto register(UserRegisterRequest request) {
@@ -67,6 +69,7 @@ public class UserService {
     if (!userRepository.existsById(userId)) {
       throw UserNotFoundException.withId(userId);
     }
+    userActivityMongoRepository.deleteById(userId);
     userRepository.deleteById(userId);
   }
 }
