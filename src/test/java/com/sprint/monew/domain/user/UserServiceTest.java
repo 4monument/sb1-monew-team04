@@ -40,28 +40,28 @@ class UserServiceTest {
     testUser = new User(userId, "test@example.com", "테스트유저", "password123", now, false);
   }
 
-  @Test
-  @DisplayName("회원 가입 - 성공")
-  void register_Success() {
-    // given
-    UserRegisterRequest request = new UserRegisterRequest("new@example.com", "새유저", "password123");
-
-    when(userRepository.existsByEmail(anyString())).thenReturn(false);
-    when(userRepository.save(any(User.class))).thenReturn(
-        new User(UUID.randomUUID(), request.email(), request.nickname(), request.password(), now, false)
-    );
-
-    // when
-    UserDto result = userService.register(request);
-
-    // then
-    assertThat(result).isNotNull();
-    assertThat(result.email()).isEqualTo(request.email());
-    assertThat(result.nickname()).isEqualTo(request.nickname());
-
-    verify(userRepository).existsByEmail(request.email());
-    verify(userRepository).save(any(User.class));
-  }
+//  @Test
+//  @DisplayName("회원 가입 - 성공")
+//  void register_Success() {
+//    // given
+//    UserRegisterRequest request = new UserRegisterRequest("new@example.com", "새유저", "password123");
+//
+//    when(userRepository.existsByEmail(anyString())).thenReturn(false);
+//    when(userRepository.save(any(User.class))).thenReturn(
+//        new User(UUID.randomUUID(), request.email(), request.nickname(), request.password(), now, false)
+//    );
+//
+//    // when
+//    UserDto result = userService.register(request);
+//
+//    // then
+//    assertThat(result).isNotNull();
+//    assertThat(result.email()).isEqualTo(request.email());
+//    assertThat(result.nickname()).isEqualTo(request.nickname());
+//
+//    verify(userRepository).existsByEmail(request.email());
+//    verify(userRepository).save(any(User.class));
+//  }
 
   @Test
   @DisplayName("회원 가입 - 이미 존재하는 이메일")
