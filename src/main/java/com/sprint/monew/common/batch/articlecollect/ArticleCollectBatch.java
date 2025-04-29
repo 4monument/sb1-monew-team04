@@ -108,7 +108,7 @@ public class ArticleCollectBatch {
   @JobScope
   public Step naverArticleHandlerStep(
       @Qualifier("naverArticleCollectReader") ItemReader<ArticleApiDto> naverArticleCollectReader,
-      @Qualifier("basicArticleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor,
+      @Qualifier("articleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor,
       @Qualifier("articleWithInterestsJdbcItemWriter") ItemWriter<ArticleWithInterestList> articleJdbcItemWriter,
       @Qualifier("naverExecutionContextCleanupListener") StepExecutionListener naverExecutionContextCleanupListener) {
 

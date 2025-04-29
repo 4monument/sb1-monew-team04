@@ -1,4 +1,4 @@
-package com.sprint.monew.common.batch.articlecollect;
+package com.sprint.monew.common.batch.articlecollect.config;
 
 import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.api.ArticleApiDto;

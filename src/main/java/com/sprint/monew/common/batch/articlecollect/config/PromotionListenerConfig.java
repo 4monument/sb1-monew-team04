@@ -1,9 +1,8 @@
-package com.sprint.monew.common.batch.articlecollect;
+package com.sprint.monew.common.batch.articlecollect.config;
 
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.ARTICLE_IDS;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.CHOSUN_ARTICLE_DTOS;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.DB_SOURCEURS;
-import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.HANKYUNG_ARTICLE_DTOS;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.INTERESTS;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.NAVER_ARTICLE_DTOS;
 

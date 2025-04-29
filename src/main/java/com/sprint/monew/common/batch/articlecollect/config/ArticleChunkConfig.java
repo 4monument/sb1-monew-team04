@@ -1,11 +1,12 @@
-package com.sprint.monew.common.batch.articlecollect;
+package com.sprint.monew.common.batch.articlecollect.config;
 
-import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.*;
+import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.ARTICLE_IDS;
 
 import com.sprint.monew.common.batch.support.ArticleInterestJdbc;
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
-import com.sprint.monew.common.batch.support.CustomExecutionContextKeys;
+import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.Article;
+import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.article.articleinterest.ArticleInterest;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.ArrayList;
@@ -14,36 +15,79 @@ import java.util.UUID;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.ItemWriteListener;
-import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.StepSynchronizationManager;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
+import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class ArticleItemWriterConfig {
+public class ArticleChunkConfig {
 
   private final EntityManagerFactory emf;
   private final DataSource dataSource;
+
+  /**
+   *  Reader
+   */
+  @Bean(name = "naverArticleCollectReader")
+  @StepScope
+  public ItemReader<ArticleApiDto> naverArticleCollectReader(
+      @Value("#{JobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> naverArticleDtos) {
+    return new ListItemReader<>(naverArticleDtos);
+  }
+
+  @Bean(name = "chosunArticleCollectReader")
+  @StepScope
+  public ItemReader<Object> chosunArticleCollectReader() {
+    return null;
+  }
+
+  /**
+   * Processor
+   */
+
+  @Bean
+  @StepScope
+  public ItemProcessor<ArticleApiDto, ArticleWithInterestList> articleCollectProcessor(
+      @Value("#{JobExecutionContext['interests']}") Interests interests) {
+    return interests::toArticleWithRelevantInterests;
+  }
+
+  @Bean
+  @StepScope
+  public ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor(
+      @Value("#{JobExecutionContext['interests']}") Interests interests) {
+    return item -> {
+      if (interests.isDuplicateUrl(item)){
+        return null;
+      }
+      return interests.toArticleWithRelevantInterests(item);
+    };
+  }
+
+  /**
+   * Writer
+   */
 
   @Bean
   @StepScope
   public ItemWriter<ArticleWithInterestList> articleWithInterestsJdbcItemWriter(
       @Qualifier("articleJdbcItemWriter") JdbcBatchItemWriter<Article> articleJdbcItemWriter,
-      @Qualifier("articleInterestJdbcItemWriter") JdbcBatchItemWriter<ArticleInterestJdbc> articleInterestJdbcItemWriter,
-      JobExecutionListener articleCollectJobContextCleanupListener) {
+      @Qualifier("articleInterestJdbcItemWriter") JdbcBatchItemWriter<ArticleInterestJdbc> articleInterestJdbcItemWriter) {
     return items -> {
       List<ArticleWithInterestList> articleWithInterestLists = (List<ArticleWithInterestList>) items.getItems();
 
@@ -84,7 +128,7 @@ public class ArticleItemWriterConfig {
 
     String articleInsertSql =
         "INSERT INTO articles (id, source, source_url, title, publish_date, summary, deleted) " +
-        "VALUES (:id, :source, :sourceUrl, :title, :publishDate, :summary, :deleted)";
+            "VALUES (:id, :source, :sourceUrl, :title, :publishDate, :summary, :deleted)";
 
     return new JdbcBatchItemWriterBuilder<Article>()
         .dataSource(dataSource)
@@ -100,7 +144,7 @@ public class ArticleItemWriterConfig {
 
     String articleInterestInsertSql =
         "INSERT INTO article_interests (id, article_id, interest_id, created_at) " +
-        "VALUES (:id, :articleId, :interestId, :createdAt)";
+            "VALUES (:id, :articleId, :interestId, :createdAt)";
 
     return new JdbcBatchItemWriterBuilder<ArticleInterestJdbc>()
         .dataSource(dataSource)
@@ -109,15 +153,6 @@ public class ArticleItemWriterConfig {
         .columnMapped()
         .build();
   }
-  //[
-  //  {
-  //    "restoreDate": "2025-04-29T01:24:37.762Z",
-  //    "restoredArticleIds": [
-  //      "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-  //    ],
-  //    "restoredArticleCount": 9007199254740991
-  //  }
-
 
   /**
    *  jpaWrriter를 사용할 경우
@@ -160,4 +195,5 @@ public class ArticleItemWriterConfig {
         .entityManagerFactory(emf)
         .build();
   }
+
 }

@@ -17,6 +17,7 @@ spring:
   batch:
     job:
       enabled: false
+
   profiles:
     active:
       - ${SPRING_PROFILES_ACTIVE}
@@ -41,4 +42,3 @@ article:
 logging:
   level:
     root: info
-
