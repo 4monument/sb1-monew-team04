@@ -33,14 +33,17 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 class UserActivityMVCIntegrationTest {
 
+  static final MongoContainer mongo = MongoContainer.getInstance();
+  static final PostgresContainer postgres = PostgresContainer.getInstance();
+
+  static {
+    mongo.start();
+    postgres.start();
+  }
+
   @LocalServerPort
   private int port;
 
-  @BeforeAll
-  static void beforeAll() {
-    MongoContainer.getInstance().start();
-    PostgresContainer.getInstance().start();
-  }
   @Autowired
   private MockMvc mockMvc;
 
