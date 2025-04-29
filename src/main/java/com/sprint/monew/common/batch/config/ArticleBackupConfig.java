@@ -129,6 +129,7 @@ public class ArticleBackupConfig {
               .bucket(s3Properties.bucket())
               .contentType("text/csv")
               .build();
+
           File localCsvFile = new File(getNowLocalPath());
           RequestBody requestBody = RequestBody.fromFile(localCsvFile);
 
@@ -140,57 +141,6 @@ public class ArticleBackupConfig {
         }, transactionManager)
         .build();
   }
-//
-//  @Bean
-//  @StepScope
-//  public ItemWriter<ArticleApiDto> backupS3ArticlesWriter(
-//      @Value("#{jobParameters['s3BucketName']}") String s3BucketName,
-//      @Value("#{jobParameters['s3ObjectKey']}") String s3ObjectKey) {
-//
-//    log.info("S3 Backup Writer Run");
-//    String[] header = {"source", "sourceUrl", "title", "publishDate", "summary"};
-//    return new FlatFileItemWriterBuilder<ArticleApiDto>()
-//        .append(true)
-//        .resource(new FileSystemResource(getNowLocalPath()))
-//        .delimited().delimiter(",")
-//        .names(header)
-//        .build();
-//
-//  }
-//  @Bean
-//  @StepScope // 기사 수집한 거 백업
-//  public Step backupNaverArticlesToS3Step(
-//      @Qualifier("naverPromotionListener") ExecutionContextPromotionListener promotionListener) {
-//    return new StepBuilder("s3BackupStep", jobRepository)
-//        .tasklet((contribution, chunkContext) -> {
-//
-//          ExecutionContext jobContext = contribution.getStepExecution().getJobExecution()
-//              .getExecutionContext();
-//
-//          Interests interests = (Interests) jobContext.get(INTERESTS.getKey());
-//          if (interests == null) {
-//            throw new RuntimeException("ExecutionContext로부터 Interests를 가져오는 데 실패했습니다.");
-//          }
-//
-//          List<ArticleApiDto> articleApiDtos = (List<ArticleApiDto>) jobContext.get(
-//              NAVER_ARTICLE_DTOS.getKey());
-//          if (articleApiDtos == null || articleApiDtos.isEmpty()) {
-//            throw new RuntimeException("ExecutionContext로부터 ArticleApiDto를 가져오는 데 실패했습니다.");
-//          }
-//
-//          List<ArticleApiDto> filteredArticleApiDtos = interests.filterArticleDtos(articleApiDtos);
-//
-//          backupArticlesToS3File(articleApiDtos);
-//
-//          ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
-//          stepContext.put(NAVER_ARTICLE_DTOS.getKey(), filteredArticleApiDtos);
-//
-//          return RepeatStatus.FINISHED;
-//        }, transactionManager)
-//        .listener(promotionListener)
-//        .build();
-//  }
-
   /**
    * 편의 메서드
    */
@@ -198,30 +148,4 @@ public class ArticleBackupConfig {
     LocalDateTime now = LocalDateTime.now();
     return String.format("%s-%s.csv", now.toLocalDate(), now.getHour());
   }
-
-//  private S3Resource createS3Resource(LocalDate backupTargetDate,
-//      S3OutputStreamProvider s3OutputStreamProvider) {
-//    String fileName = backupTargetDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
-//    String location = "s3://" + s3Properties.bucket() + "/" + fileName;
-//    return S3Resource.create(location, s3Client, s3OutputStreamProvider);
-//  }
-//
-//  private void backupArticlesToS3File(List<ArticleApiDto> articleApiDtos) throws IOException {
-//    if (articleApiDtos == null || articleApiDtos.isEmpty()) {
-//      throw new RuntimeException("백업할 기사가 없습니다");
-//    }
-//
-//    try (BufferedOutputStream writer =
-//        new BufferedOutputStream(articleS3Resource.getOutputStream())) {
-//      log.info("S3 Backup Writer Run");
-//      for (ArticleApiDto item : articleApiDtos) {
-//        writer.write(String.format("%s,%s,%s,%s,%s\n",
-//            item.source(),
-//            item.sourceUrl(),
-//            item.title(),
-//            item.publishDate(),
-//            item.summary()).getBytes());
-//      }
-//    }
-//  }
 }

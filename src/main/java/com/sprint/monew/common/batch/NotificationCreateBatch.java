@@ -1,17 +1,31 @@
 package com.sprint.monew.common.batch;
 
 
+import com.sprint.monew.common.batch.support.NotificationJdbc;
+import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
+import com.sprint.monew.domain.notification.Notification;
+import com.sprint.monew.domain.notification.NotificationRepository;
+import com.sprint.monew.domain.notification.NotificationService;
+import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
+import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.support.ListItemReader;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -22,6 +36,9 @@ public class NotificationCreateBatch {
 
   private final JobRepository jobRepository;
   private final PlatformTransactionManager transactionManager;
+  private final SubscriptionRepository subscriptionRepository;
+  private final NotificationService notificationService;
+  private final DataSource dataSource;
 
   @Bean
   public Job notificationCreateJob() {
@@ -30,29 +47,45 @@ public class NotificationCreateBatch {
 
   @Bean
   @JobScope
-  public Step notificationCreateStep() {
+  public Step notificationCreateStep(
+      @Qualifier("notificationCreateReader") ItemReader<UnreadInterestArticleCount> reader,
+      @Qualifier("notificationCreateProcessor") ItemProcessor<UnreadInterestArticleCount, NotificationJdbc> processor,
+      @Qualifier("notificationCreateWriter") ItemWriter<NotificationJdbc> writer) {
     return new StepBuilder("notificationCreateStep", jobRepository)
-        .<Object, Object>chunk(10, transactionManager)
+        .<UnreadInterestArticleCount, NotificationJdbc>chunk(500, transactionManager)
         .reader(notificationCreateReader())
-        .processor(notificationCreateProcessor())
-        .writer(notificationCreateWriter())
+        .processor(processor)
+        .writer(writer)
         .build();
   }
 
-  public ItemReader<Object> notificationCreateReader() {
-    // 유진님 Notification create관련에 쓰일 재료 가져오는 로직
-    List<String> temp = List.of("재료1", "재료2", "재료3");
-    ListItemReader<String> tempReader = new ListItemReader<>(temp);
-    return null;
+  @Bean
+  @StepScope
+  public ItemReader<UnreadInterestArticleCount> notificationCreateReader() {
+    Instant afterAt = Instant.now().minus(Duration.ofMinutes(3));
+    List<UnreadInterestArticleCount> newArticleCountWithUserInterest =
+        subscriptionRepository.findNewArticleCountWithUserInterest(afterAt);
+    return new ListItemReader<>(newArticleCountWithUserInterest);
   }
 
-  public ItemProcessor<Object, Object> notificationCreateProcessor() {
-    // 유진님이 쓰는 로직 사용. I/O 작업은 하지 않도록 설계
-    return null;
+  @Bean
+  @StepScope
+  public ItemProcessor<UnreadInterestArticleCount, NotificationJdbc> notificationCreateProcessor() {
+    return notificationService::createArticleInterestNotifications;
   }
 
-  public ItemWriter<Object> notificationCreateWriter() {
-    // 만든거 저장하는 로직
-    return null;
+  @Bean
+  @StepScope
+  public ItemWriter<NotificationJdbc> notificationCreateWriter() {
+    String notificationInsertSql =
+        "INSERT INTO notifications (id, user_id, resource_id, resource_type, content, created_at, updated_at, confirmed)" +
+        " VALUES (:id, userId, resourceId, resourceType, content, createdAt, updatedAt, confirmed)";
+
+    return new JdbcBatchItemWriterBuilder<NotificationJdbc>()
+        .dataSource(dataSource)
+        .assertUpdates(false)
+        .sql(notificationInsertSql)
+        .columnMapped()
+        .build();
   }
 }
