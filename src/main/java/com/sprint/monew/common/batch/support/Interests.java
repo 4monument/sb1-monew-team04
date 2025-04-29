@@ -26,7 +26,7 @@ public class Interests implements Serializable {
 
 
   public ArticleApiDto filter(ArticleApiDto articleApiDto){
-    if (isContainKeywords(articleApiDto) && isDuplicateUrl(articleApiDto)) {
+    if (isContainKeywords(articleApiDto) && !isDuplicateUrl(articleApiDto)) {
       return articleApiDto;
     }
     return null;
