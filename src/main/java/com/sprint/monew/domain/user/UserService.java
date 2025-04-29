@@ -1,5 +1,6 @@
 package com.sprint.monew.domain.user;
 
+import com.sprint.monew.domain.activity.UserActivityService;
 import com.sprint.monew.domain.user.exception.EmailAlreadyExistsException;
 import com.sprint.monew.domain.user.exception.InvalidCredentialsException;
 import com.sprint.monew.domain.user.exception.UserAlreadyDeletedException;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final UserActivityService userActivityService;
 
   @Transactional
   public UserDto register(UserRegisterRequest request) {
@@ -24,7 +26,12 @@ public class UserService {
     }
     User user = new User(null, request.email(), request.nickname(),
         request.password(), Instant.now(), false);
-    return UserDto.from(userRepository.save(user));
+
+    User savedUser = userRepository.save(user);
+
+    userActivityService.saveUserActivityToMongo(savedUser.getId());
+
+    return UserDto.from(savedUser);
   }
 
   @Transactional(readOnly = true)
