@@ -1,7 +1,6 @@
 package com.sprint.monew.domain.notification;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
-import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.notification.dto.NotificationSearchRequest;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.notification.exception.NotificationNotFoundException;
@@ -23,7 +22,6 @@ public class NotificationService {
 
   private final NotificationRepository notificationRepository;
   private final UserRepository userRepository;
-  private final SubscriptionRepository subscriberRepository;
 
   //알림 등록 - 일괄 등록
   public List<Notification> createArticleInterestNotifications(
@@ -82,7 +80,7 @@ public class NotificationService {
     PageRequest pagerequest = PageRequest.of(0, limit + 1);
 
     List<Notification> notifications
-        = notificationRepository.findUnconfirmedWithCursor(userId, cursor, after,
+        = notificationRepository.getUnconfirmedWithCursor(userId, cursor, after,
         pagerequest);
 
     boolean hasNext = notifications.size() > limit;
