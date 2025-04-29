@@ -1,4 +1,4 @@
-package com.sprint.monew.common.batch.notification;
+package com.sprint.monew.common.batch;
 
 
 import java.util.List;

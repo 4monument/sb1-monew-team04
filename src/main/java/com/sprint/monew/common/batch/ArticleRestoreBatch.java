@@ -1,4 +1,4 @@
-package com.sprint.monew.common.batch.articlecollect;
+package com.sprint.monew.common.batch;
 
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.INTERESTS;
 
@@ -38,7 +38,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.PlatformTransactionManager;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;

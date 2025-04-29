@@ -1,4 +1,4 @@
-package com.sprint.monew.common.batch.articlecollect;
+package com.sprint.monew.common.batch;
 
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.*;
 import static org.springframework.batch.core.ExitStatus.*;
