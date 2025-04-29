@@ -1,4 +1,4 @@
-package com.sprint.monew.common.util;
+package com.sprint.monew.domain.interest.util;
 
 import java.util.Arrays;
 import java.util.HashSet;

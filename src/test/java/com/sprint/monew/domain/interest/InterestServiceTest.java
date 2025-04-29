@@ -17,6 +17,7 @@ import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
+import com.sprint.monew.domain.interest.dto.InterestSubscriptionInfoDto;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
 import com.sprint.monew.domain.interest.exception.EmptyKeywordsException;
 import com.sprint.monew.domain.interest.exception.InterestAlreadyExistsException;
@@ -31,6 +32,7 @@ import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,6 +44,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("관심사 서비스 테스트")
@@ -199,8 +202,8 @@ class InterestServiceTest {
   }
 
   @Nested
-  @DisplayName("관심사 목록 조회")
-  class GetInterest {
+  @DisplayName("관심사 목록 조회-deprecated")
+  class GetInterestDeprecated {
 
     @Test
     @DisplayName("성공: 검색어를 관심사 이름으로 포함하는 관심사가 있음(name asc)")
@@ -429,6 +432,265 @@ class InterestServiceTest {
       assertFalse(result.hasNext());
     }
   }
+
+  @Nested
+  @DisplayName("관심사 목록 조회 - QueryDSL")
+  class GetInterest {
+
+    @Test
+    @DisplayName("성공: 검색어를 관심사 이름으로 포함하는 관심사가 있음(name asc)")
+    void getInterestKeywordInNameOrderByNameAscSuccess() {
+      // given
+      String keyword = "프로그래";
+      String orderBy = "name";
+      String direction = "asc";
+      UUID cursor = null;
+      Instant after = null;
+      int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
+      PageRequest pageRequest = PageRequest.of(0, limit + 1);
+
+      UUID userId = UUID.randomUUID();
+
+      List<InterestSubscriptionInfoDto> searchResult = new ArrayList<>();
+
+      Interest programing = interests.get(0); //프로그래밍
+
+      InterestSubscriptionInfoDto interestSubscriptionInfoDto = new InterestSubscriptionInfoDto(
+          programing,
+          0L
+      );
+
+      searchResult.add(interestSubscriptionInfoDto);
+
+      searchResult.sort(Comparator.comparing(dto -> dto.getInterest().getName()));
+
+      when(interestRepository
+          .getByNameOrKeywordsContaining(keyword, cursor, after, direction, orderBy, pageRequest))
+          .thenReturn(searchResult);
+      when(subscriptionRepository
+          .existsByUserIdAndInterestId(userId, programing.getId()))
+          .thenReturn(true);
+      when(interestRepository.findById(programing.getId())).thenReturn(
+          Optional.of(programing));
+
+      // when
+      CursorPageResponseDto<InterestDto> result = interestService.getInterestsWithSubscriberInfo(
+          interestSearchRequest, userId);
+
+      //then
+      assertNotNull(result);
+      assertEquals(1, searchResult.size());
+      assertEquals(programing.getId(), result.nextCursor());
+      assertEquals(programing.getCreatedAt(), result.nextAfter());
+    }
+
+    @Test
+    @DisplayName("성공: 검색어를 키워드로 포함하는 관심사가 있음 (name desc)")
+    void getInterestKeywordInKeywordsOrderByNameDescSuccess() {
+      // given
+      String keyword = "개발";
+      String orderBy = "name";
+      String direction = "desc";
+      UUID cursor = null;
+      Instant after = null;
+      int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
+      PageRequest pageRequest = PageRequest.of(0, limit + 1);
+
+      UUID userId = UUID.randomUUID();
+
+      List<InterestSubscriptionInfoDto> searchResult = new ArrayList<>();
+
+      Interest programing = interests.get(0); //프로그래밍
+      Interest develop = interests.get(3); //개발
+
+      InterestSubscriptionInfoDto interestSubscriptionInfoDto1 = new InterestSubscriptionInfoDto(
+          programing,
+          1L
+      );
+      InterestSubscriptionInfoDto interestSubscriptionInfoDto2 = new InterestSubscriptionInfoDto(
+          develop,
+          0L
+      );
+
+      searchResult.add(interestSubscriptionInfoDto1);
+      searchResult.add(interestSubscriptionInfoDto2);
+
+      searchResult.sort(
+          Comparator.comparing((InterestSubscriptionInfoDto dto) -> dto.getInterest().getName())
+              .reversed());
+
+      when(interestRepository
+          .getByNameOrKeywordsContaining(keyword, cursor, after, direction, orderBy, pageRequest))
+          .thenReturn(searchResult);
+      when(interestRepository.findById(develop.getId())).thenReturn(
+          Optional.of(develop));
+      when(subscriptionRepository
+          .existsByUserIdAndInterestId(userId, programing.getId())).thenReturn(true);
+      when(subscriptionRepository
+          .existsByUserIdAndInterestId(userId, develop.getId())).thenReturn(false);
+      when(interestRepository.countByKeyword(keyword)).thenReturn(2);
+
+      // when
+      CursorPageResponseDto<InterestDto> result = interestService.getInterestsWithSubscriberInfo(
+          interestSearchRequest, userId);
+
+      //then
+      assertNotNull(result);
+      assertEquals(2, result.totalElements());
+      assertEquals(develop.getId(), result.nextCursor());
+      assertEquals(develop.getCreatedAt(), result.nextAfter());
+    }
+
+    @Test
+    @DisplayName("성공: 검색어를 관심사 이름으로 포함하는 관심사가 있음(subscriberCount desc)")
+    void getInterestKeywordInNameOrderBySubscriberCountDescSuccess() {
+      // given
+      String keyword = "프로그래";
+      String orderBy = "subscriberCount";
+      String direction = "desc";
+      UUID cursor = null;
+      Instant after = null;
+      int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
+      PageRequest pageRequest = PageRequest.of(0, limit + 1);
+
+      UUID userId = UUID.randomUUID();
+
+      Interest programing = interests.get(0); //프로그래밍
+
+      List<InterestSubscriptionInfoDto> searchResult = new ArrayList<>();
+
+      InterestSubscriptionInfoDto interestSubscriptionInfoDto1 = new InterestSubscriptionInfoDto(
+          programing,
+          1L
+      );
+
+      searchResult.add(interestSubscriptionInfoDto1);
+
+      searchResult.sort(
+          Comparator.comparingLong(InterestSubscriptionInfoDto::getSubscriberCount).reversed());
+
+      when(interestRepository
+          .getByNameOrKeywordsContaining(keyword, cursor, after, direction, orderBy, pageRequest))
+          .thenReturn(searchResult);
+      when(interestRepository.findById(programing.getId())).thenReturn(
+          Optional.of(programing));
+      when(subscriptionRepository
+          .existsByUserIdAndInterestId(userId, programing.getId())).thenReturn(true);
+
+      // when
+      CursorPageResponseDto<InterestDto> result = interestService.getInterestsWithSubscriberInfo(
+          interestSearchRequest, userId);
+
+      //then
+      assertNotNull(result);
+      assertEquals(1, searchResult.size());
+      assertEquals(programing.getId(), result.nextCursor());
+      assertEquals(programing.getCreatedAt(), result.nextAfter());
+    }
+
+    @Test
+    @DisplayName("성공: 검색어를 키워드로 포함하는 관심사가 있음 (subscriber asc)")
+    void getInterestKeywordInKeywordsOrderBySubscriberCountAscSuccess() {
+      // given
+      String keyword = "개발";
+      String orderBy = "subscriberCount";
+      String direction = "asc";
+      UUID cursor = null;
+      Instant after = null;
+      int limit = 1;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
+      PageRequest pageRequest = PageRequest.of(0, limit + 1);
+
+      UUID userId = UUID.randomUUID();
+
+      Interest programing = interests.get(0);
+      Interest develop = interests.get(3);
+
+      List<InterestSubscriptionInfoDto> searchResult = new ArrayList<>();
+
+      InterestSubscriptionInfoDto interestSubscriptionInfoDto1 = new InterestSubscriptionInfoDto(
+          programing,
+          1L
+      );
+      InterestSubscriptionInfoDto interestSubscriptionInfoDto2 = new InterestSubscriptionInfoDto(
+          develop,
+          0L
+      );
+
+      searchResult.add(interestSubscriptionInfoDto1);
+      searchResult.add(interestSubscriptionInfoDto2);
+
+      searchResult.sort(Comparator.comparingLong(InterestSubscriptionInfoDto::getSubscriberCount));
+
+      when(interestRepository
+          .getByNameOrKeywordsContaining(keyword, cursor, after, direction, orderBy, pageRequest))
+          .thenReturn(searchResult);
+
+      when(interestRepository.findById(develop.getId())).thenReturn(
+          Optional.of(develop));
+
+      when(subscriptionRepository
+          .existsByUserIdAndInterestId(userId, develop.getId())).thenReturn(false);
+      when(interestRepository.countByKeyword(keyword)).thenReturn(2);
+
+      // when
+      CursorPageResponseDto<InterestDto> result = interestService.getInterestsWithSubscriberInfo(
+          interestSearchRequest, userId);
+
+      //then
+      assertNotNull(result);
+      assertEquals(2, result.totalElements());
+      assertEquals(develop.getId(), result.nextCursor());
+      assertEquals(develop.getCreatedAt(), result.nextAfter());
+    }
+
+    @Test
+    @DisplayName("성공: 조회 결과가 없음")
+    void getInterestEmptySuccess() {
+      // given
+      String keyword = "뷰티";
+      String orderBy = "name";
+      String direction = "asc";
+      UUID cursor = null;
+      Instant after = null;
+      int limit = 10;
+
+      InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+          direction, cursor, after, limit);
+
+      UUID userId = UUID.randomUUID();
+
+      when(interestRepository.countByKeyword(keyword)).thenReturn(0);
+
+      // when
+      CursorPageResponseDto<InterestDto> result = interestService.getInterestsWithSubscriberInfo(
+          interestSearchRequest, userId);
+
+      //then
+      assertNotNull(result);
+      assertEquals(0, result.content().size());
+      assertNull(result.nextCursor());
+      assertNull(result.nextAfter());
+      assertEquals(0, result.totalElements());
+      assertFalse(result.hasNext());
+    }
+  }
+
 
   @Nested
   @DisplayName("수정")
