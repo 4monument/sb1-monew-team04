@@ -15,7 +15,7 @@ public class TestUnreadInterestArticleCount implements UnreadInterestArticleCoun
     this.user = user;
     this.totalNewArticles = totalNewArticles;
   }
-  
+
   @Override
   public Interest getInterest() {
     return interest;
@@ -27,7 +27,7 @@ public class TestUnreadInterestArticleCount implements UnreadInterestArticleCoun
   }
 
   @Override
-  public Long getTotalNewArticles() {
+  public Long getArticleCount() {
     return totalNewArticles;
   }
 }

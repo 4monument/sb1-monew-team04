@@ -135,3 +135,64 @@ FROM u2,
 SELECT conname, pg_get_constraintdef(c.oid)
 FROM pg_constraint c
 WHERE conrelid = 'notifications'::regclass;
+
+
+-- 추가 기사 데이터
+INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date")
+VALUES
+    -- 기술 관련 기사
+    (gen_random_uuid(), 'ZDNet', 'https://zdnet.com/quantum', '양자 컴퓨팅의 혁신적 발전',
+     '최신 양자 컴퓨팅 기술의 발전과 산업 적용 사례', now()),
+    (gen_random_uuid(), 'TechCrunch', 'https://techcrunch.com/blockchain', '블록체인이 바꾸는 금융의 미래',
+     '블록체인 기술의 금융권 적용과 미래 전망', now()),
+    (gen_random_uuid(), 'MIT Tech Review', 'https://mittr.com/robotics', '로봇 공학의 최신 동향',
+     '자율주행 로봇과 산업용 로봇의 최신 기술 동향', now()),
+
+    -- 건강 관련 기사
+    (gen_random_uuid(), 'Health Today', 'https://healthtoday.com/nutrition', '영양소의 균형과 장수',
+     '올바른 영양 섭취로 건강한 삶을 유지하는 방법', now()),
+    (gen_random_uuid(), 'Medical Journal', 'https://medjournal.com/mental', '정신 건강의 중요성',
+     '현대 사회에서 정신 건강을 유지하는 실용적 방법', now());
+
+-- 새 기사와 관심사 연결
+WITH a1 AS (SELECT id AS article_id FROM articles WHERE title = '양자 컴퓨팅의 혁신적 발전'),
+     a2 AS (SELECT id AS article_id FROM articles WHERE title = '블록체인이 바꾸는 금융의 미래'),
+     a3 AS (SELECT id AS article_id FROM articles WHERE title = '로봇 공학의 최신 동향'),
+     a4 AS (SELECT id AS article_id FROM articles WHERE title = '영양소의 균형과 장수'),
+     a5 AS (SELECT id AS article_id FROM articles WHERE title = '정신 건강의 중요성'),
+     i_tech AS (SELECT id AS interest_id FROM interests WHERE name = '기술'),
+     i_health AS (SELECT id AS interest_id FROM interests WHERE name = '건강')
+
+INSERT
+INTO "articles_interests" ("id", "article_id", "interest_id", "created_at")
+-- 기술 관련 기사 연결
+SELECT gen_random_uuid(), a1.article_id, i_tech.interest_id, now()
+FROM a1,
+     i_tech
+UNION
+SELECT gen_random_uuid(), a2.article_id, i_tech.interest_id, now()
+FROM a2,
+     i_tech
+UNION
+SELECT gen_random_uuid(), a3.article_id, i_tech.interest_id, now()
+FROM a3,
+     i_tech
+UNION
+-- 건강 관련 기사 연결
+SELECT gen_random_uuid(), a4.article_id, i_health.interest_id, now()
+FROM a4,
+     i_health
+UNION
+SELECT gen_random_uuid(), a5.article_id, i_health.interest_id, now()
+FROM a5,
+     i_health;
+
+-- 호연 사용자에게 기술 관심사 추가 구독
+WITH u_hoyeon AS (SELECT id AS user_id FROM users WHERE email = 'hoyeon@example.com'),
+     i_tech AS (SELECT id AS interest_id FROM interests WHERE name = '기술')
+
+INSERT
+INTO "users_interests" ("id", "user_id", "interest_id", "created_at")
+SELECT gen_random_uuid(), u_hoyeon.user_id, i_tech.interest_id, now()
+FROM u_hoyeon,
+     i_tech;

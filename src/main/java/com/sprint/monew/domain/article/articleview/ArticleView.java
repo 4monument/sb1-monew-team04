@@ -50,6 +50,7 @@ public class ArticleView {
   private ArticleView(User user, Article article) {
     this.user = user;
     this.article = article;
+    this.createdAt = Instant.now();
   }
 
   public static ArticleView create(User user, Article article) {

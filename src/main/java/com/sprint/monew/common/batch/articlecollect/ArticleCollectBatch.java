@@ -1,20 +1,12 @@
 package com.sprint.monew.common.batch.articlecollect;
 
-import static com.sprint.monew.common.batch.util.CustomExecutionContextKeys.*;
+import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.*;
 import static org.springframework.batch.core.ExitStatus.*;
 
-import com.sprint.monew.common.batch.util.ArticleWithInterestList;
-import com.sprint.monew.common.batch.util.Interests;
+import com.sprint.monew.common.batch.support.ArticleWithInterestList;
+import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.interest.InterestRepository;
-import com.sprint.monew.global.config.S3ConfigProperties;
-import io.awspring.cloud.s3.S3OutputStreamProvider;
-import io.awspring.cloud.s3.S3Resource;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -22,7 +14,6 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.JobScope;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
@@ -43,7 +34,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
-import software.amazon.awssdk.services.s3.S3Client;
 
 @Slf4j
 @Configuration
@@ -52,40 +42,33 @@ public class ArticleCollectBatch {
 
   private final PlatformTransactionManager transactionManager;
   private final JobRepository jobRepository;
-  private final S3ConfigProperties s3Properties;
-  private final S3Client s3Client;
-  private S3Resource articleS3Resource; // 매일 변하는 변수(백업 하는 날마다 PATH가 달라짐)
 
   @Bean(name = "articleCollectJob")
   public Job articleCollectJob(
       @Qualifier("interestsFetchStep") Step interestsFetchStep,
       @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow,
-      @Qualifier("jobExecutionContextCleanupListener") JobExecutionListener jobExecutionCleanupListener) {
+      @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener,
+      @Qualifier("backupArticleJobStep") Step backupArticleJobStep) {
 
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
         .start(interestsFetchStep)
         .on(COMPLETED.getExitCode())
-        .to(naverArticleCollectFlow)
+        .to(naverArticleCollectFlow)// 1. Article 자료 수집
         //.split(taskExecutor()).add(null) // 나중
+        .next(backupArticleJobStep) // 2. backup + 필터링
         .end()
-        .listener(jobExecutionCleanupListener)
+        .listener(jobContextCleanupListener)
         .build();
   }
 
   @Bean(name = "interestsFetchStep")
   @JobScope
-  public Step interestsFetchStep(
-      InterestRepository interestRepository,
-      S3OutputStreamProvider s3OutputStreamProvider,
+  public Step interestsFetchStep(InterestRepository interestRepository,
       @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener) {
 
     return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
-
-          LocalDate backupTargetDate = LocalDate.now();
-          articleS3Resource = createS3Resource(backupTargetDate, s3OutputStreamProvider);
-
           ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
           Interests interests = new Interests(interestRepository.findAll());
           stepContext.put(INTERESTS.getKey(), interests);
@@ -115,31 +98,7 @@ public class ArticleCollectBatch {
 
     return new FlowBuilder<Flow>("naverCollectFlow")
         .start(naverArticleCollectStep)
-        .next(backupNaverArticlesToS3Step())
         .next(articleHandlerStep) // 처리  스텝
-        .build();
-  }
-
-  @Bean
-  @StepScope // 기사 수집한 거 백업
-  public Step backupNaverArticlesToS3Step() {
-    return new StepBuilder("s3BackupStep", jobRepository)
-        .tasklet((contribution, chunkContext) -> {
-
-          ExecutionContext jobContext = contribution.getStepExecution().getJobExecution()
-              .getExecutionContext();
-
-          List<ArticleApiDto> articleApiDtos;
-          try {
-            articleApiDtos = (List<ArticleApiDto>) jobContext.get(NAVER_ARTICLE_DTOS.getKey());
-          } catch (ClassCastException e) {
-            throw new RuntimeException("ExecutionContext로부터 ArticleApiDto를 Casting하는데 실패했습니다.");
-          }
-
-          backupArticlesToS3File(articleApiDtos);
-
-          return RepeatStatus.FINISHED;
-        }, transactionManager)
         .build();
   }
 
@@ -164,7 +123,6 @@ public class ArticleCollectBatch {
         .build();
   }
 
-
   /**
    * API Multi-threading TaskExecutor
    */
@@ -175,34 +133,5 @@ public class ArticleCollectBatch {
     executor.setMaxPoolSize(10);
     executor.setThreadNamePrefix("article-async-thread-");
     return executor;
-  }
-
-  /**
-   * 편의 메서드
-   */
-  private S3Resource createS3Resource(LocalDate backupTargetDate,
-      S3OutputStreamProvider s3OutputStreamProvider) {
-    String fileName = backupTargetDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
-    String location = "s3://" + s3Properties.bucket() + "/" + fileName;
-    return S3Resource.create(location, s3Client, s3OutputStreamProvider);
-  }
-
-  private void backupArticlesToS3File(List<ArticleApiDto> articleApiDtos) throws IOException {
-    if (articleApiDtos == null || articleApiDtos.isEmpty()) {
-      throw new RuntimeException("백업할 기사가 없습니다");
-    }
-
-    try (BufferedOutputStream writer =
-        new BufferedOutputStream(articleS3Resource.getOutputStream())) {
-      log.info("S3 Backup Writer Run");
-      for (ArticleApiDto item : articleApiDtos) {
-        writer.write(String.format("%s|%s|%s|%s|%s\n",
-            item.source(),
-            item.sourceUrl(),
-            item.title(),
-            item.publishDate(),
-            item.summary()).getBytes());
-      }
-    }
   }
 }

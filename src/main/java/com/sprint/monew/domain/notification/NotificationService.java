@@ -1,13 +1,11 @@
 package com.sprint.monew.domain.notification;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
-import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -25,37 +23,19 @@ public class NotificationService {
   private final SubscriptionRepository subscriberRepository;
 
   //알림 등록 - 일괄 등록
-  public List<Notification> createArticleInterestNotifications(Instant afterAt) {
-
-    List<UnreadInterestArticleCount> unreadInterestArticleCounts
-        = subscriberRepository.findNewArticleCountWithUserInterest(afterAt);
-
-    List<Notification> newNotifications = new ArrayList<>();
-
-    for (UnreadInterestArticleCount unreadInterestArticleCount : unreadInterestArticleCounts) {
-      User user = unreadInterestArticleCount.getUser();
-      Interest interest = unreadInterestArticleCount.getInterest();
-      long totalNewArticles = unreadInterestArticleCount.getTotalNewArticles();
-      Notification notification = new Notification(
-          user,
-          interest.getId(),
-          ResourceType.INTEREST,
-          interest.getName() + "와/과 관련된 기사가 " + totalNewArticles + "건 등록되었습니다.");
-      newNotifications.add(notification);
-
-      //아래 save는 배치로 한번에 하는건지, 아니면 메소드 내부에서 해야하는건지?
-      //전자라면 주석 해제, 후자라면 save 코드 지우고 만들어진 알림 리스트로 보내주기만 하면된다.
-      //notificationRepository.save(notification);
-    }
-    return newNotifications;
+  public List<Notification> createArticleInterestNotifications(
+      List<UnreadInterestArticleCount> unreadInterestArticleCounts) {
+    
+    return unreadInterestArticleCounts.stream()
+        .map(un -> {
+          Notification notification = new Notification(
+              un.getUser(),
+              un.getInterest().getId(),
+              ResourceType.INTEREST,
+              un.getInterest().getName() + "와/과 관련된 기사가 " + un.getArticleCount() + "건 등록되었습니다.");
+          return notification;
+        }).toList();
   }
-
-  //알림 등록 - 좋아요
-  public List<Notification> createLikeNotification(User userId) {
-    List<Notification> notifications = new ArrayList<>();
-    return notifications;
-  }
-
 
   //알림 수정 - 전체 알림 확인
   public void checkAllNotifications(UUID userId) {

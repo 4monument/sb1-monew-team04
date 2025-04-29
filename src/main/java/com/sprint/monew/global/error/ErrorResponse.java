@@ -17,8 +17,9 @@ public class ErrorResponse {
     private final String exceptionType;
     private final int status;
 
-    public ErrorResponse(MonewException exception, int status) {
-        this(Instant.now(), exception.getErrorCode().name(), exception.getMessage(), exception.getDetails(), exception.getClass().getSimpleName(), status);
+    public ErrorResponse(MonewException exception) {
+        this(Instant.now(), exception.getErrorCode().name(), exception.getMessage(), exception.getDetails(), exception.getClass().getSimpleName(),
+            exception.getErrorCode().getStatus().value());
     }
 
     public ErrorResponse(Exception exception, int status) {

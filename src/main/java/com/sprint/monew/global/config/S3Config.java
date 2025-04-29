@@ -39,17 +39,17 @@ public class S3Config {
         s3Properties.secretKey());
   }
 
-//  // 멀티파트, 메모리 완화 기능 위해 S3Resource.create 사용 및 S3Resource로 반환
-//  @Bean(name = "articleS3Resource")
-//  public S3Resource articleS3Resource(S3OutputStreamProvider s3OutputStreamProvider) {
-//    //s3Operations.createResource(s3Properties.bucketName(), ...)
-//    String location = "s3://" + s3Properties.bucket() + "/";
-//    return S3Resource.create(location, s3Client(), s3OutputStreamProvider);
-//  }
+/*  // 멀티파트, 메모리 완화 기능 위해 S3Resource.create 사용 및 S3Resource로 반환
+  @Bean(name = "articleS3Resource")
+  public S3Resource articleS3Resource(S3OutputStreamProvider s3OutputStreamProvider) {
+    //s3Operations.createResource(s3Properties.bucketName(), ...)
+    String location = "s3://" + s3Properties.bucket() + "/";
+    return S3Resource.create(location, s3Client(), s3OutputStreamProvider);
+  }
 
-//  @Bean
-//  public Resource resourceLoader(ResourceLoader resourceLoader) {
-//    String location = "s3://" + s3Properties.bucketName();
-//    return resourceLoader.getResource(location);
-//  }
+  @Bean
+  public Resource resourceLoader(ResourceLoader resourceLoader) {
+    String location = "s3://" + s3Properties.bucketName();
+    return resourceLoader.getResource(location);
+  }*/
 }

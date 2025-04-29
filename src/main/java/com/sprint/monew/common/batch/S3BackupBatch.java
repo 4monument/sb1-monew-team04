@@ -124,25 +124,25 @@
 //    String location = "s3://" + s3Properties.bucket() + "/" + fileName;
 //    return S3Resource.create(location, s3Client, s3OutputStreamProvider);
 //  }
-//
-////    @Bean
-////  public FlatFileItemWriter<Article> flatFileItemWriter() {
-////    // 문제는
-//////    String location = "s3://" + s3Properties.bucket() + "/";
-////    OutputStream outputStream = null;
-////    try {
-////      outputStream = articleS3Resource.getOutputStream();
-////    } catch (IOException e) {
-////      throw new RuntimeException(e);
-////    }
-////    return new FlatFileItemWriterBuilder<Article>()
-////        .name("s3BackupWriter")
-////        .resource((WritableResource) outputStream)
-////        .append(true)
-////        .delimited().delimiter("|")  // 나중에 @Value로 바꾸기
-////        .names(getFieldNames())
-////        .build();
-////  }
+
+//    @Bean
+//  public FlatFileItemWriter<Article> flatFileItemWriter() {
+//    // 문제는
+////    String location = "s3://" + s3Properties.bucket() + "/";
+//    OutputStream outputStream = null;
+//    try {
+//      outputStream = articleS3Resource.getOutputStream();
+//    } catch (IOException e) {
+//      throw new RuntimeException(e);
+//    }
+//    return new FlatFileItemWriterBuilder<Article>()
+//        .name("s3BackupWriter")
+//        .resource((WritableResource) outputStream)
+//        .append(true)
+//        .delimited().delimiter("|")  // 나중에 @Value로 바꾸기
+//        .names(getFieldNames())
+//        .build();
+//  }
 //
 ////  // 하드코딩 해결 나중에 생각하기
 ////  private String[] getFieldNames() {
