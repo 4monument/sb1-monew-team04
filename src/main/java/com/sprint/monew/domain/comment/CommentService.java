@@ -14,6 +14,7 @@ import com.sprint.monew.domain.comment.exception.CommentNotOwnedException;
 import com.sprint.monew.domain.comment.exception.LikeAlreadyExistException;
 import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.comment.like.LikeRepository;
+import com.sprint.monew.domain.comment.repository.CommentRepository;
 import com.sprint.monew.domain.notification.Notification;
 import com.sprint.monew.domain.notification.NotificationRepository;
 import com.sprint.monew.domain.notification.ResourceType;

@@ -9,7 +9,7 @@ import com.sprint.monew.domain.article.dto.ArticleRestoreResultDto;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
 import com.sprint.monew.domain.article.dto.request.ArticleRequest;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
-import com.sprint.monew.domain.comment.CommentRepository;
+import com.sprint.monew.domain.comment.repository.CommentRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.global.error.ErrorCode;
