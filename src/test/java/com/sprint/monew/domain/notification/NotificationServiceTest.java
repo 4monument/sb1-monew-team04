@@ -13,6 +13,7 @@ import com.sprint.monew.domain.comment.Comment;
 import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
+import com.sprint.monew.domain.notification.dto.NotificationSearchRequest;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
@@ -118,7 +119,7 @@ class NotificationServiceTest {
               ResourceType.INTEREST,
               queryResult.get(0).getInterest().getName() + "와/과 관련된 기사가 "
                   + queryResult.get(0).getArticleCount() + "건 등록되었습니다."));
-      
+
       //todo - 테스트코드 수정
       //when
 //      List<Notification> notifications = notificationService.createArticleInterestNotifications(
@@ -170,12 +171,12 @@ class NotificationServiceTest {
       //given
       Interest interest = interests.get(0);
 
-      UUID cursor = null;
-      Instant afterAt = null;
-      int limit = 50;
+      NotificationSearchRequest request
+          = new NotificationSearchRequest(null, null, 50);
+
       UUID userId = user.getId();
 
-      PageRequest pageRequest = PageRequest.of(0, limit + 1);
+      PageRequest pageRequest = PageRequest.of(0, request.limit() + 1);
 
       List<Notification> expectNotifications = new ArrayList<>();
       expectNotifications.add(new Notification(user, interest.getId(), ResourceType.INTEREST,
@@ -183,12 +184,12 @@ class NotificationServiceTest {
 
       when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
       when(notificationRepository
-          .findUnconfirmedWithCursor(userId, cursor, afterAt, pageRequest))
+          .findUnconfirmedWithCursor(userId, request.cursor(), request.after(), pageRequest))
           .thenReturn(expectNotifications);
 
       //when
       CursorPageResponseDto<NotificationDto> allNotifications
-          = notificationService.getAllNotifications(null, null, limit, userId);
+          = notificationService.getAllNotifications(request, userId);
 
       //then
       assertEquals(expectNotifications.get(0).getId(), allNotifications.content().get(0).id());
@@ -212,13 +213,12 @@ class NotificationServiceTest {
     void getNotificationHasNextTrueSuccess() {
       //given
 
-      UUID cursor = null;
-      Instant afterAt = null;
-      int limit = 1;
+      NotificationSearchRequest request
+          = new NotificationSearchRequest(null, null, 1);
 
       UUID userId = user.getId();
 
-      PageRequest pageRequest = PageRequest.of(0, limit + 1);
+      PageRequest pageRequest = PageRequest.of(0, request.limit() + 1);
 
       List<Notification> expectNotifications = new ArrayList<>();
 
@@ -242,12 +242,12 @@ class NotificationServiceTest {
 
       when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
       when(notificationRepository
-          .findUnconfirmedWithCursor(userId, cursor, afterAt, pageRequest))
+          .findUnconfirmedWithCursor(userId, request.cursor(), request.after(), pageRequest))
           .thenReturn(expectNotifications);
 
       //when
       CursorPageResponseDto<NotificationDto> allNotifications
-          = notificationService.getAllNotifications(null, null, limit, userId);
+          = notificationService.getAllNotifications(request, userId);
 
       //then
       assertEquals(notification2.getId(), allNotifications.nextCursor());
@@ -257,13 +257,14 @@ class NotificationServiceTest {
     }
 
     @Test
-    @DisplayName("성공: 다음 페이지 있고 커서 있음 (cursor not null / afterAt not null / limit 1)")
+    @DisplayName("성공: 다음 페이지 있고 커서 없음 (cursor not null / afterAt not null / limit 1)")
     void getNotificationHasNextTrueWithCursorSuccess() {
       //given
-      int limit = 1;
+      NotificationSearchRequest request
+          = new NotificationSearchRequest(null, null, 1);
       UUID userId = user.getId();
 
-      PageRequest pageRequest = PageRequest.of(0, limit + 1);
+      PageRequest pageRequest = PageRequest.of(0, request.limit() + 1);
 
       List<Notification> expectNotifications = new ArrayList<>();
 
@@ -284,7 +285,7 @@ class NotificationServiceTest {
       expectNotifications.add(notification2);
 
       expectNotifications.sort(Comparator.comparing(Notification::getCreatedAt).reversed());
-      expectNotifications.remove(expectNotifications.size() - 1 - limit);
+      expectNotifications.remove(expectNotifications.size() - 1 - request.limit());
 
       UUID cursor = notification2.getId();
       Instant afterAt = notification2.getCreatedAt();
@@ -296,7 +297,7 @@ class NotificationServiceTest {
 
       //when
       CursorPageResponseDto<NotificationDto> allNotifications
-          = notificationService.getAllNotifications(cursor, afterAt, limit, userId);
+          = notificationService.getAllNotifications(request, userId);
 
       //then
       assertEquals(notification1.getId(), allNotifications.nextCursor());

@@ -2,9 +2,12 @@ package com.sprint.monew.domain.notification;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
+import com.sprint.monew.domain.notification.dto.NotificationSearchRequest;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
+import com.sprint.monew.domain.notification.exception.NotificationNotFoundException;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
+import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +28,7 @@ public class NotificationService {
   //알림 등록 - 일괄 등록
   public List<Notification> createArticleInterestNotifications(
       List<UnreadInterestArticleCount> unreadInterestArticleCounts) {
-    
+
     return unreadInterestArticleCounts.stream()
         .map(un -> {
           Notification notification = new Notification(
@@ -40,7 +43,8 @@ public class NotificationService {
   //알림 수정 - 전체 알림 확인
   public void checkAllNotifications(UUID userId) {
 
-    User user = userRepository.findById(userId).orElseThrow();
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     List<Notification> notifications = notificationRepository.findByUser(user);
     Instant updatedAt = Instant.now();
@@ -56,20 +60,24 @@ public class NotificationService {
   public void checkNotification(UUID notificationId, UUID userId) {
 
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     Notification notification = notificationRepository.findById(notificationId)
-        .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
+        .orElseThrow(() -> NotificationNotFoundException.notFound(notificationId));
 
     notification.confirm(Instant.now());
     notificationRepository.save(notification);
   }
 
   //알림 목록 조회
-  public CursorPageResponseDto<NotificationDto> getAllNotifications(UUID cursor, Instant after,
-      int limit, UUID userId) {
+  public CursorPageResponseDto<NotificationDto> getAllNotifications(
+      NotificationSearchRequest request, UUID userId) {
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
+
+    int limit = request.limit();
+    UUID cursor = request.cursor();
+    Instant after = request.after();
 
     PageRequest pagerequest = PageRequest.of(0, limit + 1);
 
