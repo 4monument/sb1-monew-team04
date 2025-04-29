@@ -66,6 +66,7 @@ public class Comment {
     this.article = article;
     this.content = content;
     this.deleted = false;
+    this.createdAt = Instant.now();
   }
 
   public static Comment create(User user, Article article, String content) {
