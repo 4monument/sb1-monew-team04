@@ -8,6 +8,7 @@ import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +29,12 @@ public class NotificationService {
       List<UnreadInterestArticleCount> unreadInterestArticleCounts) {
 
     return unreadInterestArticleCounts.stream()
-        .map(un -> {
-          Notification notification = new Notification(
-              un.getUser(),
-              un.getInterest().getId(),
-              ResourceType.INTEREST,
-              un.getInterest().getName() + "와/과 관련된 기사가 " + un.getArticleCount() + "건 등록되었습니다.");
-          return notification;
-        }).toList();
+        .map(un -> new Notification(
+            un.getUser(),
+            un.getInterest().getId(),
+            ResourceType.INTEREST,
+            un.getInterest().getName() + "와/과 관련된 기사가 " + un.getArticleCount() + "건 등록되었습니다.")
+        ).toList();
   }
 
   //알림 수정 - 전체 알림 확인
@@ -87,6 +86,18 @@ public class NotificationService {
 
     if (hasNext) {
       notifications = notifications.subList(0, limit);
+    }
+
+    // 빈 리스트 처리
+    if (notifications.isEmpty()) {
+      return new CursorPageResponseDto<>(
+          Collections.emptyList(),
+          null,
+          null,
+          0,
+          0,
+          false
+      );
     }
 
     UUID nextCursor = notifications.get(notifications.size() - 1).getId();
