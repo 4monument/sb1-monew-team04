@@ -32,7 +32,7 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
       Instant afterAt, Pageable pageable);
 
   @Query(
-      "SELECT n "
+      "SELECT COUNT(n) "
           + "FROM Notification n "
           + "WHERE n.user.id = :userId AND n.confirmed = false")
   int countUnconfirmedByUserId(UUID userId);
