@@ -5,7 +5,9 @@ import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.article.articleinterest.ArticleInterest;
 import com.sprint.monew.domain.interest.Interest;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public record ArticleWithInterestList(
     Source source,
@@ -15,6 +17,18 @@ public record ArticleWithInterestList(
     String summary,
     List<Interest> interestList) {
 
+  // JDBC Writer 사용 시
+  public Article toArticleWithId() {
+    return Article.createWithId(
+        source,
+        sourceUrl,
+        title,
+        publishDate,
+        summary
+    );
+  }
+
+  // JPA Writer 사용 시
   public Article toArticle(){
     return Article.create(
         source,
@@ -25,6 +39,7 @@ public record ArticleWithInterestList(
     );
   }
 
+  // JPA Writer 사용 시
   public List<ArticleInterest> toArticleInterests() {
     Article article = toArticle();
     return interestList.stream()

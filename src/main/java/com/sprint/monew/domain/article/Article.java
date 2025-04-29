@@ -71,6 +71,17 @@ public class Article {
     this.deleted = false;
   }
 
+  private Article(UUID id, Source source, String sourceUrl, String title, Instant publishDate,
+      String summary) {
+    this.id = id;
+    this.source = source;
+    this.sourceUrl = sourceUrl;
+    this.title = title;
+    this.publishDate = publishDate;
+    this.summary = summary;
+    this.deleted = false;
+  }
+
   public static Article create(Source source, String sourceUrl, String title, Instant publishDate,
       String summary) {
     return Article.builder()
@@ -80,6 +91,12 @@ public class Article {
         .publishDate(publishDate)
         .summary(summary)
         .build();
+  }
+
+  // JDBC 용
+  public static Article createWithId(Source source, String sourceUrl, String title, Instant publishDate,
+      String summary) {
+    return new Article(UUID.randomUUID(), source, sourceUrl, title, publishDate, summary);
   }
 
   public enum Source {

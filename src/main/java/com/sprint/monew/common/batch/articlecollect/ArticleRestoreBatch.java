@@ -56,8 +56,6 @@ public class ArticleRestoreBatch {
    * 1. Interest 가져오기: ArticleInterest도 생성해야 하므로 Interest 객체 필요 2. 특정 날짜 기준 논리삭제된 것 전부 True; 3. 기존에
    * 있는거는 추가하지 않기 : SourceUrl이 unique라서 이걸 이용(원본 주소가 변할 가능성은 고려하지 않고 진행)
    */
-
-
   private final JobRepository jobRepository;
   private final PlatformTransactionManager transactionManager;
   private final JobLauncher jobLauncher;
@@ -135,13 +133,13 @@ public class ArticleRestoreBatch {
   public Step articleRestoreStep(
       @Qualifier("articleRestoreS3ItemReader") MultiResourceItemReader<ArticleApiDto> mrir,
       @Qualifier("restoreArticleProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor,
-      @Qualifier("articleJpaItemWriter") ItemWriter<ArticleWithInterestList> articleJpaItemWriter) {
+      @Qualifier("articleWithInterestsJdbcItemWriter") ItemWriter<ArticleWithInterestList> articleJdbcItemWriter) {
 
     return new StepBuilder("articleRestoreStep", jobRepository)
         .<ArticleApiDto, ArticleWithInterestList>chunk(500, transactionManager)
         .reader(mrir)
         .processor(restoreArticleProcessor)
-        .writer(articleJpaItemWriter)
+        .writer(articleJdbcItemWriter)
         .build();
   }
 
@@ -220,8 +218,4 @@ public class ArticleRestoreBatch {
         )
         .build();
   }
-
-//  public String getKey(LocalDate localDate) {
-//    return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
-//  }
 }

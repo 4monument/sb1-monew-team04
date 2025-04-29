@@ -109,14 +109,14 @@ public class ArticleCollectBatch {
   public Step naverArticleHandlerStep(
       @Qualifier("naverArticleCollectReader") ItemReader<ArticleApiDto> naverArticleCollectReader,
       @Qualifier("basicArticleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor,
-      @Qualifier("articleJpaItemWriter") ItemWriter<ArticleWithInterestList> articleJpaItemWriter,
+      @Qualifier("articleWithInterestsJdbcItemWriter") ItemWriter<ArticleWithInterestList> articleJdbcItemWriter,
       @Qualifier("naverExecutionContextCleanupListener") StepExecutionListener naverExecutionContextCleanupListener) {
 
     return new StepBuilder("articleHandlerStep", jobRepository)
         .<ArticleApiDto, ArticleWithInterestList>chunk(200, transactionManager)
         .reader(naverArticleCollectReader)
         .processor(naverArticleCollectProcessor)
-        .writer(articleJpaItemWriter)
+        .writer(articleJdbcItemWriter)
         .faultTolerant()
         .retryLimit(3)
         .retry(Exception.class)
