@@ -41,4 +41,13 @@ public class UserActivityController {
   ) {
     return ResponseEntity.ok(userActivityService.saveUserActivityToMongo(userId));
   }
+
+  @GetMapping("/{userId}/update")
+  public ResponseEntity<Void> updateUserActivityToMongo(
+      @PathVariable UUID userId,
+      @RequestHeader(name = "Monew-Request-User-ID", required = false) UUID headerUserId
+  ) {
+    userActivityService.updateUserActivity(userId);
+    return ResponseEntity.ok(null);
+  }
 }

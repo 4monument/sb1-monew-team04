@@ -9,7 +9,7 @@ public record SubscriptionDto(
     UUID interestId,
     String interestName,
     List<String> interestKeywords,
-    int interestSubscriberCount,
+    long interestSubscriberCount,
     Instant createdAt
 ) {
 
