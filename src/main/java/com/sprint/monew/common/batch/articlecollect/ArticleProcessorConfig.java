@@ -1,7 +1,7 @@
 package com.sprint.monew.common.batch.articlecollect;
 
-import com.sprint.monew.common.batch.util.ArticleWithInterestList;
-import com.sprint.monew.common.batch.util.Interests;
+import com.sprint.monew.common.batch.support.ArticleWithInterestList;
+import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
@@ -16,12 +16,6 @@ public class ArticleProcessorConfig {
   @StepScope
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> basicArticleCollectProcessor(
       @Value("#{JobExecutionContext['interests']}") Interests interests) {
-    return (dto) -> {
-      // 중복 되는 url은 패스
-      if (interests.isDuplicateUrl(dto)) {
-        return null; // null 반환하면 배치에서는 Writer에 skilp
-      }
-      return interests.toArticleWithRelevantInterests(dto);
-    };
+    return interests::toArticleWithRelevantInterests;
   }
 }

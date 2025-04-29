@@ -1,4 +1,4 @@
-package com.sprint.monew.common.batch.util;
+package com.sprint.monew.common.batch.support;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,7 +10,8 @@ public enum CustomExecutionContextKeys {
   INTERESTS("interests"),
   NAVER_ARTICLE_DTOS("naverArticleDtos"),
   CHOSUN_ARTICLE_DTOS("choshunArticleDtos"),
-  HANKYUNG_ARTICLE_DTOS("hanyungArticleDtos");
+  HANKYUNG_ARTICLE_DTOS("hanyungArticleDtos"),
+  S3_INPUT_STREAMS("s3InputStreams");
 
   private final String key;
 }

@@ -1,4 +1,4 @@
-package com.sprint.monew.common.batch.util;
+package com.sprint.monew.common.batch.support;
 
 
 import com.sprint.monew.domain.article.api.ArticleApiDto;
@@ -13,14 +13,33 @@ public class Interests implements Serializable {
 
   private static final long serialVersionUID = 1L;
   private final List<Interest> interests;
+  private final Set<String> keywords = ConcurrentHashMap.newKeySet();
   private final Set<String> sourceUrlFilterSet = ConcurrentHashMap.newKeySet();
 
   public Interests(List<Interest> interests) {
     this.interests = Collections.unmodifiableList(interests);
+    interests.stream()
+        .map(Interest::getKeywords)
+        .flatMap(List::stream)
+        .forEach(keywords::add);
   }
 
-  public boolean isDuplicateUrl(ArticleApiDto articleApiDto) {
+
+  public ArticleApiDto filter(ArticleApiDto articleApiDto){
+    if (isContainKeywords(articleApiDto) && !isDuplicateUrl(articleApiDto)) {
+      return articleApiDto;
+    }
+    return null;
+  }
+
+  private boolean isDuplicateUrl(ArticleApiDto articleApiDto) {
     return sourceUrlFilterSet.add(articleApiDto.sourceUrl());
+  }
+
+  private boolean isContainKeywords(ArticleApiDto articleApiDto) {
+    String summary = articleApiDto.summary();
+    return keywords.stream()
+        .anyMatch(summary::contains);
   }
 
   public ArticleWithInterestList toArticleWithRelevantInterests(ArticleApiDto articleApiDto) {
@@ -28,7 +47,7 @@ public class Interests implements Serializable {
     List<Interest> interestList = interests.stream()
         .filter(interest ->
             interest.getKeywords().stream()
-            .anyMatch(summary::contains))
+                .anyMatch(summary::contains))
         .toList();
 
     // 관련된 키워드가 없는 Aritcle은 필터링
@@ -45,24 +64,4 @@ public class Interests implements Serializable {
         interestList
     );
   }
-
-//  public Boolean isContainKeywords(ArticleApiDto articleApiDto) {
-//    String summary = articleApiDto.summary();
-//    return keywords.stream()
-//        .anyMatch(summary::contains);
-//  }
-//  public Map<Article, List<Interest>> mapToArticleInterestsMap(List<Article> articles) {
-//    return articles.stream()
-//        .collect(Collectors.toMap(
-//            article -> article,
-//            article -> interests.stream()
-//                .filter(
-//                    interest -> interest.isContainsKeyword(article)) // 해당 뉴스에 해당하지 않는 Keyword 제외시키기
-//                .toList()
-//        ));
-//  }
-//
-//  public Boolean validateKeywordContainingAndUniqueUrl(ArticleApiDto articleApiDto) {
-//    return isContainKeywords(articleApiDto) && isDuplicateUrl(articleApiDto);
-//  }
 }
