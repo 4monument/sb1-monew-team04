@@ -10,8 +10,7 @@ public enum CustomExecutionContextKeys {
   INTERESTS("interests"),
   NAVER_ARTICLE_DTOS("naverArticleDtos"),
   CHOSUN_ARTICLE_DTOS("choshunArticleDtos"),
-  HANKYUNG_ARTICLE_DTOS("hanyungArticleDtos"),
-  S3_INPUT_STREAMS("s3InputStreams");
+  HANKYUNG_ARTICLE_DTOS("hanyungArticleDtos");
 
   private final String key;
 }

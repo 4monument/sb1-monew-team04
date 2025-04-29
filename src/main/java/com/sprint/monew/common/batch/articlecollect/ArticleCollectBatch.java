@@ -69,6 +69,7 @@ public class ArticleCollectBatch {
 
     return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
+
           ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
           Interests interests = new Interests(interestRepository.findAll());
           stepContext.put(INTERESTS.getKey(), interests);
