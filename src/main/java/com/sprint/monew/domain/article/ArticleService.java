@@ -1,5 +1,8 @@
 package com.sprint.monew.domain.article;
 
+import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.*;
+
+import com.sprint.monew.common.batch.support.CustomExecutionContextKeys;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.activity.UserActivityService;
 import com.sprint.monew.domain.article.articleview.ArticleView;
@@ -14,11 +17,23 @@ import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.global.error.ErrorCode;
 import com.sprint.monew.domain.article.exception.ArticleViewAlreadyExistException;
+import jakarta.annotation.Resource;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +44,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ArticleService {
 
+
+  @Resource(name = "articleRestoreJob")
+  private final Job articleRestoreJob;
+  private final JobLauncher jobLauncher;
   private final ArticleRepository articleRepository;
   private final UserRepository userRepository;
   private final CommentRepository commentRepository;
@@ -77,8 +96,30 @@ public class ArticleService {
     );
   }
 
-  public List<ArticleRestoreResultDto> restoreArticle(Instant from, Instant to) {
-    return null;
+
+  public List<ArticleRestoreResultDto> restoreArticle(Instant from, Instant to)
+      throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+
+    JobParameters jobParameters = new JobParametersBuilder()
+        .addLocalDate("backupDay", LocalDate.now())
+        .addString("from", from.toString())
+        .addString("to", to.toString())
+        .toJobParameters();
+
+    JobExecution jobExecution = jobLauncher.run(articleRestoreJob, jobParameters);
+
+    ExecutionContext jobContext = jobExecution.getExecutionContext();
+    List<UUID> articleIds = (List<UUID>) jobContext.get(ARTICLE_IDS.getKey());
+    if (articleIds == null || articleIds.isEmpty()) {
+      throw new RuntimeException("ExecutionContext로부터 Article Ids를 가져오는 데 실패했습니다.");
+    }
+
+    ArticleRestoreResultDto result = new ArticleRestoreResultDto(
+        Instant.now(),
+        articleIds,
+        (long) articleIds.size()
+    );
+    return List.of(result);
   }
 
   public void deleteArticle(UUID id) {

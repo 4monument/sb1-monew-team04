@@ -42,10 +42,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ArticleController {
 
   private final ArticleService articleService;
-  private final JobLauncher jobLauncher;
-
-  @Resource(name = "articleRestoreJob")
-  private final Job articleRestoreJob;
 
   @PostMapping("/{id}/article-views")
   public ResponseEntity<ArticleViewDto> registerArticleView(
@@ -77,23 +73,9 @@ public class ArticleController {
   )
       throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
 
-    JobParameters jobParameters = new JobParametersBuilder()
-        .addLocalDate("backupDay", LocalDate.now()) // 똑같은 날짜 기간 복구는 하루에 한번만(무분별 방지)
-        .addString("from", from.toString())
-        .addString("to", to.toString())
-        .toJobParameters();
-
-    JobExecution jobExecution = jobLauncher.run(articleRestoreJob, jobParameters);
-    // result 꺼내기
-    //[
-    //  {
-    //    "restoreDate": "2025-04-29T01:24:37.762Z",
-    //    "restoredArticleIds": [
-    //      "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-    //    ],
-    //    "restoredArticleCount": 9007199254740991
-    //  }
-    return null;
+    List<ArticleRestoreResultDto> response = articleService.restoreArticle(from,
+        to);
+    return ResponseEntity.ok(response);
   }
 
   @DeleteMapping("/{id}")

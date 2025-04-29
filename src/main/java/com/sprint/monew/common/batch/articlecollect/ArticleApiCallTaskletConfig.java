@@ -6,7 +6,6 @@ import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.N
 
 import com.sprint.monew.domain.article.api.ArticleApiClient;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
-import com.sprint.monew.global.config.S3ConfigProperties;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -15,15 +14,12 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
 @RequiredArgsConstructor
 public class ArticleApiCallTaskletConfig {
 
   private final ArticleApiClient articleApiClient;
-  private final S3Client s3Client;
-  private final S3ConfigProperties s3Properties;
 
   @Bean
   @StepScope

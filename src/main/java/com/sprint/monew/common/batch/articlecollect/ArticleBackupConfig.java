@@ -37,7 +37,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class BackupConfig {
+public class ArticleBackupConfig {
 
   private final JobRepository jobRepository;
   private final PlatformTransactionManager transactionManager;

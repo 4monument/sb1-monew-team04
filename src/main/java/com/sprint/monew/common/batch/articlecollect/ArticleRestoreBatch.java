@@ -21,7 +21,6 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -39,6 +38,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.PlatformTransactionManager;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -52,13 +52,8 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 @RequiredArgsConstructor
 public class ArticleRestoreBatch {
 
-  /**
-   * 1. Interest 가져오기: ArticleInterest도 생성해야 하므로 Interest 객체 필요 2. 특정 날짜 기준 논리삭제된 것 전부 True; 3. 기존에
-   * 있는거는 추가하지 않기 : SourceUrl이 unique라서 이걸 이용(원본 주소가 변할 가능성은 고려하지 않고 진행)
-   */
   private final JobRepository jobRepository;
   private final PlatformTransactionManager transactionManager;
-  private final JobLauncher jobLauncher;
   private final S3Client s3Client;
   private final S3ConfigProperties s3Properties;
   private final ArticleRepository articleRepository;
@@ -68,12 +63,12 @@ public class ArticleRestoreBatch {
       @Qualifier("articleRestoreStep") Step articleRestoreStep,
       @Qualifier("interestsAndSourceUrlFetchStep") Step interestsAndSourceUrlFetchStep,
       @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener,
-      @Qualifier("changeArticleIsDeltedStep") Step changeArticleIsDeltedStep) {
+      @Qualifier("changeArticleIsDeletedStep") Step changeArticleIsDeletedStep) {
 
     return new JobBuilder("articleRestoreJob", jobRepository)
-        .start(interestsAndSourceUrlFetchStep)  // 1
-        .next(changeArticleIsDeltedStep) // 2
-        .next(articleRestoreStep) // 3
+        .start(interestsAndSourceUrlFetchStep)  // 1. Interest 가져오기: ArticleInterest도 생성해야 하므로 Interest 객체 필요
+        .next(changeArticleIsDeletedStep) // 2.  특정 날짜 기준 논리삭제된 것 전부 True
+        .next(articleRestoreStep) // 3. 복구 : 기존에 있는거는 추가하지 않기
         .listener(jobContextCleanupListener)
         .build();
   }
@@ -98,16 +93,11 @@ public class ArticleRestoreBatch {
   }
 
   /**
-   * restoredArticleCount
-   * restoredArticleIds
-   */
-
-  /**
   복구 요청 범위에서 -> 논리삭제 기사의 deleted 필드 변경
    **/
   @Bean
   @StepScope
-  public Step changeArticleIsDeltedStep(
+  public Step changeArticleIsDeletedStep(
       @Value("#{jobParameters['from']}") String fromStr,
       @Value("#{jobParameters['to']}") String toStr) {
 
@@ -133,13 +123,15 @@ public class ArticleRestoreBatch {
   public Step articleRestoreStep(
       @Qualifier("articleRestoreS3ItemReader") MultiResourceItemReader<ArticleApiDto> mrir,
       @Qualifier("restoreArticleProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor,
-      @Qualifier("articleWithInterestsJdbcItemWriter") ItemWriter<ArticleWithInterestList> articleJdbcItemWriter) {
+      @Qualifier("articleWithInterestsJdbcItemWriter") ItemWriter<ArticleWithInterestList> articleJdbcItemWriter,
+      @Qualifier("restoreArticleIdsPromotionListener") ExecutionContextPromotionListener restoreArticleIdsListener) {
 
     return new StepBuilder("articleRestoreStep", jobRepository)
         .<ArticleApiDto, ArticleWithInterestList>chunk(500, transactionManager)
         .reader(mrir)
         .processor(restoreArticleProcessor)
         .writer(articleJdbcItemWriter)
+        .listener(restoreArticleIdsListener)
         .build();
   }
 
@@ -148,11 +140,11 @@ public class ArticleRestoreBatch {
   @StepScope
   public MultiResourceItemReader<ArticleApiDto> articleRestoreS3ItemReader(
       @Value("#{jobParameters['from']}") String fromStr,
-      @Value("#{jobParameters['to']}") String toStr) {
+      @Value("#{jobParameters['to']}") String toStr,
+      @Qualifier("csvReader") ResourceAwareItemReaderItemStream<ArticleApiDto> csvReader) {
 
     LocalDate from = getLocalDate(fromStr);
     LocalDate to = getLocalDate(toStr);
-
     // 날짜 레인지
     List<LocalDate> dateRange = from.datesUntil(to.plusDays(1)).toList();
 
@@ -176,14 +168,14 @@ public class ArticleRestoreBatch {
           .key(s3Object.key())
           .build();
 
-      ResponseInputStream<GetObjectResponse> ri = s3Client.getObject(getObjectRequest);
+      ResponseInputStream<GetObjectResponse> ri = s3Client.getObject(getObjectRequest); // 리소스 세는 곳
       resources.add(new InputStreamResource(ri));
     }
 
     Resource[] resourcesArray = resources.toArray(Resource[]::new);
     return new MultiResourceItemReaderBuilder<ArticleApiDto>()
         .resources(resourcesArray)
-        .delegate(csvReader())
+        .delegate(csvReader)
         .build();
   }
 

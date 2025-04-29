@@ -1,5 +1,6 @@
 package com.sprint.monew.common.batch.articlecollect;
 
+import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.ARTICLE_IDS;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.CHOSUN_ARTICLE_DTOS;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.DB_SOURCEURS;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.HANKYUNG_ARTICLE_DTOS;
@@ -35,11 +36,17 @@ public class PromotionListenerConfig {
     return listener;
   }
 
-
   @Bean
   public ExecutionContextPromotionListener dbSourceUrlPromotionListener() {
     ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
     listener.setKeys(new String[] { DB_SOURCEURS.getKey() });
+    return listener;
+  }
+
+  @Bean
+  public ExecutionContextPromotionListener restoreArticleIdsPromotionListener() {
+    ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
+    listener.setKeys(new String[] { ARTICLE_IDS.getKey() });
     return listener;
   }
 }
