@@ -52,7 +52,7 @@ public class NotificationCreateBatch {
       @Qualifier("notificationCreateWriter") ItemWriter<NotificationJdbc> writer) {
     return new StepBuilder("notificationCreateStep", jobRepository)
         .<UnreadInterestArticleCount, NotificationJdbc>chunk(500, transactionManager)
-        .reader(notificationCreateReader())
+        .reader(reader)
         .processor(processor)
         .writer(writer)
         .build();
@@ -64,6 +64,7 @@ public class NotificationCreateBatch {
     Instant afterAt = Instant.now().minus(Duration.ofMinutes(30));
     List<UnreadInterestArticleCount> newArticleCountWithUserInterest =
         subscriptionRepository.findNewArticleCountWithUserInterest(afterAt);
+
     return new ListItemReader<>(newArticleCountWithUserInterest);
   }
 

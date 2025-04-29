@@ -22,7 +22,7 @@ public interface ArticleRepository extends JpaRepository<Article, UUID>,
   @Query("""
          UPDATE Article as a
          SET a.deleted = false
-         WHERE a.publishDate BETWEEN :from AND :to
+         WHERE a.publishDate BETWEEN :from AND :to AND a.deleted = true
       """)
-  int changeDeletedFalseByPublishDateBetween(@Param("from") Instant from, @Param("to") Instant to);
+  int restoreArticleDeletionBetweenDates(@Param("from") Instant from, @Param("to") Instant to);
 }

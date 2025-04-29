@@ -59,7 +59,6 @@ public class ArticleChunkConfig {
   /**
    * Processor
    */
-
   @Bean
   @StepScope
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> articleCollectProcessor(

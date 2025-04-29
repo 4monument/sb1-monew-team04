@@ -110,7 +110,7 @@ public class ArticleCollectBatch {
       @Qualifier("naverArticleCollectReader") ItemReader<ArticleApiDto> naverArticleCollectReader,
       @Qualifier("articleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor,
       @Qualifier("articleWithInterestsJdbcItemWriter") ItemWriter<ArticleWithInterestList> articleJdbcItemWriter,
-      @Qualifier("naverExecutionContextCleanupListener") StepExecutionListener naverExecutionContextCleanupListener) {
+      @Qualifier("naverContextCleanupListener") StepExecutionListener naverContextCleanupListener) {
 
     return new StepBuilder("articleHandlerStep", jobRepository)
         .<ArticleApiDto, ArticleWithInterestList>chunk(200, transactionManager)
@@ -120,7 +120,7 @@ public class ArticleCollectBatch {
         .faultTolerant()
         .retryLimit(3)
         .retry(Exception.class)
-        .listener(naverExecutionContextCleanupListener)
+        .listener(naverContextCleanupListener)
         .build();
   }
 

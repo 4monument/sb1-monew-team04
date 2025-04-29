@@ -12,9 +12,9 @@ public record ArticleInterestJdbc(
     Instant createdAt) {
 
   public static ArticleInterestJdbc create(Article article, Interest interest) {
-    UUID articleInterestJdbcId = UUID.randomUUID();
+    UUID id = UUID.randomUUID();
     return new ArticleInterestJdbc(
-        articleInterestJdbcId,
+        id,
         article.getId(),
         interest.getId(),
         Instant.now()

@@ -17,21 +17,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ExecutionContextCleanupListenerConfig {
 
-  @Bean(name = "naverExecutionContextCleanupListener")
+  @Bean(name = "naverContextCleanupListener")
   @StepScope
-  public StepExecutionListener naverExecutionContextCleanupListener() {
+  public StepExecutionListener naverContextCleanupListener() {
     return new stepExecutionContextCleanupListener(NAVER_ARTICLE_DTOS.getKey());
   }
 
-  @Bean(name = "chosunExecutionContextCleanupListener")
+  @Bean(name = "chosunContextCleanupListener")
   @StepScope
-  public StepExecutionListener chosunExecutionContextCleanupListener() {
+  public StepExecutionListener chosunContextCleanupListener() {
     return new stepExecutionContextCleanupListener(CHOSUN_ARTICLE_DTOS.getKey());
   }
 
-  @Bean(name = "hankyungExecutionContextCleanupListener")
+  @Bean(name = "hankyungContextCleanupListener")
   @StepScope
-  public StepExecutionListener hankyungExecutionContextCleanupListener() {
+  public StepExecutionListener hankyungContextCleanupListener() {
     return new stepExecutionContextCleanupListener(HANKYUNG_ARTICLE_DTOS.getKey());
   }
 

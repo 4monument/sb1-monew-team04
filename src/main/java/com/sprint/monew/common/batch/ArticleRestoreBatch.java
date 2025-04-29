@@ -82,8 +82,10 @@ public class ArticleRestoreBatch {
         .tasklet((contribution, chunkContext) -> {
 
           ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
+
           Interests interests = new Interests(interestRepository.findAll());
           interests.addSourceUrls(articleRepository.findAllSourceUrl());
+
           stepContext.put(INTERESTS.getKey(), interests);
 
           return RepeatStatus.FINISHED;
@@ -106,7 +108,7 @@ public class ArticleRestoreBatch {
 
           Instant from = getStartOfDateInstant(fromStr);
           Instant to = getStartOfDateInstant(toStr).plus(Duration.ofDays(1));
-          articleRepository.changeDeletedFalseByPublishDateBetween(from, to);
+          articleRepository.restoreArticleDeletionBetweenDates(from, to);
 
           return RepeatStatus.FINISHED;
         }, transactionManager)
@@ -114,7 +116,7 @@ public class ArticleRestoreBatch {
   }
 
   /**
-   * Reader : S3에서 여러 파일리소프를 ArticleApiDto로 읽어오는 reader
+   * Reader : S3에서 여러 파일리소스를 ArticleApiDto로 읽어오는 reader
    * processor : db에 저장되어있는 sourceUrl겹치는거 필터링 + 해당 기사의 관심사 매핑
    * wirter : 기사 + 기사 관심사 저장
    */
@@ -145,53 +147,16 @@ public class ArticleRestoreBatch {
 
     LocalDate from = getLocalDate(fromStr);
     LocalDate to = getLocalDate(toStr);
-    // 날짜 레인지
     List<LocalDate> dateRange = from.datesUntil(to.plusDays(1)).toList();
 
-    List<S3Object> s3Objects = new ArrayList<>();
-    for (LocalDate localDate : dateRange) {
-      ListObjectsV2Request v2Request = ListObjectsV2Request.builder()
-          .bucket(s3Properties.bucket())
-          .prefix(localDate + "/")
-          .encodingType("UTF-8")
-          .build();
-
-      ListObjectsV2Response v2Response = s3Client.listObjectsV2(v2Request);
-      s3Objects.addAll(v2Response.contents());
-    }
-
-    List<Resource> resources = new ArrayList<>();
-    for (S3Object s3Object : s3Objects) {
-
-      GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-          .bucket(s3Properties.bucket())
-          .key(s3Object.key())
-          .build();
-
-      ResponseInputStream<GetObjectResponse> ri = s3Client.getObject(getObjectRequest); // 리소스 세는 곳
-      resources.add(new InputStreamResource(ri));
-    }
+    List<S3Object> s3Objects = getS3Objects(dateRange);
+    List<Resource> resources = getS3InputStreamResources(s3Objects);
 
     Resource[] resourcesArray = resources.toArray(Resource[]::new);
     return new MultiResourceItemReaderBuilder<ArticleApiDto>()
         .resources(resourcesArray)
         .delegate(csvReader)
         .build();
-  }
-
-  private LocalDate getLocalDate(String fromStr) {
-    Instant fromInstant = Instant.parse(fromStr);
-    return fromInstant.atZone(ZoneId.systemDefault()).toLocalDate();
-  }
-
-  private Instant getStartOfDateInstant(String instantTime) {
-    ZoneId zoneId = ZoneId.systemDefault();
-    return Instant
-        .parse(instantTime)
-        .atZone(zoneId)
-        .toLocalDate()
-        .atStartOfDay(zoneId)
-        .toInstant();
   }
 
   @Bean
@@ -220,4 +185,53 @@ public class ArticleRestoreBatch {
         )
         .build();
   }
+
+  /**
+   * 편의
+   */
+  private LocalDate getLocalDate(String fromStr) {
+    Instant fromInstant = Instant.parse(fromStr);
+    return fromInstant.atZone(ZoneId.systemDefault()).toLocalDate();
+  }
+
+  private Instant getStartOfDateInstant(String instantTime) {
+    ZoneId zoneId = ZoneId.systemDefault();
+    return Instant
+        .parse(instantTime)
+        .atZone(zoneId)
+        .toLocalDate()
+        .atStartOfDay(zoneId)
+        .toInstant();
+  }
+
+  private List<Resource> getS3InputStreamResources(List<S3Object> s3Objects) {
+    List<Resource> resources = new ArrayList<>();
+    for (S3Object s3Object : s3Objects) {
+
+      GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+          .bucket(s3Properties.bucket())
+          .key(s3Object.key())
+          .build();
+
+      ResponseInputStream<GetObjectResponse> ri = s3Client.getObject(getObjectRequest); // 리소스 세는 곳
+      resources.add(new InputStreamResource(ri));
+    }
+    return resources;
+  }
+
+  private List<S3Object> getS3Objects(List<LocalDate> dateRange) {
+    List<S3Object> s3Objects = new ArrayList<>();
+    for (LocalDate localDate : dateRange) {
+      ListObjectsV2Request v2Request = ListObjectsV2Request.builder()
+          .bucket(s3Properties.bucket())
+          .prefix(localDate + "/")
+          .encodingType("UTF-8")
+          .build();
+
+      ListObjectsV2Response v2Response = s3Client.listObjectsV2(v2Request);
+      s3Objects.addAll(v2Response.contents());
+    }
+    return s3Objects;
+  }
+
 }
