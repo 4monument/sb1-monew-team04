@@ -3,13 +3,10 @@ package com.sprint.monew.common.batch;
 
 import com.sprint.monew.common.batch.support.NotificationJdbc;
 import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
-import com.sprint.monew.domain.notification.Notification;
-import com.sprint.monew.domain.notification.NotificationRepository;
 import com.sprint.monew.domain.notification.NotificationService;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +19,6 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -78,8 +74,9 @@ public class NotificationCreateBatch {
   @StepScope
   public ItemWriter<NotificationJdbc> notificationCreateWriter() {
     String notificationInsertSql =
-        "INSERT INTO notifications (id, user_id, resource_id, resource_type, content, created_at, updated_at, confirmed)" +
-        " VALUES (:id, userId, resourceId, resourceType, content, createdAt, updatedAt, confirmed)";
+        "INSERT INTO notifications (id, user_id, resource_id, resource_type, content, created_at, updated_at, confirmed)"
+            +
+            " VALUES (:id, userId, resourceId, resourceType, content, createdAt, updatedAt, confirmed)";
 
     return new JdbcBatchItemWriterBuilder<NotificationJdbc>()
         .dataSource(dataSource)

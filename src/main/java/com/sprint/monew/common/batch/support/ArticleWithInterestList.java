@@ -5,9 +5,7 @@ import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.article.articleinterest.ArticleInterest;
 import com.sprint.monew.domain.interest.Interest;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public record ArticleWithInterestList(
     Source source,

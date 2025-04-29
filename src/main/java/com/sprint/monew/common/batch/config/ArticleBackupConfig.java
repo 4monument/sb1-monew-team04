@@ -141,6 +141,7 @@ public class ArticleBackupConfig {
         }, transactionManager)
         .build();
   }
+
   /**
    * 편의 메서드
    */

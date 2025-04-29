@@ -14,9 +14,9 @@ import org.springframework.context.annotation.Configuration;
 public class PromotionListenerConfig {
 
   @Bean
-  public ExecutionContextPromotionListener interestsFetchPromotionListener(){
+  public ExecutionContextPromotionListener interestsFetchPromotionListener() {
     ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-    listener.setKeys(new String[] {INTERESTS.getKey()});
+    listener.setKeys(new String[]{INTERESTS.getKey()});
     return listener;
   }
 
@@ -24,28 +24,28 @@ public class PromotionListenerConfig {
   public ExecutionContextPromotionListener naverPromotionListener() {
     //new RepositoryItemReader<>()
     ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-    listener.setKeys(new String[] {NAVER_ARTICLE_DTOS.getKey()});
+    listener.setKeys(new String[]{NAVER_ARTICLE_DTOS.getKey()});
     return listener;
   }
 
   @Bean
   public ExecutionContextPromotionListener chosunPromotionListener() {
     ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-    listener.setKeys(new String[] {CHOSUN_ARTICLE_DTOS.getKey()});
+    listener.setKeys(new String[]{CHOSUN_ARTICLE_DTOS.getKey()});
     return listener;
   }
 
   @Bean
   public ExecutionContextPromotionListener dbSourceUrlPromotionListener() {
     ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-    listener.setKeys(new String[] { DB_SOURCEURS.getKey() });
+    listener.setKeys(new String[]{DB_SOURCEURS.getKey()});
     return listener;
   }
 
   @Bean
   public ExecutionContextPromotionListener restoreArticleIdsPromotionListener() {
     ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-    listener.setKeys(new String[] { ARTICLE_IDS.getKey() });
+    listener.setKeys(new String[]{ARTICLE_IDS.getKey()});
     return listener;
   }
 }

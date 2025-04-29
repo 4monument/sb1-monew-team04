@@ -1,6 +1,5 @@
 package com.sprint.monew.common.batch.support;
 
-import com.sprint.monew.domain.notification.Notification;
 import com.sprint.monew.domain.notification.ResourceType;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import java.time.Instant;
