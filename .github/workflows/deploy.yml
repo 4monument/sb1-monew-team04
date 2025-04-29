@@ -33,7 +33,7 @@ jobs:
         run: echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application-test.yaml
 
       - name: 테스트 및 빌드하기
-        run: ./gradlew clean build --debug
+        run: ./gradlew clean build --info --stacktrace
 
       - name: ECR에 로그인하기
         id: login-ecr
