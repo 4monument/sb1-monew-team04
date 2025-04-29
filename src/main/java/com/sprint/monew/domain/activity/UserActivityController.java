@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/user-activity")
+@RequestMapping("/api/user-activities")
 @RequiredArgsConstructor
 public class UserActivityController {
 
