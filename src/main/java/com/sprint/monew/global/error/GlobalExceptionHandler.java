@@ -24,15 +24,13 @@ public class GlobalExceptionHandler {
         .body(errorResponse);
   }
 
-
   @ExceptionHandler(MonewException.class)
   public ResponseEntity<ErrorResponse> handleMonewException(MonewException exception) {
     log.error("커스텀 예외 발생: code={}, message={}", exception.getErrorCode(), exception.getMessage(),
         exception);
-    HttpStatus status = determineHttpStatus(exception);
-    ErrorResponse response = new ErrorResponse(exception, status.value());
+    ErrorResponse response = new ErrorResponse(exception);
     return ResponseEntity
-        .status(status)
+        .status(response.getStatus())
         .body(response);
   }
 
@@ -60,15 +58,5 @@ public class GlobalExceptionHandler {
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
         .body(response);
-  }
-
-  private HttpStatus determineHttpStatus(MonewException exception) {
-    ErrorCode errorCode = exception.getErrorCode();
-    return switch (errorCode) {
-      case USER_NOT_FOUND, ARTICLE_NOT_FOUND, INTEREST_NOT_FOUND, COMMENT_NOT_FOUND -> HttpStatus.NOT_FOUND;
-      case DUPLICATE_USER, ARTICLE_VIEW_ALREADY_EXIST, INTEREST_ALREADY_EXISTS -> HttpStatus.CONFLICT;
-      case INVALID_USER_CREDENTIALS -> HttpStatus.UNAUTHORIZED;
-      case ALREADY_DELETED_USER, EMPTY_KEYWORDS_NOT_ALLOWED, LIKE_ALREADY_EXIST, COMMENT_NOT_OWNED -> HttpStatus.BAD_REQUEST;
-    };
   }
 }

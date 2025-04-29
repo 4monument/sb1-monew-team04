@@ -29,4 +29,10 @@ public class UserActivityService {
 
     return dto;
   }
+
+  public void updateUserActivity(UUID userId) {
+    UserActivityDto dto = userActivityQueryRepository.findUserActivity(userId);
+    UserActivityDocument document = UserActivityDto.toDocument(dto);
+    userActivityMongoRepository.save(document);
+  }
 }

@@ -1,6 +1,7 @@
 package com.sprint.monew.domain.article;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.activity.UserActivityService;
 import com.sprint.monew.domain.article.articleview.ArticleView;
 import com.sprint.monew.domain.article.articleview.ArticleViewRepository;
 import com.sprint.monew.domain.article.dto.ArticleDto;
@@ -32,6 +33,7 @@ public class ArticleService {
   private final UserRepository userRepository;
   private final CommentRepository commentRepository;
   private final ArticleViewRepository articleViewRepository;
+  private final UserActivityService userActivityService;
 
   public ArticleViewDto registerArticleView(UUID id, UUID userId) {
     User user = userRepository.findByIdAndDeletedFalse(userId)
@@ -45,6 +47,9 @@ public class ArticleService {
 
     ArticleView articleView = ArticleView.create(user, article);
     articleViewRepository.save(articleView);
+
+    userActivityService.updateUserActivity(userId);
+
     long commentCount = commentRepository.countByArticleAndDeletedFalse(article);
     long viewCount = articleViewRepository.countByArticle(article);
 
