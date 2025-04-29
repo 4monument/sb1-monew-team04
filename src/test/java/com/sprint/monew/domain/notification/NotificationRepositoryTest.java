@@ -134,7 +134,6 @@ public class NotificationRepositoryTest {
   @DisplayName("확인 시간으로부터 일주일 된 알림 삭제")
   void deleteUnconfirmedNotification() {
     //given - 알림 읽은 시각 7일 +1초 전으로 업데이트 변경
-    //todo - deleteConfirmedNotificationsOlderThan()의 쿼리문에서 7일 계산해야하지 않을까?
     notification.confirm(Instant.now().minus(Duration.ofDays(7).plusSeconds(1)));
     em.flush();
 
