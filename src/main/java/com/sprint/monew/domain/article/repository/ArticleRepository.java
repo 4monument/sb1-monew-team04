@@ -5,11 +5,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
-public interface ArticleRepository extends JpaRepository<Article, UUID>, QuerydslPredicateExecutor<Article>, ArticleRepositoryCustom {
+public interface ArticleRepository extends JpaRepository<Article, UUID>,
+    QuerydslPredicateExecutor<Article>, ArticleRepositoryCustom {
 
   Optional<Article> findByIdAndDeletedFalse(UUID id);
 
   List<Article> findAllByDeletedFalse();
+
+  @Modifying(clearAutomatically = true)
+  @Query("""
+         UPDATE Article as a
+         SET a.deleted = false
+         WHERE a.publishDate BETWEEN :from AND :to
+      """)
+  int changeDeletedFalseByPublishDateBetween(String from, String to);
 }

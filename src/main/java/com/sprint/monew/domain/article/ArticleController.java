@@ -5,11 +5,23 @@ import com.sprint.monew.domain.article.dto.ArticleDto;
 import com.sprint.monew.domain.article.dto.ArticleRestoreResultDto;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
 import com.sprint.monew.domain.article.dto.request.ArticleRequest;
+import jakarta.annotation.Resource;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +42,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class ArticleController {
 
   private final ArticleService articleService;
+  private final JobLauncher jobLauncher;
+
+  @Resource(name = "articleRestoreJob")
+  private final Job articleRestoreJob;
 
   @PostMapping("/{id}/article-views")
   public ResponseEntity<ArticleViewDto> registerArticleView(
@@ -58,7 +74,25 @@ public class ArticleController {
   public ResponseEntity<List<ArticleRestoreResultDto>> restoreArticles(
       @RequestParam Instant from,
       @RequestParam Instant to
-  ) {
+  )
+      throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+
+    JobParameters jobParameters = new JobParametersBuilder()
+        .addLocalDate("backupDay", LocalDate.now()) // 똑같은 날짜 기간 복구는 하루에 한번만(무분별 방지)
+        .addString("from", from.toString())
+        .addString("to", to.toString())
+        .toJobParameters();
+
+    JobExecution jobExecution = jobLauncher.run(articleRestoreJob, jobParameters);
+    // result 꺼내기
+    //[
+    //  {
+    //    "restoreDate": "2025-04-29T01:24:37.762Z",
+    //    "restoredArticleIds": [
+    //      "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    //    ],
+    //    "restoredArticleCount": 9007199254740991
+    //  }
     return null;
   }
 

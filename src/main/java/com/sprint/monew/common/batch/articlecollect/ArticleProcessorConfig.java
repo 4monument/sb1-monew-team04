@@ -18,4 +18,17 @@ public class ArticleProcessorConfig {
       @Value("#{JobExecutionContext['interests']}") Interests interests) {
     return interests::toArticleWithRelevantInterests;
   }
+
+  @Bean
+  @StepScope
+  public ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor(
+      @Value("#{JobExecutionContext['interests']}") Interests interests) {
+    return item -> {
+      // 1번 url 겹치는 기사는 패스
+      if (interests.isDuplicateUrl(item)){
+        return null;
+      }
+      return interests.toArticleWithRelevantInterests(item);
+    };
+  }
 }

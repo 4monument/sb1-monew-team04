@@ -24,7 +24,6 @@ public class Interests implements Serializable {
         .forEach(keywords::add);
   }
 
-
   public ArticleApiDto filter(ArticleApiDto articleApiDto){
     if (isContainKeywords(articleApiDto) && !isDuplicateUrl(articleApiDto)) {
       return articleApiDto;
@@ -32,7 +31,11 @@ public class Interests implements Serializable {
     return null;
   }
 
-  private boolean isDuplicateUrl(ArticleApiDto articleApiDto) {
+  public void addSourceUrls(List<String> sourceUrls) {
+    sourceUrlFilterSet.addAll(sourceUrls);
+  }
+
+  public boolean isDuplicateUrl(ArticleApiDto articleApiDto) {
     return sourceUrlFilterSet.add(articleApiDto.sourceUrl());
   }
 
