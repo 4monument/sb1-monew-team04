@@ -11,6 +11,7 @@ import com.sprint.monew.domain.article.articleinterest.ArticleInterest;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,7 @@ public class ArticleChunkConfig {
   private final DataSource dataSource;
 
   /**
-   *  Reader
+   * Reader
    */
   @Bean(name = "naverArticleCollectReader")
   @StepScope
@@ -71,7 +72,7 @@ public class ArticleChunkConfig {
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor(
       @Value("#{JobExecutionContext['interests']}") Interests interests) {
     return item -> {
-      if (interests.isDuplicateUrl(item)){
+      if (interests.isDuplicateUrl(item)) {
         return null;
       }
       return interests.toArticleWithRelevantInterests(item);
@@ -97,15 +98,16 @@ public class ArticleChunkConfig {
         Article articleWithId = item.toArticleWithId();
 
         item.interestList().forEach(interest -> {
-          ArticleInterestJdbc articleInterestJdbc = ArticleInterestJdbc.create(articleWithId,
-              interest);
+          ArticleInterestJdbc articleInterestJdbc =
+              ArticleInterestJdbc.create(articleWithId, interest);
           articleInterestsJdbc.add(articleInterestJdbc);
         });
 
         articlesWithId.add(articleWithId);
       }
 
-      ExecutionContext stepContext = StepSynchronizationManager.getContext().getStepExecution()
+      ExecutionContext stepContext = Objects.requireNonNull(StepSynchronizationManager.getContext())
+          .getStepExecution()
           .getExecutionContext();
 
       List<UUID> articleIdList = articlesWithId.stream()
@@ -117,7 +119,8 @@ public class ArticleChunkConfig {
       log.info("저장 될 Article Interest size : {}", articleInterestsJdbc.size());
 
       articleJdbcItemWriter.write((Chunk<? extends Article>) articlesWithId);
-      articleInterestJdbcItemWriter.write((Chunk<? extends ArticleInterestJdbc>) articleInterestsJdbc);
+      articleInterestJdbcItemWriter.write(
+          (Chunk<? extends ArticleInterestJdbc>) articleInterestsJdbc);
     };
   }
 
@@ -152,47 +155,4 @@ public class ArticleChunkConfig {
         .columnMapped()
         .build();
   }
-
-  /**
-   *  jpaWrriter를 사용할 경우
-   */
-
-  @Bean
-  @StepScope
-  public ItemWriter<ArticleWithInterestList> articleJpaItemWriter() {
-
-    return items -> {
-      List<ArticleWithInterestList> articleAndInterestsList = (List<ArticleWithInterestList>) items.getItems();
-
-      List<Article> articleList = articleAndInterestsList.stream()
-          .map(ArticleWithInterestList::toArticle)
-          .toList();
-
-      List<ArticleInterest> articleInterestList = articleAndInterestsList.stream()
-          .map(ArticleWithInterestList::toArticleInterests)
-          .flatMap(List::stream)
-          .toList();
-
-      log.info("저장 될 Article: {}", articleList);
-      log.info("저장 될 Article Interest : {}", articleInterestList);
-
-      articleWriter().write((Chunk<? extends Article>) articleList);
-      articleInterestWriter().write((Chunk<? extends ArticleInterest>) articleInterestList);
-    };
-  }
-
-  private JpaItemWriter<Article> articleWriter() {
-    return new JpaItemWriterBuilder<Article>()
-        .usePersist(true)
-        .entityManagerFactory(emf)
-        .build();
-  }
-
-  private JpaItemWriter<ArticleInterest> articleInterestWriter() {
-    return new JpaItemWriterBuilder<ArticleInterest>()
-        .usePersist(true)
-        .entityManagerFactory(emf)
-        .build();
-  }
-
 }

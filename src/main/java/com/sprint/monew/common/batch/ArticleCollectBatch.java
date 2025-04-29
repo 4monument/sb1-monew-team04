@@ -55,7 +55,7 @@ public class ArticleCollectBatch {
         .start(interestsFetchStep)
         .on(COMPLETED.getExitCode())
         .to(naverArticleCollectFlow)// 1. Article 자료 수집
-        //.split(taskExecutor()).add(null) // 나중
+        //.split(taskExecutor()).add(null) // 여기에 추가 API 호출 되는 Flow 복붙하면 완성
         .next(backupArticleJobStep) // 2. backup + 필터링
         .end()
         .listener(jobContextCleanupListener)
