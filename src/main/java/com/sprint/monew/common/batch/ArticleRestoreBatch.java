@@ -9,6 +9,7 @@ import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
 import com.sprint.monew.domain.interest.InterestRepository;
 import com.sprint.monew.global.config.S3ConfigProperties;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -103,8 +104,8 @@ public class ArticleRestoreBatch {
     return new StepBuilder("  changeArticleIsDeltedStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
 
-          String from = getLocalDate(fromStr).toString();
-          String to = getLocalDate(toStr).plusDays(1).toString();
+          Instant from = getStartOfDateInstant(fromStr);
+          Instant to = getStartOfDateInstant(toStr).plus(Duration.ofDays(1));
           articleRepository.changeDeletedFalseByPublishDateBetween(from, to);
 
           return RepeatStatus.FINISHED;
@@ -181,6 +182,16 @@ public class ArticleRestoreBatch {
   private LocalDate getLocalDate(String fromStr) {
     Instant fromInstant = Instant.parse(fromStr);
     return fromInstant.atZone(ZoneId.systemDefault()).toLocalDate();
+  }
+
+  private Instant getStartOfDateInstant(String instantTime) {
+    ZoneId zoneId = ZoneId.systemDefault();
+    return Instant
+        .parse(instantTime)
+        .atZone(zoneId)
+        .toLocalDate()
+        .atStartOfDay(zoneId)
+        .toInstant();
   }
 
   @Bean

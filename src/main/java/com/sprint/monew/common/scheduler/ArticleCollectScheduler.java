@@ -39,9 +39,6 @@ public class ArticleCollectScheduler {
     jobLauncher.run(articleCoolectJob, jobParameters);
 
     log.info("Notification create start");
-    JobParameters notificationJobParameters = new JobParametersBuilder()
-        .addLong("time", System.currentTimeMillis())
-        .toJobParameters();
-    jobLauncher.run(notificationCreateJob, notificationJobParameters);
+    jobLauncher.run(notificationCreateJob, jobParameters);
   }
 }

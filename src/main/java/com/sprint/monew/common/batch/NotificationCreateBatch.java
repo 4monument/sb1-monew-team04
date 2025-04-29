@@ -14,6 +14,7 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
@@ -37,8 +38,10 @@ public class NotificationCreateBatch {
   private final DataSource dataSource;
 
   @Bean
-  public Job notificationCreateJob() {
-    return null; // Job configuration goes here
+  public Job notificationCreateJob(@Qualifier("notificationCreateStep") Step notificationCreateStep) {
+    return new JobBuilder("notificationCreateJob", jobRepository)
+        .start(notificationCreateStep)
+        .build();
   }
 
   @Bean
@@ -58,7 +61,7 @@ public class NotificationCreateBatch {
   @Bean
   @StepScope
   public ItemReader<UnreadInterestArticleCount> notificationCreateReader() {
-    Instant afterAt = Instant.now().minus(Duration.ofMinutes(3));
+    Instant afterAt = Instant.now().minus(Duration.ofMinutes(30));
     List<UnreadInterestArticleCount> newArticleCountWithUserInterest =
         subscriptionRepository.findNewArticleCountWithUserInterest(afterAt);
     return new ListItemReader<>(newArticleCountWithUserInterest);
