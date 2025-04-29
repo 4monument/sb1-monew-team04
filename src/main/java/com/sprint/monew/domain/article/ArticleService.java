@@ -119,6 +119,7 @@ public class ArticleService {
         articleIds,
         (long) articleIds.size()
     );
+    jobContext.remove(ARTICLE_IDS.getKey());
     return List.of(result);
   }
 
