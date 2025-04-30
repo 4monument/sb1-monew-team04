@@ -6,8 +6,8 @@
       "name": "monew-app",
       "image": "074787506837.dkr.ecr.ap-northeast-2.amazonaws.com/monew:latest",
       "essential": true,
-      "memory": 192,
-      "cpu": 96,
+      "memory": 500,
+      "cpu": 256,
       "portMappings": [
         {
           "containerPort": 80,
