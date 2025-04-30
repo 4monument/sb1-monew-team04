@@ -8,12 +8,14 @@ import com.sprint.monew.domain.article.repository.ArticleRepository;
 import com.sprint.monew.domain.comment.dto.CommentDto;
 import com.sprint.monew.domain.comment.dto.CommentLikeDto;
 import com.sprint.monew.domain.comment.dto.request.CommentRegisterRequest;
+import com.sprint.monew.domain.comment.dto.request.CommentRequest;
 import com.sprint.monew.domain.comment.dto.request.CommentUpdateRequest;
 import com.sprint.monew.domain.comment.exception.CommentNotFoundException;
 import com.sprint.monew.domain.comment.exception.CommentNotOwnedException;
 import com.sprint.monew.domain.comment.exception.LikeAlreadyExistException;
 import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.comment.like.LikeRepository;
+import com.sprint.monew.domain.comment.repository.CommentRepository;
 import com.sprint.monew.domain.notification.Notification;
 import com.sprint.monew.domain.notification.NotificationRepository;
 import com.sprint.monew.domain.notification.ResourceType;
@@ -21,10 +23,14 @@ import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import jakarta.transaction.Transactional;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -41,18 +47,31 @@ public class CommentService {
   private final UserActivityService userActivityService;
 
   //댓글 조회 메서드
-  public CursorPageResponseDto<CommentDto> getComments(UUID articleId) {
-    //임시로 모든 comment 반환. 추후에 queryDSL 적용 예정입니다.
-    List<CommentDto> dtos = commentRepository.findByArticle_Id(articleId).stream()
-        .map(comment -> CommentDto.from(comment, false))
-        .toList();
+  public CursorPageResponseDto<CommentDto> getComments(CommentRequest request, UUID userId, Pageable pageable) {
+    Page<CommentDto> page = commentRepository.getComments(request, userId, pageable);
+
+    List<CommentDto> content = page.getContent();
+    Sort sort = page.getSort();
+    Object nextCursor = null;
+    Instant after = null;
+
+    if (!content.isEmpty()) {
+      String property = sort.iterator().next().getProperty();
+      if (property.equals("createdAt")) {
+        nextCursor = content.get(content.size() - 1).createdAt();
+      } else if (property.equals("likeCount")) {
+        nextCursor = content.get(content.size() - 1).likeCount();
+      }
+      after = content.get(content.size() - 1).createdAt();
+    }
+
     return new CursorPageResponseDto<>(
-        dtos,
-        null,
-        null,
-        dtos.size(),
-        dtos.size(),
-        false
+        page.getContent(),
+        nextCursor,
+        after,
+        page.getSize(),
+        page.getTotalElements(),
+        page.hasNext()
     );
   }
 

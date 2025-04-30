@@ -4,13 +4,16 @@ import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.comment.dto.CommentDto;
 import com.sprint.monew.domain.comment.dto.CommentLikeDto;
 import com.sprint.monew.domain.comment.dto.request.CommentRegisterRequest;
+import com.sprint.monew.domain.comment.dto.request.CommentRequest;
 import com.sprint.monew.domain.comment.dto.request.CommentUpdateRequest;
-import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,15 +32,15 @@ public class CommentController {
 
   @GetMapping
   public ResponseEntity<CursorPageResponseDto<CommentDto>> getComments(
-      @RequestParam UUID articleId,
-      @RequestParam String cursor,
-      @RequestParam Instant after,
+      @ModelAttribute CommentRequest commentRequest,
       @RequestParam String orderBy,
       @RequestParam String direction,
       @RequestParam int limit,
       @RequestHeader("Monew-Request-User-ID") UUID userId
   ) {
-    return null;
+    PageRequest pageRequest = PageRequest
+        .of(0, limit, Direction.fromString(direction), orderBy);
+    return ResponseEntity.ok(commentService.getComments(commentRequest, userId, pageRequest));
   }
 
   @PostMapping
