@@ -2,7 +2,6 @@ package com.sprint.monew.domain.comment.repository;
 
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.comment.Comment;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,5 +14,5 @@ public interface CommentRepository extends JpaRepository<Comment, UUID>, Comment
 
   Optional<Comment> findByIdAndDeletedFalse(UUID id);
 
-  List<Comment> findByArticle_Id(UUID articleId);
+  long countByArticle_Id(UUID articleId);
 }
