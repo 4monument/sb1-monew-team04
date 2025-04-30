@@ -2,6 +2,7 @@ package com.sprint.monew.domain.interest;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.sprint.monew.PostgresContainer;
 import com.sprint.monew.common.config.TestQuerydslConfig;
 import com.sprint.monew.domain.interest.dto.InterestSubscriptionInfoDto;
 import com.sprint.monew.domain.interest.subscription.Subscription;
@@ -18,20 +19,35 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({CustomInterestRepositoryImpl.class, TestQuerydslConfig.class})
+@Testcontainers
 public class InterestRepositoryTest {
+
+  static final PostgresContainer postgresContainer = PostgresContainer.getInstance();
+
+  static {
+    postgresContainer.start();
+  }
+
+  @DynamicPropertySource
+  static void overrideDataSourceProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.datasource.url", postgresContainer::getJdbcUrl);
+    registry.add("spring.datasource.username", postgresContainer::getUsername);
+    registry.add("spring.datasource.password", postgresContainer::getPassword);
+  }
 
   @Autowired
   private EntityManager em;
