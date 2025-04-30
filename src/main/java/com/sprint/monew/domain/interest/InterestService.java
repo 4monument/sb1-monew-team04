@@ -11,6 +11,7 @@ import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
 import com.sprint.monew.domain.interest.exception.EmptyKeywordsException;
 import com.sprint.monew.domain.interest.exception.InterestAlreadyExistsException;
 import com.sprint.monew.domain.interest.exception.InterestNotFoundException;
+import com.sprint.monew.domain.interest.exception.SubscriptionNotFound;
 import com.sprint.monew.domain.interest.subscription.Subscription;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
 import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
@@ -129,9 +130,7 @@ public class InterestService {
         .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     Subscription subscribe = subscriptionRepository.findByUserAndInterest(user, interest)
-        .orElseThrow(
-            () -> new IllegalArgumentException("UserInterest not found")
-        );
+        .orElseThrow(SubscriptionNotFound::notFound);
 
     subscriptionRepository.delete(subscribe);
 

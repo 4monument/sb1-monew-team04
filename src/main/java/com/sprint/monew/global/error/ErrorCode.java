@@ -17,6 +17,9 @@ public enum ErrorCode {
   INTEREST_NOT_FOUND("관심사 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
   EMPTY_KEYWORDS_NOT_ALLOWED("키워드는 한 개 이상 포함되어야 합니다.", HttpStatus.BAD_REQUEST),
 
+  // Subscription 관련 에러 코드
+  SUBSCRIPTION_NOT_FOUND("해당 유저의 구독 정보가 없습니다.", HttpStatus.NOT_FOUND),
+
   // Notification 관련 에러코드
   NOTIFICATION_NOT_FOUND("알림을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
