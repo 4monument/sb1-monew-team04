@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.file.MultiResourceItemReader;
@@ -58,13 +57,9 @@ public class ArticleRestoreBatch {
 
   // 일단 s3
   @Bean
-  @StepScope
   public MultiResourceItemReader<ArticleApiDto> articleRestoreS3ItemReader(
-      @Value("#{jobParameters['from']}") String fromString,
-      @Value("#{jobParameters['to']}") String toString
-  ) throws IOException {
-    LocalDate from = LocalDate.parse(fromString);
-    LocalDate to = LocalDate.parse(toString);
+      @Value("#{jobParameters['from']}") LocalDate from,
+      @Value("#{jobParameters['to']}") LocalDate to) throws IOException {
     // 날짜
     List<LocalDate> dateRange = from.datesUntil(to).toList();
 
