@@ -1,5 +1,6 @@
 package com.sprint.monew.domain.notification;
 
+import com.sprint.monew.common.batch.support.NotificationJdbc;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.notification.dto.NotificationSearchRequest;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
@@ -25,23 +26,14 @@ public class NotificationService {
   private final UserRepository userRepository;
 
   //알림 등록 - 일괄 등록
-  public List<Notification> createArticleInterestNotifications(
-      List<UnreadInterestArticleCount> unreadInterestArticleCounts) {
-
-    return unreadInterestArticleCounts.stream()
-        .map(un -> new Notification(
-            un.getUser(),
-            un.getInterest().getId(),
-            ResourceType.INTEREST,
-            un.getInterest().getName() + "와/과 관련된 기사가 " + un.getArticleCount() + "건 등록되었습니다.")
-        ).toList();
+  public NotificationJdbc createArticleInterestNotifications(UnreadInterestArticleCount unreadInterestArticleCounts) {
+    return NotificationJdbc.create(unreadInterestArticleCounts);
   }
 
   //알림 수정 - 전체 알림 확인
   public void checkAllNotifications(UUID userId) {
 
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> UserNotFoundException.withId(userId));
+    User user = userRepository.findById(userId).orElseThrow();
 
     List<Notification> notifications = notificationRepository.findByUser(user);
     Instant updatedAt = Instant.now();

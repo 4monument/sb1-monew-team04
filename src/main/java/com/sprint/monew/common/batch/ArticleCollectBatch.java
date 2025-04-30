@@ -1,4 +1,4 @@
-package com.sprint.monew.common.batch.articlecollect;
+package com.sprint.monew.common.batch;
 
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.*;
 import static org.springframework.batch.core.ExitStatus.*;
@@ -55,7 +55,7 @@ public class ArticleCollectBatch {
         .start(interestsFetchStep)
         .on(COMPLETED.getExitCode())
         .to(naverArticleCollectFlow)// 1. Article 자료 수집
-        //.split(taskExecutor()).add(null) // 나중
+        //.split(taskExecutor()).add(null) // 여기에 추가 API 호출 되는 Flow 복붙하면 완성
         .next(backupArticleJobStep) // 2. backup + 필터링
         .end()
         .listener(jobContextCleanupListener)
@@ -69,6 +69,7 @@ public class ArticleCollectBatch {
 
     return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
+
           ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
           Interests interests = new Interests(interestRepository.findAll());
           stepContext.put(INTERESTS.getKey(), interests);
@@ -107,19 +108,19 @@ public class ArticleCollectBatch {
   @JobScope
   public Step naverArticleHandlerStep(
       @Qualifier("naverArticleCollectReader") ItemReader<ArticleApiDto> naverArticleCollectReader,
-      @Qualifier("basicArticleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor,
-      @Qualifier("articleJpaItemWriter") ItemWriter<ArticleWithInterestList> articleJpaItemWriter,
-      @Qualifier("naverExecutionContextCleanupListener") StepExecutionListener naverExecutionContextCleanupListener) {
+      @Qualifier("articleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor,
+      @Qualifier("articleWithInterestsJdbcItemWriter") ItemWriter<ArticleWithInterestList> articleJdbcItemWriter,
+      @Qualifier("naverContextCleanupListener") StepExecutionListener naverContextCleanupListener) {
 
     return new StepBuilder("articleHandlerStep", jobRepository)
         .<ArticleApiDto, ArticleWithInterestList>chunk(200, transactionManager)
         .reader(naverArticleCollectReader)
         .processor(naverArticleCollectProcessor)
-        .writer(articleJpaItemWriter)
+        .writer(articleJdbcItemWriter)
         .faultTolerant()
         .retryLimit(3)
         .retry(Exception.class)
-        .listener(naverExecutionContextCleanupListener)
+        .listener(naverContextCleanupListener)
         .build();
   }
 

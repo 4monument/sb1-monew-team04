@@ -19,15 +19,18 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ArticleCollectScheduler {
 
-  //private final ArticleService articleService;
-
   @Resource(name = "articleCollectJob")
   private Job articleCoolectJob;
+
+  @Resource(name = "notificationCreateJob")
+  private Job notificationCreateJob;
+
   private final JobLauncher jobLauncher;
 
   @Scheduled(cron = "0 0 0/1 * * ?", zone = "Asia/Seoul")
   public void collectArticles()
       throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+
     JobParameters jobParameters = new JobParametersBuilder()
         .addLong("time", System.currentTimeMillis())
         .toJobParameters();
@@ -35,10 +38,7 @@ public class ArticleCollectScheduler {
     log.info("Article collection start");
     jobLauncher.run(articleCoolectJob, jobParameters);
 
-    JobParameters notificationJobParameters = new JobParametersBuilder()
-        .addLong("time", System.currentTimeMillis())
-        .toJobParameters();
-
-    //jobLauncher.run()
+    log.info("Notification create start");
+    jobLauncher.run(notificationCreateJob, jobParameters);
   }
 }

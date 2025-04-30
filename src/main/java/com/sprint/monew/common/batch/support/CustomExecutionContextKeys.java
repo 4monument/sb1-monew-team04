@@ -11,7 +11,8 @@ public enum CustomExecutionContextKeys {
   NAVER_ARTICLE_DTOS("naverArticleDtos"),
   CHOSUN_ARTICLE_DTOS("choshunArticleDtos"),
   HANKYUNG_ARTICLE_DTOS("hanyungArticleDtos"),
-  S3_INPUT_STREAMS("s3InputStreams");
+  DB_SOURCEURS("dbSourceUrls"),
+  ARTICLE_IDS("articleIds");
 
   private final String key;
 }
