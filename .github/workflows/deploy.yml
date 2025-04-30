@@ -13,6 +13,12 @@ jobs:
       APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
 
     steps:
+      - name: 도커 컨테이너 다 삭제
+        run: docker ps -aq | xargs -r docker rm -f
+
+      - name: 도커 이미지 다 삭제
+        run: docker images -aq | xargs -r docker rmi -f
+
       - name: Github Repository 파일 불러오기
         uses: actions/checkout@v4
 
