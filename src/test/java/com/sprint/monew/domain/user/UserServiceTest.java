@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.sprint.monew.domain.activity.UserActivityDto;
+import com.sprint.monew.domain.activity.UserActivityService;
 import com.sprint.monew.domain.user.exception.EmailAlreadyExistsException;
 import com.sprint.monew.domain.user.exception.InvalidCredentialsException;
 import com.sprint.monew.domain.user.exception.UserNotFoundException;
@@ -26,6 +28,9 @@ class UserServiceTest {
   @Mock
   private UserRepository userRepository;
 
+  @Mock
+  private UserActivityService userActivityService;
+
   @InjectMocks
   private UserService userService;
 
@@ -45,13 +50,16 @@ class UserServiceTest {
   void register_Success() {
     // given
     UserRegisterRequest request = new UserRegisterRequest("new@example.com", "새유저", "password123");
-
-    when(userRepository.existsByEmail(anyString())).thenReturn(false);
-    when(userRepository.save(any(User.class))).thenReturn(
-        new User(UUID.randomUUID(), request.email(), request.nickname(), request.password(), now, false)
-    );
+    UUID savedUserId = UUID.randomUUID();
 
     // when
+    when(userRepository.existsByEmail(anyString())).thenReturn(false);
+    when(userRepository.save(any(User.class))).thenReturn(
+        new User(savedUserId, request.email(), request.nickname(), request.password(), now, false)
+    );
+    when(userActivityService.saveUserActivityToMongo(any(UUID.class)))
+        .thenReturn(mock(UserActivityDto.class));
+
     UserDto result = userService.register(request);
 
     // then
@@ -61,6 +69,7 @@ class UserServiceTest {
 
     verify(userRepository).existsByEmail(request.email());
     verify(userRepository).save(any(User.class));
+    verify(userActivityService).saveUserActivityToMongo(savedUserId);
   }
 
   @Test
