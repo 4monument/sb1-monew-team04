@@ -32,7 +32,7 @@ public class InterestController {
   public ResponseEntity<CursorPageResponseDto> getInterests(
       @RequestHeader("Monew-Request-User-ID") UUID userId, InterestSearchRequest request) {
     return ResponseEntity.ok(
-        interestService.getInterests(request, userId));
+        interestService.getInterestsWithSubscriberInfo(request, userId));
   }
 
   //관심사 등록
