@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.sprint.monew.domain.activity.UserActivityDto;
+import com.sprint.monew.domain.activity.UserActivityMongoRepository;
+import com.sprint.monew.domain.activity.UserActivityQueryRepository;
 import com.sprint.monew.domain.activity.UserActivityService;
 import com.sprint.monew.domain.user.exception.EmailAlreadyExistsException;
 import com.sprint.monew.domain.user.exception.InvalidCredentialsException;
@@ -30,6 +32,12 @@ class UserServiceTest {
 
   @Mock
   private UserActivityService userActivityService;
+
+  @Mock
+  private UserActivityQueryRepository userActivityQueryRepository;
+
+  @Mock
+  private UserActivityMongoRepository userActivityMongoRepository;
 
   @InjectMocks
   private UserService userService;
