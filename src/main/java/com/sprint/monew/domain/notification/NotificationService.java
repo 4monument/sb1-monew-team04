@@ -1,11 +1,14 @@
 package com.sprint.monew.domain.notification;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
-import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
+import com.sprint.monew.domain.notification.dto.NotificationSearchRequest;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
+import com.sprint.monew.domain.notification.exception.NotificationNotFoundException;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
+import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -20,27 +23,25 @@ public class NotificationService {
 
   private final NotificationRepository notificationRepository;
   private final UserRepository userRepository;
-  private final SubscriptionRepository subscriberRepository;
 
   //알림 등록 - 일괄 등록
   public List<Notification> createArticleInterestNotifications(
       List<UnreadInterestArticleCount> unreadInterestArticleCounts) {
-    
+
     return unreadInterestArticleCounts.stream()
-        .map(un -> {
-          Notification notification = new Notification(
-              un.getUser(),
-              un.getInterest().getId(),
-              ResourceType.INTEREST,
-              un.getInterest().getName() + "와/과 관련된 기사가 " + un.getArticleCount() + "건 등록되었습니다.");
-          return notification;
-        }).toList();
+        .map(un -> new Notification(
+            un.getUser(),
+            un.getInterest().getId(),
+            ResourceType.INTEREST,
+            un.getInterest().getName() + "와/과 관련된 기사가 " + un.getArticleCount() + "건 등록되었습니다.")
+        ).toList();
   }
 
   //알림 수정 - 전체 알림 확인
   public void checkAllNotifications(UUID userId) {
 
-    User user = userRepository.findById(userId).orElseThrow();
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     List<Notification> notifications = notificationRepository.findByUser(user);
     Instant updatedAt = Instant.now();
@@ -56,31 +57,47 @@ public class NotificationService {
   public void checkNotification(UUID notificationId, UUID userId) {
 
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     Notification notification = notificationRepository.findById(notificationId)
-        .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
+        .orElseThrow(() -> NotificationNotFoundException.notFound(notificationId));
 
     notification.confirm(Instant.now());
     notificationRepository.save(notification);
   }
 
   //알림 목록 조회
-  public CursorPageResponseDto<NotificationDto> getAllNotifications(UUID cursor, Instant after,
-      int limit, UUID userId) {
+  public CursorPageResponseDto<NotificationDto> getAllNotifications(
+      NotificationSearchRequest request, UUID userId) {
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
+
+    int limit = request.limit();
+    UUID cursor = request.cursor();
+    Instant after = request.after();
 
     PageRequest pagerequest = PageRequest.of(0, limit + 1);
 
     List<Notification> notifications
-        = notificationRepository.findUnconfirmedWithCursor(userId, cursor, after,
+        = notificationRepository.getUnconfirmedWithCursor(userId, cursor, after,
         pagerequest);
 
     boolean hasNext = notifications.size() > limit;
 
     if (hasNext) {
       notifications = notifications.subList(0, limit);
+    }
+
+    // 빈 리스트 처리
+    if (notifications.isEmpty()) {
+      return new CursorPageResponseDto<>(
+          Collections.emptyList(),
+          null,
+          null,
+          0,
+          0,
+          false
+      );
     }
 
     UUID nextCursor = notifications.get(notifications.size() - 1).getId();
@@ -95,7 +112,7 @@ public class NotificationService {
         .map(NotificationDto::from)
         .toList();
 
-    return new CursorPageResponseDto(
+    return new CursorPageResponseDto<>(
         notificationDtos,
         nextCursor,
         nextAfter,

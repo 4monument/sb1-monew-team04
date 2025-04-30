@@ -10,7 +10,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface NotificationRepository extends JpaRepository<Notification, UUID> {
+public interface NotificationRepository extends JpaRepository<Notification, UUID>,
+    NotificationRepositoryCustom {
 
   List<Notification> findByUser(User user);
 
@@ -31,7 +32,7 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
       Instant afterAt, Pageable pageable);
 
   @Query(
-      "SELECT n "
+      "SELECT COUNT(n) "
           + "FROM Notification n "
           + "WHERE n.user.id = :userId AND n.confirmed = false")
   int countUnconfirmedByUserId(UUID userId);

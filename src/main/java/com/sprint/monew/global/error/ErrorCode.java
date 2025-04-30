@@ -17,6 +17,9 @@ public enum ErrorCode {
   INTEREST_NOT_FOUND("관심사 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
   EMPTY_KEYWORDS_NOT_ALLOWED("키워드는 한 개 이상 포함되어야 합니다.", HttpStatus.BAD_REQUEST),
 
+  // Notification 관련 에러코드
+  NOTIFICATION_NOT_FOUND("알림을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
   // Article 관련 에러코드
   ARTICLE_NOT_FOUND("기사를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
   ARTICLE_VIEW_ALREADY_EXIST("이미 존재하는 기사 뷰 입니다.", HttpStatus.CONFLICT),

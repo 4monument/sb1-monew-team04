@@ -3,16 +3,13 @@ package com.sprint.monew.domain.notification;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
-import com.sprint.monew.domain.comment.Comment;
-import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.interest.Interest;
-import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
+import com.sprint.monew.domain.notification.dto.NotificationSearchRequest;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
@@ -38,10 +35,6 @@ class NotificationServiceTest {
 
   @Mock
   private NotificationRepository notificationRepository;
-
-  @Mock
-  private SubscriptionRepository subscriberRepository;
-
 
   @Mock
   private UserRepository userRepository;
@@ -91,34 +84,22 @@ class NotificationServiceTest {
       Interest interest = interests.get(0);
 
       //기사 관심사 등록
-      Article article = Article.create(
-          Source.NAVER,
-          "https://news.example.com/tech/2025/04/23/article12345",
-          "인공지능 기술의 최신 동향과 미래 전망",
+      Article article = Article.create(Source.NAVER,
+          "https://news.example.com/tech/2025/04/23/article12345", "인공지능 기술의 최신 동향과 미래 전망",
           Instant.parse("2025-04-22T15:30:00Z"),
-          "최근 인공지능 기술의 발전과 산업 적용 사례를 분석하고, 향후 5년간의 기술 발전 방향을 예측한 보고서입니다."
-      );
+          "최근 인공지능 기술의 발전과 산업 적용 사례를 분석하고, 향후 5년간의 기술 발전 방향을 예측한 보고서입니다.");
 
       //ArticleInterest 생성
       article.addInterest(interest);
 
       List<UnreadInterestArticleCount> queryResult = new ArrayList<>();
-      queryResult.add(new TestUnreadInterestArticleCount(
-          interest,
-          user,
-          1L
-      ));
-
-      when(subscriberRepository.findNewArticleCountWithUserInterest(afterAt))
-          .thenReturn(queryResult);
+      queryResult.add(new TestUnreadInterestArticleCount(interest, user, 1L));
 
       NotificationDto expectedNotification = NotificationDto.from(
-          new Notification(user,
-              interest.getId(),
-              ResourceType.INTEREST,
-              queryResult.get(0).getInterest().getName() + "와/과 관련된 기사가 "
-                  + queryResult.get(0).getArticleCount() + "건 등록되었습니다."));
-      
+          new Notification(user, interest.getId(), ResourceType.INTEREST,
+              queryResult.get(0).getInterest().getName() + "와/과 관련된 기사가 " + queryResult.get(0)
+                  .getArticleCount() + "건 등록되었습니다."));
+
       //todo - 테스트코드 수정
       //when
 //      List<Notification> notifications = notificationService.createArticleInterestNotifications(
@@ -132,27 +113,8 @@ class NotificationServiceTest {
 //      assertEquals(expectedNotification.content(), notifications.get(0).getContent());
 //      assertFalse(expectedNotification.confirmed());
     }
-
-
-    @Test
-    @DisplayName("성공: 내가 작성한 댓글에 좋아요 눌림")
-    void createNotificationMyCommentSuccess() {
-      //given
-      Instant afterAt = Instant.now();
-
-      Comment comment = mock(Comment.class);
-      Like like = new Like();
-      like.setUser(user);
-      like.setComment(comment);
-
-      //유저가 가지고있는 마지막 좋아요 알림 시간보다 이후에 생성된 좋아요
-
-      //when
-
-    }
-
-
   }
+
 
   @Nested
   @DisplayName("알림 수정")
@@ -170,25 +132,24 @@ class NotificationServiceTest {
       //given
       Interest interest = interests.get(0);
 
-      UUID cursor = null;
-      Instant afterAt = null;
-      int limit = 50;
+      NotificationSearchRequest request = new NotificationSearchRequest(null, null, 50);
+
       UUID userId = user.getId();
 
-      PageRequest pageRequest = PageRequest.of(0, limit + 1);
+      PageRequest pageRequest = PageRequest.of(0, request.limit() + 1);
 
       List<Notification> expectNotifications = new ArrayList<>();
       expectNotifications.add(new Notification(user, interest.getId(), ResourceType.INTEREST,
           interest.getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다."));
 
       when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
-      when(notificationRepository
-          .findUnconfirmedWithCursor(userId, cursor, afterAt, pageRequest))
-          .thenReturn(expectNotifications);
+      when(
+          notificationRepository.getUnconfirmedWithCursor(userId, request.cursor(), request.after(),
+              pageRequest)).thenReturn(expectNotifications);
 
       //when
-      CursorPageResponseDto<NotificationDto> allNotifications
-          = notificationService.getAllNotifications(null, null, limit, userId);
+      CursorPageResponseDto<NotificationDto> allNotifications = notificationService.getAllNotifications(
+          request, userId);
 
       //then
       assertEquals(expectNotifications.get(0).getId(), allNotifications.content().get(0).id());
@@ -212,22 +173,18 @@ class NotificationServiceTest {
     void getNotificationHasNextTrueSuccess() {
       //given
 
-      UUID cursor = null;
-      Instant afterAt = null;
-      int limit = 1;
+      NotificationSearchRequest request = new NotificationSearchRequest(null, null, 1);
 
       UUID userId = user.getId();
 
-      PageRequest pageRequest = PageRequest.of(0, limit + 1);
+      PageRequest pageRequest = PageRequest.of(0, request.limit() + 1);
 
       List<Notification> expectNotifications = new ArrayList<>();
 
       Notification notification1 = new Notification(user, interests.get(0).getId(),
-          ResourceType.INTEREST,
-          interests.get(0).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+          ResourceType.INTEREST, interests.get(0).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
       Notification notification2 = new Notification(user, interests.get(1).getId(),
-          ResourceType.INTEREST,
-          interests.get(1).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+          ResourceType.INTEREST, interests.get(1).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
 
       UUID notificationId1 = UUID.randomUUID();
       UUID notificationId2 = UUID.randomUUID();
@@ -241,13 +198,13 @@ class NotificationServiceTest {
       expectNotifications.sort(Comparator.comparing(Notification::getCreatedAt).reversed());
 
       when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
-      when(notificationRepository
-          .findUnconfirmedWithCursor(userId, cursor, afterAt, pageRequest))
-          .thenReturn(expectNotifications);
+      when(
+          notificationRepository.getUnconfirmedWithCursor(userId, request.cursor(), request.after(),
+              pageRequest)).thenReturn(expectNotifications);
 
       //when
-      CursorPageResponseDto<NotificationDto> allNotifications
-          = notificationService.getAllNotifications(null, null, limit, userId);
+      CursorPageResponseDto<NotificationDto> allNotifications = notificationService.getAllNotifications(
+          request, userId);
 
       //then
       assertEquals(notification2.getId(), allNotifications.nextCursor());
@@ -257,25 +214,26 @@ class NotificationServiceTest {
     }
 
     @Test
-    @DisplayName("성공: 다음 페이지 있고 커서 있음 (cursor not null / afterAt not null / limit 1)")
+    @DisplayName("성공: 다음 페이지 있고 커서 없음 (cursor not null / afterAt not null / limit 1)")
     void getNotificationHasNextTrueWithCursorSuccess() {
       //given
-      int limit = 1;
       UUID userId = user.getId();
-
-      PageRequest pageRequest = PageRequest.of(0, limit + 1);
 
       List<Notification> expectNotifications = new ArrayList<>();
 
       Notification notification1 = new Notification(user, interests.get(0).getId(),
-          ResourceType.INTEREST,
-          interests.get(0).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+          ResourceType.INTEREST, interests.get(0).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
       Notification notification2 = new Notification(user, interests.get(1).getId(),
-          ResourceType.INTEREST,
-          interests.get(1).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+          ResourceType.INTEREST, interests.get(1).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
 
       UUID notificationId1 = UUID.randomUUID();
       UUID notificationId2 = UUID.randomUUID();
+
+      UUID cursor = notification2.getId();
+      Instant afterAt = notification2.getCreatedAt();
+
+      NotificationSearchRequest request = new NotificationSearchRequest(cursor, afterAt, 1);
+      PageRequest pageRequest = PageRequest.of(0, request.limit() + 1);
 
       ReflectionTestUtils.setField(notification1, "id", notificationId1);
       ReflectionTestUtils.setField(notification2, "id", notificationId2);
@@ -284,19 +242,15 @@ class NotificationServiceTest {
       expectNotifications.add(notification2);
 
       expectNotifications.sort(Comparator.comparing(Notification::getCreatedAt).reversed());
-      expectNotifications.remove(expectNotifications.size() - 1 - limit);
-
-      UUID cursor = notification2.getId();
-      Instant afterAt = notification2.getCreatedAt();
+      expectNotifications.remove(expectNotifications.size() - 1 - request.limit());
 
       when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
-      when(notificationRepository
-          .findUnconfirmedWithCursor(userId, cursor, afterAt, pageRequest))
-          .thenReturn(expectNotifications);
+      when(notificationRepository.getUnconfirmedWithCursor(userId, cursor, afterAt,
+          pageRequest)).thenReturn(expectNotifications);
 
       //when
-      CursorPageResponseDto<NotificationDto> allNotifications
-          = notificationService.getAllNotifications(cursor, afterAt, limit, userId);
+      CursorPageResponseDto<NotificationDto> allNotifications = notificationService.getAllNotifications(
+          request, userId);
 
       //then
       assertEquals(notification1.getId(), allNotifications.nextCursor());
