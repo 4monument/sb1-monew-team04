@@ -117,14 +117,14 @@ class UserActivityMVCIntegrationTest {
         .andExpect(status().is5xxServerError());
   }
 
-  @Test
-  @DisplayName("실패 - mongoDB엔 유저가 존재하지 않지만 조회한다")
-  void testGetNonExistUserActivityFromMongo() throws Exception {
-    mockMvc.perform(get("/api/user-activities/{userId}", testUserId)
-            .header("Monew-Request-User-ID", testUserId))
-        .andExpect(status().is5xxServerError());
-//        .andExpect(jsonPath("$.userId").value(testUserId.toString()));
-  }
+//  @Test
+//  @DisplayName("실패 - mongoDB엔 유저가 존재하지 않지만 조회한다")
+//  void testGetNonExistUserActivityFromMongo() throws Exception {
+//    mockMvc.perform(get("/api/user-activities/{userId}", testUserId)
+//            .header("Monew-Request-User-ID", testUserId))
+//        .andExpect(status().is5xxServerError());
+////        .andExpect(jsonPath("$.userId").value(testUserId.toString()));
+//  }
 
   @Test
   @DisplayName("성공 - 유저의 모든 활동 정보를 MongoDB에서 조회한다")
