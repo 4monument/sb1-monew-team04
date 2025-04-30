@@ -256,7 +256,7 @@ public class InterestRepositoryTest {
     }
 
     @Test
-    @DisplayName("커서 O,  보조커서 O - 구독자수 내림차순")
+    @DisplayName("커서 O,  보조커서 O - 구독자수 오름차순")
     void getInterestUsingPaginationOrderBySubscriberCursors() {
 
       //given
@@ -264,14 +264,14 @@ public class InterestRepositoryTest {
 
       // 전체 데이터 확인
       List<InterestSubscriptionInfoDto> allResults = interestRepository.getByNameOrKeywordsContaining(
-          "프로그래", null, null, "desc", "subscriberCount", PageRequest.of(0, 2));
+          "프로그래", null, null, "asc", "subscriberCount", PageRequest.of(0, 2));
 
       UUID cursorId = allResults.get(0).getInterest().getId();
       Instant afterAt = allResults.get(0).getInterest().getCreatedAt();
 
       // when - 다음 항목을 가져오기 (첫 번째 항목 제외)
       List<InterestSubscriptionInfoDto> result = interestRepository.getByNameOrKeywordsContaining(
-          "프로그래", cursorId, afterAt, "desc", "subscriberCount", PageRequest.of(0, 1));
+          "프로그래", cursorId, afterAt, "asc", "subscriberCount", PageRequest.of(0, 1));
 
       // then
       assertThat(result.size()).isNotZero();
@@ -282,8 +282,133 @@ public class InterestRepositoryTest {
     }
 
     @Test
-    @DisplayName("커서 X, 보조커서 X - 구독자수 내림차순")
+    @DisplayName("커서 O,  보조커서 O - 구독자수 오름차순(구독자 수 같을 경우)")
+    void getInterestUsingPaginationOrderBySubscriberAscCursor() {
+
+      //given
+      setUpForPagination();
+      em.persist(new Subscription(user, interestPrograming));
+      em.flush();
+
+      // 전체 데이터 확인
+      List<InterestSubscriptionInfoDto> allResults = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", null, null, "asc", "subscriberCount", PageRequest.of(0, 10));
+
+      assertThat(allResults.size()).isNotZero();
+
+      UUID cursorId = allResults.get(0).getInterest().getId();
+      Instant afterAt = allResults.get(0).getInterest().getCreatedAt();
+
+      // when - 다음 항목을 가져오기 (첫 번째 항목 제외)
+      List<InterestSubscriptionInfoDto> result = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", cursorId, afterAt, "asc", "subscriberCount", PageRequest.of(0, 1));
+
+      // then
+      assertThat(result.size()).isNotZero();
+      assertThat(result.get(0).getInterest().getId()).isEqualTo(
+          allResults.get(1).getInterest().getId());
+
+    }
+
+    @Test
+    @DisplayName("커서 O,  보조커서 O - 구독자수 내림차순(구독자 수 같을 경우)")
+    void getInterestUsingPaginationOrderBySubscriberDescCursor() {
+
+      //given
+      setUpForPagination();
+      em.persist(new Subscription(user, interestPrograming));
+      em.flush();
+
+      // 전체 데이터 확인
+      List<InterestSubscriptionInfoDto> allResults = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", null, null, "desc", "subscriberCount", PageRequest.of(0, 10));
+
+      assertThat(allResults.size()).isNotZero();
+
+      UUID cursorId = allResults.get(0).getInterest().getId();
+      Instant afterAt = allResults.get(0).getInterest().getCreatedAt();
+
+      // when - 다음 항목을 가져오기 (첫 번째 항목 제외)
+      List<InterestSubscriptionInfoDto> result = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", cursorId, afterAt, "desc", "subscriberCount", PageRequest.of(0, 1));
+
+      // then
+      assertThat(result.size()).isNotZero();
+      assertThat(result.get(0).getInterest().getId()).isEqualTo(
+          allResults.get(1).getInterest().getId());
+
+    }
+
+    @Test
+    @DisplayName("커서 O,  보조커서 O - 관심사이름 오름차순")
+    void getInterestUsingPaginationOrderByNameAscWithCursor() {
+
+      //given
+      setUpForPagination();
+
+      // 전체 데이터 확인
+      List<InterestSubscriptionInfoDto> allResults = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", null, null, "asc", "name", PageRequest.of(0, 2));
+
+      UUID cursorId = allResults.get(0).getInterest().getId();
+      Instant afterAt = allResults.get(0).getInterest().getCreatedAt();
+
+      // when - 다음 항목을 가져오기 (첫 번째 항목 제외)
+      List<InterestSubscriptionInfoDto> result = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", cursorId, afterAt, "asc", "name", PageRequest.of(0, 1));
+
+      // then
+      assertThat(result.size()).isNotZero();
+      // 가져온 첫 번째 항목이 전체 결과의 두 번째 항목과 일치해야
+      assertThat(result.get(0).getInterest().getId()).isEqualTo(
+          allResults.get(1).getInterest().getId());
+    }
+
+    @Test
+    @DisplayName("커서 O,  보조커서 O - 관심사이름 내림차순")
+    void getInterestUsingPaginationOrderByNameCursors() {
+
+      //given
+      setUpForPagination();
+
+      // 전체 데이터 확인
+      List<InterestSubscriptionInfoDto> allResults = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", null, null, "desc", "name", PageRequest.of(0, 2));
+
+      UUID cursorId = allResults.get(0).getInterest().getId();
+      Instant afterAt = allResults.get(0).getInterest().getCreatedAt();
+
+      // when - 다음 항목을 가져오기 (첫 번째 항목 제외)
+      List<InterestSubscriptionInfoDto> result = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", cursorId, afterAt, "desc", "name", PageRequest.of(0, 1));
+
+      // then
+      assertThat(result.size()).isNotZero();
+      // 가져온 첫 번째 항목이 전체 결과의 두 번째 항목과 일치해야
+      assertThat(result.get(0).getInterest().getId()).isEqualTo(
+          allResults.get(1).getInterest().getId());
+    }
+
+    @Test
+    @DisplayName("커서 X, 보조커서 X - 구독자수 오름차순")
     void getInterestUsingPaginationOrderBySubscriberCursorsNull() {
+
+      //given
+      setUpForPagination();
+
+      // 전체 데이터 확인
+      List<InterestSubscriptionInfoDto> allResults = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", null, null, "asc", "subscriberCount", PageRequest.of(0, 2));
+
+      // then
+      assertThat(allResults.size()).isNotZero();
+      assertThat(allResults.get(0).getInterest().getId()).isEqualTo(
+          allResults.get(0).getInterest().getId());
+    }
+
+    @Test
+    @DisplayName("커서 X, 보조커서 X - 이름 내림차순")
+    void getInterestUsingPaginationOrderByNameCursorsNull() {
 
       //given
       setUpForPagination();
@@ -294,8 +419,8 @@ public class InterestRepositoryTest {
 
       // then
       assertThat(allResults.size()).isNotZero();
-      assertThat(allResults.get(allResults.size() - 1).getInterest().getId()).isEqualTo(
-          allResults.get(allResults.size() - 1).getInterest().getId());
+      assertThat(allResults.get(0).getInterest().getId()).isEqualTo(
+          allResults.get(0).getInterest().getId());
     }
 
     @Test
@@ -323,8 +448,32 @@ public class InterestRepositoryTest {
     }
 
     @Test
-    @DisplayName("커서 O, 보조커서 X - 관심사 이름 오름차순")
-    void getInterestUsingPaginationOrderBySubscriberAfterAtNull() {
+    @DisplayName("커서 X, 보조커서 O - 구독자수 오름차순")
+    void getInterestUsingPaginationOrderBySubscriberCursorIdNull() {
+
+      //given
+      setUpForPagination();
+
+      // 전체 데이터 확인
+      List<InterestSubscriptionInfoDto> allResults = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", null, null, "asc", "subscriberCount", PageRequest.of(0, 2));
+
+      UUID cursorId = allResults.get(0).getInterest().getId();
+
+      // when - 다음 항목을 가져오기 (첫 번째 항목 제외)
+      List<InterestSubscriptionInfoDto> result = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", cursorId, null, "asc", "subscriberCount", PageRequest.of(0, 1));
+
+      // then
+      assertThat(result.size()).isNotZero();
+      // 가져온 첫 번째 항목이 전체 결과의 두번째 항목과 일치해야함
+      assertThat(result.get(0).getInterest().getId()).isEqualTo(
+          allResults.get(0).getInterest().getId());
+    }
+
+    @Test
+    @DisplayName("커서 O, 보조커서 X - 관심사 이름 내림차순")
+    void getInterestUsingPaginationOrderByNameAfterAtNull() {
 
       //given
       setUpForPagination();
@@ -347,6 +496,30 @@ public class InterestRepositoryTest {
     }
 
     @Test
+    @DisplayName("커서 O, 보조커서 X - 구독자수 내림차순")
+    void getInterestUsingPaginationOrderBySubscriberAfterAtNull() {
+
+      //given
+      setUpForPagination();
+
+      // 전체 데이터 확인
+      List<InterestSubscriptionInfoDto> allResults = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", null, null, "asc", "subscriberCount", PageRequest.of(0, 2));
+
+      Instant afterAt = allResults.get(0).getInterest().getCreatedAt();
+
+      // when - 다음 항목을 가져오기 (첫 번째 항목 제외)
+      List<InterestSubscriptionInfoDto> result = interestRepository.getByNameOrKeywordsContaining(
+          "프로그래", null, afterAt, "asc", "subscriberCount", PageRequest.of(0, 1));
+
+      // then
+      assertThat(result.size()).isNotZero();
+      // 가져온 첫 번째 항목이 전체 결과의 두번째 항목과 일치해야함
+      assertThat(result.get(0).getInterest().getId()).isEqualTo(
+          allResults.get(0).getInterest().getId());
+    }
+
+    @Test
     @DisplayName("검색 결과가 없음(0개)")
     void getInterestUsingPaginationOrderBySubscriberAfterAtZero() {
       //given
@@ -358,6 +531,49 @@ public class InterestRepositoryTest {
 
       // then
       assertThat(result.size()).isZero();
+    }
+
+    @Test
+    @DisplayName("검색어가 없음 - 페이지 크기 만큼 조회")
+    void getInterestUsingPaginationWithNoKeywords() {
+      //given
+      setUpForPagination();
+
+      // 전체 데이터 확인
+      List<InterestSubscriptionInfoDto> result = interestRepository.getByNameOrKeywordsContaining(
+          null, null, null, "asc", "name", PageRequest.of(0, 3));
+
+      // then
+      assertThat(result.size()).isEqualTo(3);
+    }
+
+
+    @Test
+    @DisplayName("정렬 조건 없음")
+    void getInterestUsingPaginationWithNoSortField() {
+      //given
+      setUpForPagination();
+
+      // 전체 데이터 확인
+      List<InterestSubscriptionInfoDto> result = interestRepository.getByNameOrKeywordsContaining(
+          null, null, null, "asc", null, PageRequest.of(0, 10));
+
+      // then
+      assertThat(result.size()).isEqualTo(5);
+    }
+
+    @Test
+    @DisplayName("정렬 순서 없음")
+    void getInterestUsingPaginationWithNoSortDirection() {
+      //given
+      setUpForPagination();
+
+      // 전체 데이터 확인
+      List<InterestSubscriptionInfoDto> result = interestRepository.getByNameOrKeywordsContaining(
+          null, null, null, null, "subscriberCount", PageRequest.of(0, 10));
+
+      // then
+      assertThat(result.size()).isEqualTo(5);
     }
   }
 }
