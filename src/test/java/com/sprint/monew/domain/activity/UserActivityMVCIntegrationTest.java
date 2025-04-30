@@ -51,6 +51,7 @@ class UserActivityMVCIntegrationTest {
   static void setProperties(DynamicPropertyRegistry registry) {
     // MongoDB 연결
     registry.add("spring.data.mongodb.uri", () -> mongo.getConnectionString());
+    registry.add("spring.data.mongodb.database", () -> "test-db");
 
     // PostgreSQL 연결
     PostgresContainer postgres = PostgresContainer.getInstance();
