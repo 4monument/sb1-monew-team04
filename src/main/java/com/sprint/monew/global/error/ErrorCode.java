@@ -28,7 +28,10 @@ public enum ErrorCode {
   COMMENT_NOT_FOUND("댓글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
   COMMENT_NOT_OWNED("사용자가 작성하지 않은 댓글입니다.", HttpStatus.BAD_REQUEST),
 
-  LIKE_ALREADY_EXIST("이미 좋아요를 누른 댓글입니다.", HttpStatus.BAD_REQUEST);
+  LIKE_ALREADY_EXIST("이미 좋아요를 누른 댓글입니다.", HttpStatus.BAD_REQUEST),
+
+  // Activity 관련 에러코드
+  ACTIVITY_NOT_FOUND("활동내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
   private final String message;
   private final HttpStatus status;

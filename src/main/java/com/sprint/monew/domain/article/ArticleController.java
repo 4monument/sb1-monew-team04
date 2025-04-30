@@ -31,7 +31,7 @@ public class ArticleController {
 
   private final ArticleService articleService;
 
-  @PostMapping("/{id}/article-views")
+  @PostMapping("/{articleId}/article-views")
   public ResponseEntity<ArticleViewDto> registerArticleView(
       @PathVariable UUID articleId,
       @RequestHeader("Monew-Request-User-ID") UUID userId

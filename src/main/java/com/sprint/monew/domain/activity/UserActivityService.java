@@ -1,8 +1,10 @@
 package com.sprint.monew.domain.activity;
 
+import com.sprint.monew.domain.activity.exception.UserActivityNotFoundException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,22 +19,25 @@ public class UserActivityService {
 
   public UserActivityDto getUserActivityFromMongo(UUID userId) {
     UserActivityDocument document = userActivityMongoRepository.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("User not found in MongoDB: " + userId));
-
+        .orElseThrow(() -> UserActivityNotFoundException.withId(userId));
     return UserActivityDto.fromDocument(document);
   }
 
-  public UserActivityDto saveUserActivityToMongo(UUID userId) {
+  @Transactional
+  public UserActivityDto synchronizeUserActivityToMongo(UUID userId) {
     UserActivityDto dto = userActivityQueryRepository.findUserActivity(userId);
     UserActivityDocument document = UserActivityDto.toDocument(dto);
     userActivityMongoRepository.save(document);
-
     return dto;
   }
 
+  @Transactional
+  public UserActivityDto saveUserActivityToMongo(UUID userId) {
+    return synchronizeUserActivityToMongo(userId);
+  }
+
+  @Transactional
   public void updateUserActivity(UUID userId) {
-    UserActivityDto dto = userActivityQueryRepository.findUserActivity(userId);
-    UserActivityDocument document = UserActivityDto.toDocument(dto);
-    userActivityMongoRepository.save(document);
+    synchronizeUserActivityToMongo(userId);
   }
 }

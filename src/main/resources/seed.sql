@@ -5,8 +5,8 @@ ALTER TABLE "users"
     ALTER COLUMN "created_at" SET DEFAULT now();
 -- USERS (사용자)
 INSERT INTO "users" ("id", "email", "nickname", "password")
-VALUES (gen_random_uuid(), 'minji@example.com', '민지', 'hashed_pw1'),
-       (gen_random_uuid(), 'hoyeon@example.com', '호연', 'hashed_pw2');
+VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'minji@example.com', '민지', 'hashed_pw1'),
+       ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'hoyeon@example.com', '호연', 'hashed_pw2');
 
 -- INTERESTS (관심사)
 INSERT INTO "interests" ("id", "name", "keywords", "created_at")
@@ -31,11 +31,11 @@ INSERT
 INTO "users_interests" ("id", "user_id", "interest_id", "created_at")
 SELECT gen_random_uuid(), u1.user_id, i1.interest_id, now()
 FROM u1,
-     i1
-UNION
-SELECT gen_random_uuid(), u2.user_id, i2.interest_id, now()
-FROM u2,
-     i2;
+     i1;
+-- UNION
+-- SELECT gen_random_uuid(), u2.user_id, i2.interest_id, now()
+-- FROM u2,
+--      i2;
 
 -- ARTICLES (기사)
 INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date")
@@ -95,11 +95,11 @@ INSERT
 INTO "articles_views" ("id", "user_id", "article_id", "created_at")
 SELECT gen_random_uuid(), u1.user_id, a1.article_id, now()
 FROM u1,
-     a1
-UNION
-SELECT gen_random_uuid(), u2.user_id, a2.article_id, now()
-FROM u2,
-     a2;
+     a1;
+-- UNION
+-- SELECT gen_random_uuid(), u2.user_id, a2.article_id, now()
+-- FROM u2,
+--      a2;
 
 -- NOTIFICATIONS (알림)
 WITH u1 AS (SELECT id AS user_id FROM users WHERE email = 'minji@example.com'),
@@ -141,17 +141,17 @@ WHERE conrelid = 'notifications'::regclass;
 INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date")
 VALUES
     -- 기술 관련 기사
-    (gen_random_uuid(), 'ZDNet', 'https://zdnet.com/quantum', '양자 컴퓨팅의 혁신적 발전',
+    (gen_random_uuid(), 'NAVER', 'https://zdnet.com/quantum', '양자 컴퓨팅의 혁신적 발전',
      '최신 양자 컴퓨팅 기술의 발전과 산업 적용 사례', now()),
-    (gen_random_uuid(), 'TechCrunch', 'https://techcrunch.com/blockchain', '블록체인이 바꾸는 금융의 미래',
+    (gen_random_uuid(), 'YONHAP', 'https://techcrunch.com/blockchain', '블록체인이 바꾸는 금융의 미래',
      '블록체인 기술의 금융권 적용과 미래 전망', now()),
-    (gen_random_uuid(), 'MIT Tech Review', 'https://mittr.com/robotics', '로봇 공학의 최신 동향',
+    (gen_random_uuid(), 'YONHAP', 'https://mittr.com/robotics', '로봇 공학의 최신 동향',
      '자율주행 로봇과 산업용 로봇의 최신 기술 동향', now()),
 
     -- 건강 관련 기사
-    (gen_random_uuid(), 'Health Today', 'https://healthtoday.com/nutrition', '영양소의 균형과 장수',
+    (gen_random_uuid(), 'YONHAP', 'https://healthtoday.com/nutrition', '영양소의 균형과 장수',
      '올바른 영양 섭취로 건강한 삶을 유지하는 방법', now()),
-    (gen_random_uuid(), 'Medical Journal', 'https://medjournal.com/mental', '정신 건강의 중요성',
+    (gen_random_uuid(), 'YONHAP', 'https://medjournal.com/mental', '정신 건강의 중요성',
      '현대 사회에서 정신 건강을 유지하는 실용적 방법', now());
 
 -- 새 기사와 관심사 연결
