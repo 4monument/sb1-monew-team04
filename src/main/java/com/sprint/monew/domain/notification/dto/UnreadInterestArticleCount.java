@@ -10,4 +10,5 @@ public interface UnreadInterestArticleCount {
   User getUser();
 
   Long getArticleCount();
+
 }

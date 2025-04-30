@@ -1,8 +1,5 @@
 package com.sprint.monew.common.batch.temp;
 
-
-import static com.sprint.monew.domain.article.QArticle.*;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
