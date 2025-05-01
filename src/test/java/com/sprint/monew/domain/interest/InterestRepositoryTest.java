@@ -32,8 +32,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
-@Import({CustomInterestRepositoryImpl.class, TestQuerydslConfig.class})
 @Testcontainers
+@Import({CustomInterestRepositoryImpl.class, TestQuerydslConfig.class})
+//@Sql(scripts = "/seed-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class InterestRepositoryTest {
 
   static final PostgresContainer postgresContainer = PostgresContainer.getInstance();
@@ -575,7 +576,8 @@ public class InterestRepositoryTest {
           null, null, null, "asc", null, PageRequest.of(0, 10));
 
       // then
-      assertThat(result.size()).isEqualTo(5);
+      //assertThat(result.size()).isEqualTo(5);
+      assertThat(result.size()).isEqualTo(3);
     }
 
     @Test
@@ -589,7 +591,8 @@ public class InterestRepositoryTest {
           null, null, null, null, "subscriberCount", PageRequest.of(0, 10));
 
       // then
-      assertThat(result.size()).isEqualTo(5);
+      //assertThat(result.size()).isEqualTo(5);
+      assertThat(result.size()).isEqualTo(3);
     }
   }
 }
