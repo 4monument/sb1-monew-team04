@@ -44,6 +44,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         .leftJoin(comment.likes, likeAll)
         .leftJoin(comment.likes, likeMe).on(likeMe.user.id.eq(userId))
         .where(
+            comment.deleted.isFalse(),
             articleIdEq(condition.articleId()),
             createdAtCursor(condition.cursor(), pageable.getSort())
         )
