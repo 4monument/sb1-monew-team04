@@ -4,9 +4,12 @@ import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.*
 import static org.springframework.batch.core.ExitStatus.*;
 
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
+import com.sprint.monew.common.batch.support.InterestSingleton;
 import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
+import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.InterestRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -48,7 +51,8 @@ public class ArticleCollectBatch {
       @Qualifier("interestsFetchStep") Step interestsFetchStep,
       @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow,
       @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener,
-      @Qualifier("backupArticleJobStep") Step backupArticleJobStep) {
+      @Qualifier("localBackupArticlesStep") Step localBackupStep,
+      @Qualifier("uploadS3ArticleDtosStep") Step s3BackupStep) {
 
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
@@ -56,7 +60,8 @@ public class ArticleCollectBatch {
         .on(COMPLETED.getExitCode())
         .to(naverArticleCollectFlow)// 1. Article 자료 수집
         //.split(taskExecutor()).add(null) // 여기에 추가 API 호출 되는 Flow 복붙하면 완성
-        .next(backupArticleJobStep) // 2. backup + 필터링
+        .next(localBackupStep)
+        .next(s3BackupStep)
         .end()
         .listener(jobContextCleanupListener)
         .build();
@@ -65,14 +70,14 @@ public class ArticleCollectBatch {
   @Bean(name = "interestsFetchStep")
   @JobScope
   public Step interestsFetchStep(InterestRepository interestRepository,
-      @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener) {
+      @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener,
+      InterestSingleton interests) {
 
     return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
 
-          ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
-          Interests interests = new Interests(interestRepository.findAll());
-          stepContext.put(INTERESTS.getKey(), interests);
+          List<Interest> interestList = interestRepository.findAll();
+          interests.registerInterests(interestList);
 
           return RepeatStatus.FINISHED;
         }, transactionManager)

@@ -4,6 +4,7 @@ import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.A
 
 import com.sprint.monew.common.batch.support.ArticleInterestJdbc;
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
+import com.sprint.monew.common.batch.support.InterestSingleton;
 import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
@@ -24,9 +25,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
-import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,14 +62,14 @@ public class ArticleChunkConfig {
   @Bean
   @StepScope
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> articleCollectProcessor(
-      @Value("#{JobExecutionContext['interests']}") Interests interests) {
+      InterestSingleton interests) {
     return interests::toArticleWithRelevantInterests;
   }
 
   @Bean
   @StepScope
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor(
-      @Value("#{JobExecutionContext['interests']}") Interests interests) {
+      InterestSingleton interests) {
     return item -> {
       if (interests.isDuplicateUrl(item)) {
         return null;
@@ -115,12 +114,14 @@ public class ArticleChunkConfig {
 
       stepContext.put(ARTICLE_IDS.getKey(), articleIdList);
 
+      Chunk<Article> chunkArticles = new Chunk<>();
+      Chunk<ArticleInterestJdbc> chunkArticleInterests = new Chunk<>();
+
       log.info("저장 될 Article size : {}", articlesWithId.size());
       log.info("저장 될 Article Interest size : {}", articleInterestsJdbc.size());
 
-      articleJdbcItemWriter.write((Chunk<? extends Article>) articlesWithId);
-      articleInterestJdbcItemWriter.write(
-          (Chunk<? extends ArticleInterestJdbc>) articleInterestsJdbc);
+      articleJdbcItemWriter.write(chunkArticles);
+      articleInterestJdbcItemWriter.write(chunkArticleInterests);
     };
   }
 
@@ -136,7 +137,7 @@ public class ArticleChunkConfig {
         .dataSource(dataSource)
         .assertUpdates(false)
         .sql(articleInsertSql)
-        .columnMapped()
+        .beanMapped()
         .build();
   }
 
@@ -152,7 +153,7 @@ public class ArticleChunkConfig {
         .dataSource(dataSource)
         .assertUpdates(false)
         .sql(articleInterestInsertSql)
-        .columnMapped()
+        .beanMapped()
         .build();
   }
 }

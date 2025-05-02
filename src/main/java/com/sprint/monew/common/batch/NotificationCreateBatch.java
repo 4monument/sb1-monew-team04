@@ -80,13 +80,13 @@ public class NotificationCreateBatch {
     String notificationInsertSql =
         "INSERT INTO notifications (id, user_id, resource_id, resource_type, content, created_at, updated_at, confirmed)"
             +
-            " VALUES (:id, userId, resourceId, resourceType, content, createdAt, updatedAt, confirmed)";
+            " VALUES (:id, :userId, :resourceId, :resourceType, :content, :createdAt, :updatedAt, :confirmed)";
 
     return new JdbcBatchItemWriterBuilder<NotificationJdbc>()
         .dataSource(dataSource)
         .assertUpdates(false)
         .sql(notificationInsertSql)
-        .columnMapped()
+        .beanMapped()
         .build();
   }
 }

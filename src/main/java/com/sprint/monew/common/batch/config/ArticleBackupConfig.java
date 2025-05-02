@@ -1,5 +1,6 @@
 package com.sprint.monew.common.batch.config;
 
+import com.sprint.monew.common.batch.support.InterestSingleton;
 import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.global.config.S3ConfigProperties;
@@ -21,6 +22,7 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -43,26 +45,6 @@ public class ArticleBackupConfig {
   private final PlatformTransactionManager transactionManager;
   private final S3Client s3Client;
   private final S3ConfigProperties s3Properties;
-  private final JobLauncher jobLauncher;
-
-  @Bean(name = "backupArticleJobStep")
-  public Step backupArticleJobStep(@Qualifier("backupArticleJob") Job backupArticleJob) {
-    return new StepBuilder("backupArticleJobStep", jobRepository)
-        .job(backupArticleJob)
-        .launcher(jobLauncher)
-        .build();
-  }
-
-  @Bean
-  public Job backupArticleJob(
-      @Qualifier("localBackupArticlesStep") Step localBackupArticlesStep,
-      @Qualifier("uploadS3ArticleDtosStep") Step uploadS3ArticleDtosStep) {
-    return new JobBuilder("backupArticleJob", jobRepository)
-        .incrementer(new RunIdIncrementer())
-        .start(localBackupArticlesStep)
-        .next(uploadS3ArticleDtosStep)
-        .build();
-  }
 
   /**
    * 임시로 로컬에 저장
@@ -70,7 +52,7 @@ public class ArticleBackupConfig {
   @Bean
   public Step localBackupArticlesStep(
       @Qualifier("backupContextReader") ItemReader<ArticleApiDto> backupArticlesContextReader,
-      @Qualifier("backupLocalArticlesWriter") ItemWriter<ArticleApiDto> backupLocalArticlesWriter,
+      @Qualifier("backupLocalArticlesWriter") FlatFileItemWriter<ArticleApiDto> backupLocalArticlesWriter,
       @Qualifier("backupArticleFilterProcessor") ItemProcessor<ArticleApiDto, ArticleApiDto> backupArticleFilterProcessor) {
     return new StepBuilder("backupArticlesStep", jobRepository)
         .<ArticleApiDto, ArticleApiDto>chunk(200, transactionManager)
@@ -83,12 +65,10 @@ public class ArticleBackupConfig {
   @Bean
   @StepScope
   public ItemReader<ArticleApiDto> backupContextReader(
-      @Value("#{jobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> naverArticleApiDtos,
-      @Value("#{jobExecutionContext['chosunArticleDtos']}") List<ArticleApiDto> chosunArticleDtos) {
+      @Value("#{jobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> naverArticleApiDtos) {
     // 신문사 추가할떄마다 추가할 곳
-
     List<ArticleApiDto> allDtos = new ArrayList<>();
-    allDtos.addAll(chosunArticleDtos);
+    //allDtos.addAll(chosunArticleDtos);
     allDtos.addAll(naverArticleApiDtos);
     return new ListItemReader<>(allDtos);
   }
@@ -96,17 +76,18 @@ public class ArticleBackupConfig {
   @Bean
   @StepScope
   public ItemProcessor<ArticleApiDto, ArticleApiDto> backupArticleFilterProcessor(
-      @Value("#{jobExecutionContext['interests']}") Interests interests) {
+      InterestSingleton interests) {
     return interests::filter;
   }
 
   @Bean
   @StepScope
-  public ItemWriter<ArticleApiDto> backupLocalArticlesWriter() {
+  public FlatFileItemWriter<ArticleApiDto> backupLocalArticlesWriter() {
     log.info("S3 Backup Writer Run");
     String[] header = {"source", "sourceUrl", "title", "publishDate", "summary"};
 
     return new FlatFileItemWriterBuilder<ArticleApiDto>()
+        .name("backupLocalArticlesWriter")
         .append(true)
         .resource(new FileSystemResource(getNowLocalPath()))
         .delimited().delimiter(",")
