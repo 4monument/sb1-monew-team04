@@ -70,7 +70,7 @@ public class NotificationService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> UserNotFoundException.withId(userId));
 
-    int limit = request.limit();
+    int limit = request.limit() == null ? 30 : request.limit();
     UUID cursor = request.cursor();
     Instant after = request.after();
 
