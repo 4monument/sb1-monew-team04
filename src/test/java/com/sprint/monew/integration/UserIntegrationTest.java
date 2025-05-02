@@ -1,15 +1,15 @@
 package com.sprint.monew.integration;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sprint.monew.MongoContainer;
 import com.sprint.monew.PostgresContainer;
 import com.sprint.monew.domain.user.UserLoginRequest;
 import com.sprint.monew.domain.user.UserRegisterRequest;
@@ -43,9 +43,11 @@ public class UserIntegrationTest {
   private ObjectMapper objectMapper;
 
   static final PostgresContainer postgresContainer = PostgresContainer.getInstance();
+  static final MongoContainer mongoContainer = MongoContainer.getInstance();
 
   static {
     postgresContainer.start();
+    mongoContainer.start();
   }
 
   @DynamicPropertySource
@@ -53,6 +55,8 @@ public class UserIntegrationTest {
     registry.add("spring.datasource.url", postgresContainer::getJdbcUrl);
     registry.add("spring.datasource.username", postgresContainer::getUsername);
     registry.add("spring.datasource.password", postgresContainer::getPassword);
+
+    registry.add("spring.data.mongodb.uri", MongoContainer.getInstance()::getReplicaSetUrl);
   }
 
   @Test
