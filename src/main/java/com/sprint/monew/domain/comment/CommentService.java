@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +48,8 @@ public class CommentService {
 
   //댓글 조회 메서드
   public CursorPageResponseDto<CommentDto> getComments(CommentRequest request, UUID userId, Pageable pageable) {
-    Page<CommentDto> page = commentRepository.getComments(request, userId, pageable);
+    Slice<CommentDto> page = commentRepository.getComments(request, userId, pageable);
+    long totalElement = commentRepository.countByArticle_Id(request.articleId());
 
     List<CommentDto> content = page.getContent();
     Sort sort = page.getSort();
@@ -70,7 +71,7 @@ public class CommentService {
         nextCursor,
         after,
         page.getSize(),
-        page.getTotalElements(),
+        totalElement,
         page.hasNext()
     );
   }
