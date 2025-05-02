@@ -3,12 +3,9 @@ package com.sprint.monew.common.batch.support;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.interest.Interest;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.swing.text.html.Option;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +31,7 @@ public class InterestSingleton {
   }
 
   public ArticleApiDto filter(ArticleApiDto articleApiDto){
-    if (isContainKeywords(articleApiDto) && !isDuplicateUrl(articleApiDto)) {
+    if (isContainKeywords(articleApiDto) && isNewUrl(articleApiDto)) {
       return articleApiDto;
     }
     return null;
@@ -52,7 +49,7 @@ public class InterestSingleton {
     sourceUrlFilterSet.addAll(sourceUrls);
   }
 
-  public boolean isDuplicateUrl(ArticleApiDto articleApiDto) {
+  public boolean isNewUrl(ArticleApiDto articleApiDto) {
     return sourceUrlFilterSet.add(articleApiDto.sourceUrl());
   }
 

@@ -26,6 +26,7 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
+import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -99,10 +100,15 @@ public class ArticleBackupConfig {
 
     return new FlatFileItemWriterBuilder<ArticleApiDto>()
         .name("backupLocalArticlesWriter")
-        .append(true)
+        .append(false)
+        .encoding("UTF-8")
+        .shouldDeleteIfExists(true)
         .resource(new FileSystemResource(getNowLocalPath()))
-        .delimited().delimiter(",")
-        .names(header)
+        .delimited()                          // , 로 구분
+        .delimiter(",")
+        .names("source","sourceUrl","title","publishDate","summary")
+        .headerCallback(w ->                  // BOM + 헤더 한 줄 쓰기
+            w.write("\uFEFFsource,sourceUrl,title,publishDate,summary"))
         .build();
   }
 
@@ -119,7 +125,7 @@ public class ArticleBackupConfig {
           PutObjectRequest putObjectRequest = PutObjectRequest.builder()
               .key(s3Path)
               .bucket(s3Properties.bucket())
-              .contentType("text/csv")
+              .contentType("text/csv; charset=UTF-8")
               .build();
 
           File localCsvFile = new File(getNowLocalPath());
@@ -127,7 +133,7 @@ public class ArticleBackupConfig {
 
           s3Client.putObject(putObjectRequest, requestBody);
 
-          Files.delete(localCsvFile.toPath());
+          //Files.delete(localCsvFile.toPath());
           return RepeatStatus.FINISHED;
 
         }, transactionManager)

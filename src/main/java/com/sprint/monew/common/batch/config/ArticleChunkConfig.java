@@ -5,11 +5,10 @@ import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.A
 import com.sprint.monew.common.batch.support.ArticleInterestJdbc;
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
 import com.sprint.monew.common.batch.support.InterestSingleton;
-import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
-import com.sprint.monew.domain.article.articleinterest.ArticleInterest;
 import jakarta.persistence.EntityManagerFactory;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -71,7 +70,7 @@ public class ArticleChunkConfig {
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor(
       InterestSingleton interests) {
     return item -> {
-      if (interests.isDuplicateUrl(item)) {
+      if (interests.isNewUrl(item)) {
         // 메트릭
         return null;
       }
@@ -119,7 +118,9 @@ public class ArticleChunkConfig {
       log.info("articleInterestJdbc : {}", articleInterestsJdbc);
 
       Chunk<Article> chunkArticles = new Chunk<>();
+      chunkArticles.addAll(articlesWithId);
       Chunk<ArticleInterestJdbc> chunkArticleInterests = new Chunk<>();
+      chunkArticleInterests.addAll(articleInterestsJdbc);
 
       log.info("저장 될 Article size : {}", articlesWithId.size());
       log.info("저장 될 Article Interest size : {}", articleInterestsJdbc.size());
@@ -134,13 +135,22 @@ public class ArticleChunkConfig {
   public JdbcBatchItemWriter<Article> articleJdbcItemWriter() {
 
     String articleInsertSql =
-        "INSERT INTO articles (id, source, source_url, title, publish_date, summary, deleted) " +
-            "VALUES (:id, :source, :sourceUrl, :title, :publishDate, :summary, :deleted)";
+        "INSERT INTO articles (id, source, source_url, title, publish_date, summary, deleted) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     return new JdbcBatchItemWriterBuilder<Article>()
         .dataSource(dataSource)
         .assertUpdates(false)
         .sql(articleInsertSql)
+        .itemPreparedStatementSetter((item, ps) -> {
+          ps.setObject(1, item.getId());
+          ps.setString(2, item.getSource().name());
+          ps.setString(3, item.getSourceUrl());
+          ps.setString(4, item.getTitle());
+          ps.setTimestamp(5, Timestamp.from(item.getPublishDate()));
+          ps.setString(6, item.getSummary());
+          ps.setBoolean(7, false);
+        })
         .beanMapped()
         .build();
   }
@@ -149,15 +159,19 @@ public class ArticleChunkConfig {
   @StepScope
   public JdbcBatchItemWriter<ArticleInterestJdbc> articleInterestJdbcItemWriter() {
 
-    String articleInterestInsertSql =
-        "INSERT INTO article_interests (id, article_id, interest_id, created_at) " +
-            "VALUES (:id, :articleId, :interestId, :createdAt)";
+    String articleInterestInsertSql = "INSERT INTO articles_interests " +
+        "(id, article_id, interest_id, created_at) VALUES (?, ?, ?, ?)";
 
     return new JdbcBatchItemWriterBuilder<ArticleInterestJdbc>()
         .dataSource(dataSource)
         .assertUpdates(false)
         .sql(articleInterestInsertSql)
-        .beanMapped()
+        .itemPreparedStatementSetter((item, ps) -> {
+          ps.setObject(1, item.id());
+          ps.setObject(2, item.articleId());
+          ps.setObject(3, item.interestId());
+          ps.setTimestamp(4, Timestamp.from(item.createdAt()));
+        })
         .build();
   }
 }

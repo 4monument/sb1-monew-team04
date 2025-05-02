@@ -47,7 +47,7 @@ public class ArticleApiClient {
   }
 
   public List<ArticleApiDto> getNaverArticle() {
-    return getNaverArticle(10, 1);
+    return getNaverArticle(100, 1);
   }
 
   /**
