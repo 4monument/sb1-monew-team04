@@ -2,6 +2,7 @@ package com.sprint.monew.domain.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
@@ -38,6 +39,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("알림 서비스 테스트")
 class NotificationServiceTest {
 
   @Mock
@@ -105,7 +107,7 @@ class NotificationServiceTest {
     assertEquals(expectResult.resourceId(), articleInterestNotification.resourceId());
     assertEquals(ResourceType.INTEREST, articleInterestNotification.resourceType());
     assertFalse(articleInterestNotification.confirmed());
-    
+
   }
 
   @Nested
@@ -265,6 +267,33 @@ class NotificationServiceTest {
   @Nested
   @DisplayName("알림 조회")
   class getNotificationTest {
+
+    @Test
+    @DisplayName("성공: 새로운 알림이 없음")
+    void getNotificationSuccess() {
+      //given
+
+      NotificationSearchRequest request = new NotificationSearchRequest(null, null, 50);
+      UUID userId = user.getId();
+
+      PageRequest pageRequest = PageRequest.of(0, request.limit() + 1);
+
+      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
+      when(
+          notificationRepository.getUnconfirmedWithCursor(userId, request.cursor(), request.after(),
+              pageRequest)).thenReturn(List.of());
+
+      //when
+      CursorPageResponseDto<NotificationDto> results = notificationService.getAllNotifications(
+          request, userId);
+
+      //then
+      assertEquals(0, results.content().size());
+      assertNull(results.nextCursor());
+      assertNull(results.nextAfter());
+      assertEquals(0, results.size());
+      assertEquals(0, results.totalElements());
+    }
 
     @Test
     @DisplayName("성공: 다음 페이지 없음 (cursor null / afterAt null / limit 50)")
