@@ -48,10 +48,11 @@ public class ArticleCollectBatch {
   public Job articleCollectJob(
       @Qualifier("interestsAndUrlsFetchStep") Step interestsAndUrlsFetchStep,
       @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow,
-      @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener,
       @Qualifier("localBackupArticlesStep") Step localBackupStep,
       @Qualifier("uploadS3ArticleDtosStep") Step s3BackupStep,
-      @Qualifier("naverArticleHandlerStep") Step naverArticleHandlerStep) {
+      @Qualifier("naverArticleHandlerStep") Step naverArticleHandlerStep,
+      @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener,
+      @Qualifier("interestContainerCleanupListener") JobExecutionListener interestContainerCleanupListener) {
 
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
@@ -64,6 +65,7 @@ public class ArticleCollectBatch {
         .next(naverArticleHandlerStep)
         .end()
         .listener(jobContextCleanupListener)
+        .listener(interestContainerCleanupListener)
         .build();
   }
 

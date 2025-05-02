@@ -76,7 +76,7 @@ public class InterestContainer {
         interestList
     );
   }
-  private void clearBean() {
+  public void clearBean() {
     this.interests.clear();
     this.keywords.clear();
     this.sourceUrlFilterSet.clear();
