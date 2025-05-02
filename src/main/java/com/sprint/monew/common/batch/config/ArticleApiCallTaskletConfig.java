@@ -4,6 +4,7 @@ import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.C
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.HANKYUNG_ARTICLE_DTOS;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.NAVER_ARTICLE_DTOS;
 
+import com.sprint.monew.common.batch.support.InterestSingleton;
 import com.sprint.monew.domain.article.api.ArticleApiClient;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import java.util.List;
@@ -23,22 +24,30 @@ public class ArticleApiCallTaskletConfig {
 
   @Bean
   @StepScope
-  public Tasklet naverApiCallTasklet() {
+  public Tasklet naverApiCallTasklet(InterestSingleton interestSingleton) {
     return (contribution, chunkContext) -> {
       List<ArticleApiDto> articleApiDtos = articleApiClient.getNaverArticle();
+      List<ArticleApiDto> filteredApiDtos = articleApiDtos.stream()
+          .map(interestSingleton::filter)
+          .toList();
+
       ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
-      stepContext.put(NAVER_ARTICLE_DTOS.getKey(), articleApiDtos);
+      stepContext.put(NAVER_ARTICLE_DTOS.getKey(), filteredApiDtos);
       return RepeatStatus.FINISHED;
     };
   }
 
   @Bean
   @StepScope
-  public Tasklet chosunApiCallTasklet() {
+  public Tasklet chosunApiCallTasklet(InterestSingleton interestSingleton) {
     return (contribution, chunkContext) -> {
       List<ArticleApiDto> articleApiDtos = articleApiClient.getNaverArticle();
+      List<ArticleApiDto> filteredApiDtos = articleApiDtos.stream()
+          .map(interestSingleton::filter)
+          .toList();
+
       ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
-      stepContext.put(CHOSUN_ARTICLE_DTOS.getKey(), articleApiDtos);
+      stepContext.put(CHOSUN_ARTICLE_DTOS.getKey(), filteredApiDtos);
       return RepeatStatus.FINISHED;
     };
   }

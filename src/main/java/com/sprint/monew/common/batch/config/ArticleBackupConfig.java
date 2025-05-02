@@ -55,12 +55,10 @@ public class ArticleBackupConfig {
   @Bean
   public Step localBackupArticlesStep(
       @Qualifier("backupContextReader") ItemReader<ArticleApiDto> backupArticlesContextReader,
-      @Qualifier("backupLocalArticlesWriter") FlatFileItemWriter<ArticleApiDto> backupLocalArticlesWriter,
-      @Qualifier("backupArticleFilterProcessor") ItemProcessor<ArticleApiDto, ArticleApiDto> backupArticleFilterProcessor) {
+      @Qualifier("backupLocalArticlesWriter") FlatFileItemWriter<ArticleApiDto> backupLocalArticlesWriter) {
     return new StepBuilder("backupArticlesStep", jobRepository)
         .<ArticleApiDto, ArticleApiDto>chunk(200, transactionManager)
         .reader(backupArticlesContextReader)
-        .processor(backupArticleFilterProcessor)
         .writer(backupLocalArticlesWriter)
         .build();
   }
@@ -75,21 +73,6 @@ public class ArticleBackupConfig {
     allDtos.addAll(naverArticleApiDtos);
     log.info("backup read start : dto size = {}", allDtos.size());
     return new ListItemReader<>(allDtos);
-  }
-
-  @Bean
-  @StepScope
-  public ItemProcessor<ArticleApiDto, ArticleApiDto> backupArticleFilterProcessor(
-      InterestSingleton interests) {
-
-    return item -> {
-      ArticleApiDto filteredDto = interests.filter(item);
-      if (filteredDto == null) {
-        // metric 증가하도록 설계하기
-        return null;
-      }
-      return filteredDto;
-    };
   }
 
   @Bean
@@ -147,4 +130,21 @@ public class ArticleBackupConfig {
     LocalDateTime now = LocalDateTime.now();
     return String.format("%s-%s.csv", now.toLocalDate(), now.getHour());
   }
+
+
+
+//  @Bean
+//  @StepScope
+//  public ItemProcessor<ArticleApiDto, ArticleApiDto> backupArticleFilterProcessor(
+//      InterestSingleton interests) {
+//
+//    return item -> {
+//      ArticleApiDto filteredDto = interests.filter(item);
+//      if (filteredDto == null) {
+//        // metric 증가하도록 설계하기
+//        return null;
+//      }
+//      return filteredDto;
+//    };
+//  }
 }

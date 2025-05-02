@@ -18,17 +18,17 @@ public class InterestSingleton {
   private final Set<String> sourceUrlFilterSet = ConcurrentHashMap.newKeySet();
 
   public void register(List<Interest> interests, List<String> sourceUrls) {
-    this.interests.clear();
-    this.keywords.clear();
-    this.sourceUrlFilterSet.clear();
+    clearBean();
 
     this.interests = interests;
     this.interests.stream()
         .map(Interest::getKeywords)
         .flatMap(List::stream)
+        .map(String::toLowerCase)
         .forEach(keywords::add);
     this.sourceUrlFilterSet.addAll(sourceUrls);
   }
+
 
   public ArticleApiDto filter(ArticleApiDto articleApiDto){
     if (isContainKeywords(articleApiDto) && isNewUrl(articleApiDto)) {
@@ -37,26 +37,20 @@ public class InterestSingleton {
     return null;
   }
 
-
 //  public Optional<ArticleApiDto> filter(ArticleApiDto articleApiDto){
 //    if (isContainKeywords(articleApiDto) && !isDuplicateUrl(articleApiDto)) {
 //      return Optional.of(articleApiDto);
 //    }
 //    return Optional.empty();
 //  }
-
-  public void addSourceUrls(List<String> sourceUrls) {
-    sourceUrlFilterSet.addAll(sourceUrls);
-  }
-
   public boolean isNewUrl(ArticleApiDto articleApiDto) {
     return sourceUrlFilterSet.add(articleApiDto.sourceUrl());
   }
 
   private boolean isContainKeywords(ArticleApiDto articleApiDto) {
-    String summary = articleApiDto.summary();
+    String lowerCaseSummary = articleApiDto.summary().toLowerCase();
     return keywords.stream()
-        .anyMatch(summary::contains);
+        .anyMatch(lowerCaseSummary::contains);
   }
 
   public ArticleWithInterestList toArticleWithRelevantInterests(ArticleApiDto articleApiDto) {
@@ -82,5 +76,9 @@ public class InterestSingleton {
         interestList
     );
   }
-
+  private void clearBean() {
+    this.interests.clear();
+    this.keywords.clear();
+    this.sourceUrlFilterSet.clear();
+  }
 }

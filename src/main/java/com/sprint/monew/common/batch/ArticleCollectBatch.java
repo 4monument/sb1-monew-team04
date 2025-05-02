@@ -46,7 +46,7 @@ public class ArticleCollectBatch {
 
   @Bean(name = "articleCollectJob")
   public Job articleCollectJob(
-      @Qualifier("interestsAndUrlsFetchStep") Step interestsFetchStep,
+      @Qualifier("interestsAndUrlsFetchStep") Step interestsAndUrlsFetchStep,
       @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow,
       @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener,
       @Qualifier("localBackupArticlesStep") Step localBackupStep,
@@ -55,7 +55,7 @@ public class ArticleCollectBatch {
 
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
-        .start(interestsFetchStep)
+        .start(interestsAndUrlsFetchStep)
         .on(COMPLETED.getExitCode())
         .to(naverArticleCollectFlow)// 1. Article 자료 수집
         //.split(taskExecutor()).add(null) // 여기에 추가 API 호출 되는 Flow 복붙하면 완성

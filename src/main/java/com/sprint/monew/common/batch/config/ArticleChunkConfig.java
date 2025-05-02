@@ -70,7 +70,8 @@ public class ArticleChunkConfig {
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor(
       InterestSingleton interests) {
     return item -> {
-      if (interests.isNewUrl(item)) {
+      ArticleApiDto filteredDto = interests.filter(item);
+      if (filteredDto == null) {
         // 메트릭
         return null;
       }
