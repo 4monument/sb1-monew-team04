@@ -21,6 +21,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +38,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
 @Import({CommentRepositoryImpl.class, TestQuerydslConfig.class})
+@AutoConfigureDataMongo
 public class CommentRepositoryTest {
 
   @Container
@@ -146,7 +148,6 @@ public class CommentRepositoryTest {
     PageRequest pageRequest = PageRequest.of(0, 3, Direction.DESC, "likeCount");
 
     Slice<CommentDto> page = commentRepository.getComments(request, userId, pageRequest);
-
 
     assertThat(page.hasNext()).isTrue();
     assertThat(page.getSize()).isEqualTo(3);

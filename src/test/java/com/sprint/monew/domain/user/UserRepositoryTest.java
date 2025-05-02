@@ -8,10 +8,10 @@ import com.sprint.monew.domain.activity.UserActivityQueryRepository;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
@@ -23,6 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DataJpaTest
 @Testcontainers
 @ActiveProfiles("test")
+@AutoConfigureDataMongo
 @Import({UserActivityQueryRepository.class, TestQuerydslConfig.class})
 class UserRepositoryTest {
 

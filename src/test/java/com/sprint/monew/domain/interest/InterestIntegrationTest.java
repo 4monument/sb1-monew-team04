@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sprint.monew.MongoContainer;
 import com.sprint.monew.PostgresContainer;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
@@ -49,9 +50,11 @@ public class InterestIntegrationTest {
   private ObjectMapper objectMapper;
 
   static final PostgresContainer postgresContainer = PostgresContainer.getInstance();
+  static final MongoContainer mongoContainer = MongoContainer.getInstance();
 
   static {
     postgresContainer.start();
+    mongoContainer.start();
   }
 
   @DynamicPropertySource
@@ -59,6 +62,8 @@ public class InterestIntegrationTest {
     registry.add("spring.datasource.url", postgresContainer::getJdbcUrl);
     registry.add("spring.datasource.username", postgresContainer::getUsername);
     registry.add("spring.datasource.password", postgresContainer::getPassword);
+
+    registry.add("spring.data.mongodb.uri", MongoContainer.getInstance()::getReplicaSetUrl);
   }
 
   @Nested
@@ -142,7 +147,7 @@ public class InterestIntegrationTest {
   @DisplayName("관심사 구독")
   class interestSubscribe {
 
-    //@Test
+    @Test
     @DisplayName("성공")
     void success() throws Exception {
       //given
@@ -223,7 +228,7 @@ public class InterestIntegrationTest {
           .andExpect(status().isNotFound());
     }
 
-    //@Test
+    @Test
     @DisplayName("실패: 해당 ID의 관심사가 존재하지 않음")
     void failureSinceInterestId() throws Exception {
       //given
@@ -258,7 +263,7 @@ public class InterestIntegrationTest {
   @DisplayName("관심사 구독 취소")
   class interestUnsubscribe {
 
-    //@Test
+    @Test
     @DisplayName("성공")
     void success() throws Exception {
       //given
@@ -315,7 +320,7 @@ public class InterestIntegrationTest {
           .andExpect(status().isOk());
     }
 
-    //@Test
+    @Test
     @DisplayName("실패: 해당 ID의 사용자가 존재하지 않음")
     void failureSinceUserId() throws Exception {
       //given
@@ -375,7 +380,7 @@ public class InterestIntegrationTest {
           .andExpect(status().isNotFound());
     }
 
-    //@Test
+    @Test
     @DisplayName("실패: 해당 ID의 관심사가 존재하지 않음")
     void failureSinceInterestId() throws Exception {
       //given
@@ -629,7 +634,6 @@ public class InterestIntegrationTest {
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.content").isArray())
           .andExpect(jsonPath("$.totalElements").isNumber());
-
     }
   }
 }
