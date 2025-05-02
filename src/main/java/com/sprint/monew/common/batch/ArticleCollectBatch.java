@@ -1,12 +1,11 @@
 package com.sprint.monew.common.batch;
 
-import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.*;
 import static org.springframework.batch.core.ExitStatus.*;
 
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
 import com.sprint.monew.common.batch.support.InterestSingleton;
-import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
+import com.sprint.monew.domain.article.repository.ArticleRepository;
 import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.InterestRepository;
 import java.util.List;
@@ -26,7 +25,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -48,7 +46,7 @@ public class ArticleCollectBatch {
 
   @Bean(name = "articleCollectJob")
   public Job articleCollectJob(
-      @Qualifier("interestsFetchStep") Step interestsFetchStep,
+      @Qualifier("interestsAndUrlsFetchStep") Step interestsFetchStep,
       @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow,
       @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener,
       @Qualifier("localBackupArticlesStep") Step localBackupStep,
@@ -69,17 +67,19 @@ public class ArticleCollectBatch {
         .build();
   }
 
-  @Bean(name = "interestsFetchStep")
+  @Bean(name = "interestsAndUrlsFetchStep")
   @JobScope
-  public Step interestsFetchStep(InterestRepository interestRepository,
+  public Step interestsAndUrlsFetchStep(InterestRepository interestRepository,
       @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener,
-      InterestSingleton interests) {
+      InterestSingleton interestSingleton, ArticleRepository articleRepository) {
 
     return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
 
+          // 시간날 때 dto로 한방 쿼리
           List<Interest> interestList = interestRepository.findAll();
-          interests.registerInterests(interestList);
+          List<String> sourceUrls = articleRepository.findAllSourceUrl();
+          interestSingleton.register(interestList, sourceUrls);
 
           return RepeatStatus.FINISHED;
         }, transactionManager)

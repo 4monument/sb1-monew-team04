@@ -17,17 +17,17 @@ public class InterestSingleton {
   private final Set<String> keywords = ConcurrentHashMap.newKeySet();
   private final Set<String> sourceUrlFilterSet = ConcurrentHashMap.newKeySet();
 
-  public void registerInterests(List<Interest> interests) {
+  public void register(List<Interest> interests, List<String> sourceUrls) {
     this.interests.clear();
     this.keywords.clear();
     this.sourceUrlFilterSet.clear();
 
     this.interests = interests;
-    interests.stream()
+    this.interests.stream()
         .map(Interest::getKeywords)
         .flatMap(List::stream)
         .forEach(keywords::add);
-    log.info("Keywords: {}", keywords);
+    this.sourceUrlFilterSet.addAll(sourceUrls);
   }
 
   public ArticleApiDto filter(ArticleApiDto articleApiDto){

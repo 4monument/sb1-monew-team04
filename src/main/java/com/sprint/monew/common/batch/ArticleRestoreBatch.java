@@ -1,10 +1,7 @@
 package com.sprint.monew.common.batch;
 
-import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.INTERESTS;
-
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
 import com.sprint.monew.common.batch.support.InterestSingleton;
-import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
@@ -27,7 +24,6 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.MultiResourceItemReader;
@@ -85,7 +81,8 @@ public class ArticleRestoreBatch {
         .tasklet((contribution, chunkContext) -> {
 
           List<Interest> interests = interestRepository.findAll();
-          interestSingleton.registerInterests(interests);
+          List<String> sourceUrls = articleRepository.findAllSourceUrl();
+          interestSingleton.register(interests, sourceUrls);
 
           return RepeatStatus.FINISHED;
         }, transactionManager)
