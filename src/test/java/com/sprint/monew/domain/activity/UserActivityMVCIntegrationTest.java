@@ -122,7 +122,7 @@ class UserActivityMVCIntegrationTest {
   void testGetNonExistUserActivityFromMongo() throws Exception {
     mockMvc.perform(get("/api/user-activities/{userId}", testUserId)
             .header("Monew-Request-User-ID", testUserId))
-        .andExpect(status().is5xxServerError());
+        .andExpect(status().is4xxClientError());
 //        .andExpect(jsonPath("$.userId").value(testUserId.toString()));
   }
 

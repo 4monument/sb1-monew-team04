@@ -11,8 +11,8 @@ spring:
       hibernate:
         format_sql: true
   batch:
-      job:
-        initialize-schema: never
+    jdbc:
+      initialize-schema: never
   data:
     mongodb:
       uri: ${MONGODB_URI}

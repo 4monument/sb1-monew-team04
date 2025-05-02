@@ -11,7 +11,7 @@ spring:
       hibernate:
         format_sql: false
   batch:
-    job:
+    jdbc:
       initialize-schema: never
   data:
     mongodb:
