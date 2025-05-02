@@ -9,10 +9,12 @@ import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -70,6 +72,7 @@ public class ArticleBackupConfig {
     List<ArticleApiDto> allDtos = new ArrayList<>();
     //allDtos.addAll(chosunArticleDtos);
     allDtos.addAll(naverArticleApiDtos);
+    log.info("backup read start : dto size = {}", allDtos.size());
     return new ListItemReader<>(allDtos);
   }
 
@@ -77,7 +80,15 @@ public class ArticleBackupConfig {
   @StepScope
   public ItemProcessor<ArticleApiDto, ArticleApiDto> backupArticleFilterProcessor(
       InterestSingleton interests) {
-    return interests::filter;
+
+    return item -> {
+      ArticleApiDto filteredDto = interests.filter(item);
+      if (filteredDto == null) {
+        // metric 증가하도록 설계하기
+        return null;
+      }
+      return filteredDto;
+    };
   }
 
   @Bean
@@ -99,7 +110,7 @@ public class ArticleBackupConfig {
    * 로컬에 저장한 파일을 S3에
    */
   @Bean
-  @StepScope
+  @JobScope
   public Step uploadS3ArticleDtosStep() {
     return new StepBuilder("uploadS3ArticleDtosStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {

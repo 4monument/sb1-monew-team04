@@ -52,7 +52,8 @@ public class ArticleCollectBatch {
       @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow,
       @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener,
       @Qualifier("localBackupArticlesStep") Step localBackupStep,
-      @Qualifier("uploadS3ArticleDtosStep") Step s3BackupStep) {
+      @Qualifier("uploadS3ArticleDtosStep") Step s3BackupStep,
+      @Qualifier("naverArticleHandlerStep") Step naverArticleHandlerStep) {
 
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
@@ -62,6 +63,7 @@ public class ArticleCollectBatch {
         //.split(taskExecutor()).add(null) // 여기에 추가 API 호출 되는 Flow 복붙하면 완성
         .next(localBackupStep)
         .next(s3BackupStep)
+        .next(naverArticleHandlerStep)
         .end()
         .listener(jobContextCleanupListener)
         .build();
@@ -93,7 +95,6 @@ public class ArticleCollectBatch {
   @JobScope
   public Flow naverArticleCollectFlow(
       @Qualifier("naverApiCallTasklet") Tasklet naverApiCallTasklet,
-      @Qualifier("naverArticleHandlerStep") Step articleHandlerStep,
       @Qualifier("naverPromotionListener") ExecutionContextPromotionListener promotionListener) {
 
     // 호출
@@ -104,7 +105,6 @@ public class ArticleCollectBatch {
 
     return new FlowBuilder<Flow>("naverCollectFlow")
         .start(naverArticleCollectStep)
-        .next(articleHandlerStep) // 처리  스텝
         .build();
   }
 

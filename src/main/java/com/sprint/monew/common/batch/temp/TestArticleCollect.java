@@ -9,6 +9,7 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Scheduled;
 
 @Configuration
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class TestArticleCollect {
   private final JobLauncher jobLauncher;
 
   // 삭제할 파일 : 로컬 테스트 용
-  //@PostConstruct
+  @Scheduled(fixedRate = 100000)
   public void testInit() throws Exception {
     JobParameters jobParameters = new JobParametersBuilder()
         //.addString("runDate", Instant.now().toString())

@@ -72,6 +72,7 @@ public class ArticleChunkConfig {
       InterestSingleton interests) {
     return item -> {
       if (interests.isDuplicateUrl(item)) {
+        // 메트릭
         return null;
       }
       return interests.toArticleWithRelevantInterests(item);
@@ -113,6 +114,9 @@ public class ArticleChunkConfig {
           .map(Article::getId).toList();
 
       stepContext.put(ARTICLE_IDS.getKey(), articleIdList);
+
+      log.info("articleIdList : {}", articleIdList);
+      log.info("articleInterestJdbc : {}", articleInterestsJdbc);
 
       Chunk<Article> chunkArticles = new Chunk<>();
       Chunk<ArticleInterestJdbc> chunkArticleInterests = new Chunk<>();

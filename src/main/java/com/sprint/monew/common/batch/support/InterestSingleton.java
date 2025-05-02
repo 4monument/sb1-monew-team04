@@ -5,10 +5,14 @@ import com.sprint.monew.domain.interest.Interest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.swing.text.html.Option;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class InterestSingleton {
 
@@ -21,11 +25,12 @@ public class InterestSingleton {
     this.keywords.clear();
     this.sourceUrlFilterSet.clear();
 
-    this.interests = Collections.unmodifiableList(interests);
+    this.interests = interests;
     interests.stream()
         .map(Interest::getKeywords)
         .flatMap(List::stream)
         .forEach(keywords::add);
+    log.info("Keywords: {}", keywords);
   }
 
   public ArticleApiDto filter(ArticleApiDto articleApiDto){
@@ -34,6 +39,14 @@ public class InterestSingleton {
     }
     return null;
   }
+
+
+//  public Optional<ArticleApiDto> filter(ArticleApiDto articleApiDto){
+//    if (isContainKeywords(articleApiDto) && !isDuplicateUrl(articleApiDto)) {
+//      return Optional.of(articleApiDto);
+//    }
+//    return Optional.empty();
+//  }
 
   public void addSourceUrls(List<String> sourceUrls) {
     sourceUrlFilterSet.addAll(sourceUrls);
@@ -51,6 +64,7 @@ public class InterestSingleton {
 
   public ArticleWithInterestList toArticleWithRelevantInterests(ArticleApiDto articleApiDto) {
     String summary = articleApiDto.summary();
+    log.info("Summary: {}", summary);
     List<Interest> interestList = interests.stream()
         .filter(interest ->
             interest.getKeywords().stream()

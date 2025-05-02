@@ -3,10 +3,12 @@ package com.sprint.monew.common.batch;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.INTERESTS;
 
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
+import com.sprint.monew.common.batch.support.InterestSingleton;
 import com.sprint.monew.common.batch.support.Interests;
 import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
+import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.InterestRepository;
 import com.sprint.monew.global.config.S3ConfigProperties;
 import java.time.Duration;
@@ -76,17 +78,14 @@ public class ArticleRestoreBatch {
   @Bean
   @JobScope
   public Step interestsAndSourceUrlFetchStep(InterestRepository interestRepository,
-      @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener) {
+      @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener,
+      InterestSingleton interestSingleton) {
 
     return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
 
-          ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
-
-          Interests interests = new Interests(interestRepository.findAll());
-          interests.addSourceUrls(articleRepository.findAllSourceUrl());
-
-          stepContext.put(INTERESTS.getKey(), interests);
+          List<Interest> interests = interestRepository.findAll();
+          interestSingleton.registerInterests(interests);
 
           return RepeatStatus.FINISHED;
         }, transactionManager)
