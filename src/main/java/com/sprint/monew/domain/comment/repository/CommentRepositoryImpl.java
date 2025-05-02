@@ -110,11 +110,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         countExpr.gt(likeCount) :
         countExpr.lt(likeCount);
 
-    BooleanExpression secondary = order.isAscending() ?
-        comment.createdAt.gt(after) :
-        comment.createdAt.lt(after);
-
-    return primary.or(countExpr.eq(likeCount).and(secondary));
+    return primary.or(countExpr.eq(likeCount).and(comment.createdAt.lt(after)));
   }
 
   private OrderSpecifier<?>[] getOrderSpecifiers(Sort sort, QLike likeAll) {
