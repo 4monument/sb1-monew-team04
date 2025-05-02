@@ -2,17 +2,24 @@ package com.sprint.monew.domain.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.sprint.monew.common.batch.support.NotificationJdbc;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.notification.dto.NotificationSearchRequest;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
+import com.sprint.monew.domain.notification.exception.NotificationNotFoundException;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
+import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,13 +49,11 @@ class NotificationServiceTest {
   @InjectMocks
   private NotificationService notificationService;
 
-
   // 테스트용 Interest
   private List<Interest> interests;
 
   // 테스트용 User
   private User user;
-
 
   @BeforeEach
   void setUp() {
@@ -72,54 +77,189 @@ class NotificationServiceTest {
 
   }
 
-  @Nested
+  @Test
   @DisplayName("알림 생성")
-  class createNotificationTest {
+  void createNotificationSuccess() {
+    Instant afterAt = Instant.now();
+    Interest interest = interests.get(0);
+
+    //기사 관심사 등록
+    Article article = Article.create(Source.NAVER,
+        "https://news.example.com/tech/2025/04/23/article12345", "인공지능 기술의 최신 동향과 미래 전망",
+        Instant.parse("2025-04-22T15:30:00Z"),
+        "최근 인공지능 기술의 발전과 산업 적용 사례를 분석하고, 향후 5년간의 기술 발전 방향을 예측한 보고서입니다.");
+
+    //ArticleInterest 생성
+    article.addInterest(interest);
+
+    UnreadInterestArticleCount data = new TestUnreadInterestArticleCount(interest, user, 1L);
+
+    NotificationJdbc expectResult = NotificationJdbc.create(data);
+
+    //when
+    NotificationJdbc articleInterestNotification = notificationService.createArticleInterestNotifications(
+        data);
+
+    //then
+    assertEquals(expectResult.userId(), articleInterestNotification.userId());
+    assertEquals(expectResult.resourceId(), articleInterestNotification.resourceId());
+    assertEquals(ResourceType.INTEREST, articleInterestNotification.resourceType());
+    assertFalse(articleInterestNotification.confirmed());
+    
+  }
+
+  @Nested
+  @DisplayName("알림 전체 확인(수정)")
+  class checkAllNotificationTest {
 
     @Test
-    @DisplayName("성공: 구독 중인 관심사 관련 기사 등록")
-    void createNotificationInInterestSuccess() {
+    @DisplayName("성공")
+    void checkAllNotificationSuccess() {
       //given
-      Instant afterAt = Instant.now();
-      Interest interest = interests.get(0);
+      UUID userId = user.getId();
 
-      //기사 관심사 등록
-      Article article = Article.create(Source.NAVER,
-          "https://news.example.com/tech/2025/04/23/article12345", "인공지능 기술의 최신 동향과 미래 전망",
-          Instant.parse("2025-04-22T15:30:00Z"),
-          "최근 인공지능 기술의 발전과 산업 적용 사례를 분석하고, 향후 5년간의 기술 발전 방향을 예측한 보고서입니다.");
+      List<Notification> notifications = new ArrayList<>();
 
-      //ArticleInterest 생성
-      article.addInterest(interest);
+      Notification notification1 = new Notification(user, interests.get(0).getId(),
+          ResourceType.INTEREST,
+          interests.get(0).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
 
-      List<UnreadInterestArticleCount> queryResult = new ArrayList<>();
-      queryResult.add(new TestUnreadInterestArticleCount(interest, user, 1L));
+      Notification notification2 = new Notification(user, interests.get(1).getId(),
+          ResourceType.INTEREST,
+          interests.get(1).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
 
-      NotificationDto expectedNotification = NotificationDto.from(
-          new Notification(user, interest.getId(), ResourceType.INTEREST,
-              queryResult.get(0).getInterest().getName() + "와/과 관련된 기사가 " + queryResult.get(0)
-                  .getArticleCount() + "건 등록되었습니다."));
+      Notification notification3 = new Notification(user, interests.get(0).getId(),
+          ResourceType.COMMENT,
+          user.getNickname() + "님이 나의 댓글을 좋아합니다.");
 
-      //todo - 테스트코드 수정
+      notifications.add(notification1);
+      notifications.add(notification2);
+      notifications.add(notification3);
+
+      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
+      when(notificationRepository.findByUser(user)).thenReturn(notifications);
+
       //when
-//      List<Notification> notifications = notificationService.createArticleInterestNotifications(
-//          afterAt);
-//
-//      //then
-//      assertEquals(expectedNotification.userId(), notifications.get(0).getUser().getId());
-//      assertEquals(expectedNotification.resourceId(), notifications.get(0).getResourceId());
-//      assertEquals(expectedNotification.resourceType(),
-//          notifications.get(0).getResourceType().toString());
-//      assertEquals(expectedNotification.content(), notifications.get(0).getContent());
-//      assertFalse(expectedNotification.confirmed());
+      notificationService.checkAllNotifications(userId);
+
+      //then
+      assertTrue(notification1.isConfirmed());
+      assertTrue(notification2.isConfirmed());
+      assertTrue(notification3.isConfirmed());
+
+      verify(notificationRepository, times(1)).saveAll(notifications);
+    }
+
+    @Test
+    @DisplayName("실패: 해당 ID를 가진 사용자가 없음")
+    void checkAllNotificationFailure() {
+      //given
+      UUID userId = UUID.randomUUID();
+
+      List<Notification> notifications = new ArrayList<>();
+
+      Notification notification1 = new Notification(user, interests.get(0).getId(),
+          ResourceType.INTEREST,
+          interests.get(0).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+
+      Notification notification2 = new Notification(user, interests.get(0).getId(),
+          ResourceType.INTEREST,
+          interests.get(0).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+
+      Notification notification3 = new Notification(user, interests.get(0).getId(),
+          ResourceType.COMMENT,
+          user.getNickname() + "님이 나의 댓글을 좋아합니다.");
+
+      notifications.add(notification1);
+      notifications.add(notification2);
+      notifications.add(notification3);
+
+      when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+      //when & then
+      assertThrows(UserNotFoundException.class,
+          () -> notificationService.checkAllNotifications(userId));
+
+      //then
+      assertFalse(notification1.isConfirmed());
+      assertFalse(notification2.isConfirmed());
+      assertFalse(notification3.isConfirmed());
+
+      verify(notificationRepository, never()).saveAll(notifications);
     }
   }
 
-
   @Nested
-  @DisplayName("알림 수정")
-  class updateNotificationTest {
+  @DisplayName("알림 단일 확인(수정)")
+  class checkNotificationTest {
 
+    @Test
+    @DisplayName("성공")
+    void checkNotificationSuccess() {
+      //given
+      Interest interest = interests.get(0);
+      UUID userId = user.getId();
+      UUID notificationId = UUID.randomUUID();
+
+      Notification notification = new Notification(user, interest.getId(), ResourceType.INTEREST,
+          interest.getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+
+      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
+      when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(notification));
+
+      //when
+      notificationService.checkNotification(notificationId, userId);
+
+      //then
+      assertTrue(notification.isConfirmed());
+
+      verify(notificationRepository, times(1)).save(notification);
+    }
+
+    @Test
+    @DisplayName("실패: 해당 ID를 가진 사용자가 없음")
+    void checkNotificationFailureSinceUserId() {
+      //given
+      Interest interest = interests.get(0);
+      UUID userId = UUID.randomUUID();
+      UUID notificationId = UUID.randomUUID();
+
+      Notification notification = new Notification(user, interest.getId(), ResourceType.INTEREST,
+          interest.getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+
+      when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+      //when & then
+      assertThrows(UserNotFoundException.class,
+          () -> notificationService.checkNotification(notificationId, userId));
+
+      assertFalse(notification.isConfirmed());
+
+      verify(notificationRepository, never()).save(notification);
+    }
+
+    @Test
+    @DisplayName("실패: 해당 ID를 가진 알림이 없음")
+    void checkNotificationFailureSinceNotificationId() {
+      //given
+      Interest interest = interests.get(0);
+      UUID userId = UUID.randomUUID();
+      UUID notificationId = UUID.randomUUID();
+
+      Notification notification = new Notification(user, interest.getId(), ResourceType.INTEREST,
+          interest.getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
+
+      when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
+      when(notificationRepository.findById(notificationId)).thenReturn(Optional.empty());
+
+      //when & then
+      assertThrows(NotificationNotFoundException.class,
+          () -> notificationService.checkNotification(notificationId, userId));
+
+      assertFalse(notification.isConfirmed());
+
+      verify(notificationRepository, never()).save(notification);
+    }
   }
 
   @Nested
