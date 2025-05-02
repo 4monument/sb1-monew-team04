@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class InterestSingleton {
+public class InterestContainer {
 
   private List<Interest> interests = new ArrayList<>();
   private final Set<String> keywords = ConcurrentHashMap.newKeySet();

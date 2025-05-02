@@ -3,7 +3,7 @@ package com.sprint.monew.common.batch;
 import static org.springframework.batch.core.ExitStatus.*;
 
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
-import com.sprint.monew.common.batch.support.InterestSingleton;
+import com.sprint.monew.common.batch.support.InterestContainer;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
 import com.sprint.monew.domain.interest.Interest;
@@ -71,7 +71,7 @@ public class ArticleCollectBatch {
   @JobScope
   public Step interestsAndUrlsFetchStep(InterestRepository interestRepository,
       @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener,
-      InterestSingleton interestSingleton, ArticleRepository articleRepository) {
+      InterestContainer interestContainer, ArticleRepository articleRepository) {
 
     return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
@@ -79,7 +79,7 @@ public class ArticleCollectBatch {
           // 시간날 때 dto로 한방 쿼리
           List<Interest> interestList = interestRepository.findAll();
           List<String> sourceUrls = articleRepository.findAllSourceUrl();
-          interestSingleton.register(interestList, sourceUrls);
+          interestContainer.register(interestList, sourceUrls);
 
           return RepeatStatus.FINISHED;
         }, transactionManager)

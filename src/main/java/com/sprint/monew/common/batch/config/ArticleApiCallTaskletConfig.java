@@ -4,7 +4,7 @@ import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.C
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.HANKYUNG_ARTICLE_DTOS;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.NAVER_ARTICLE_DTOS;
 
-import com.sprint.monew.common.batch.support.InterestSingleton;
+import com.sprint.monew.common.batch.support.InterestContainer;
 import com.sprint.monew.domain.article.api.ArticleApiClient;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import java.util.List;
@@ -24,11 +24,11 @@ public class ArticleApiCallTaskletConfig {
 
   @Bean
   @StepScope
-  public Tasklet naverApiCallTasklet(InterestSingleton interestSingleton) {
+  public Tasklet naverApiCallTasklet(InterestContainer interestContainer) {
     return (contribution, chunkContext) -> {
       List<ArticleApiDto> articleApiDtos = articleApiClient.getNaverArticle();
       List<ArticleApiDto> filteredApiDtos = articleApiDtos.stream()
-          .map(interestSingleton::filter)
+          .map(interestContainer::filter)
           .toList();
 
       ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
@@ -39,11 +39,11 @@ public class ArticleApiCallTaskletConfig {
 
   @Bean
   @StepScope
-  public Tasklet chosunApiCallTasklet(InterestSingleton interestSingleton) {
+  public Tasklet chosunApiCallTasklet(InterestContainer interestContainer) {
     return (contribution, chunkContext) -> {
       List<ArticleApiDto> articleApiDtos = articleApiClient.getNaverArticle();
       List<ArticleApiDto> filteredApiDtos = articleApiDtos.stream()
-          .map(interestSingleton::filter)
+          .map(interestContainer::filter)
           .toList();
 
       ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();

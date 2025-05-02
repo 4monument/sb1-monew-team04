@@ -1,7 +1,7 @@
 package com.sprint.monew.common.batch;
 
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
-import com.sprint.monew.common.batch.support.InterestSingleton;
+import com.sprint.monew.common.batch.support.InterestContainer;
 import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
@@ -75,14 +75,14 @@ public class ArticleRestoreBatch {
   @JobScope
   public Step interestsAndSourceUrlFetchStep(InterestRepository interestRepository,
       @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener,
-      InterestSingleton interestSingleton) {
+      InterestContainer interestContainer) {
 
     return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
 
           List<Interest> interests = interestRepository.findAll();
           List<String> sourceUrls = articleRepository.findAllSourceUrl();
-          interestSingleton.register(interests, sourceUrls);
+          interestContainer.register(interests, sourceUrls);
 
           return RepeatStatus.FINISHED;
         }, transactionManager)

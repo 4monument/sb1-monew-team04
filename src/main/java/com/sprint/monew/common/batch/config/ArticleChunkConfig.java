@@ -4,7 +4,7 @@ import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.A
 
 import com.sprint.monew.common.batch.support.ArticleInterestJdbc;
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
-import com.sprint.monew.common.batch.support.InterestSingleton;
+import com.sprint.monew.common.batch.support.InterestContainer;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import jakarta.persistence.EntityManagerFactory;
@@ -61,14 +61,14 @@ public class ArticleChunkConfig {
   @Bean
   @StepScope
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> articleCollectProcessor(
-      InterestSingleton interests) {
+      InterestContainer interests) {
     return interests::toArticleWithRelevantInterests;
   }
 
   @Bean
   @StepScope
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor(
-      InterestSingleton interests) {
+      InterestContainer interests) {
     return item -> {
       ArticleApiDto filteredDto = interests.filter(item);
       if (filteredDto == null) {
