@@ -3,6 +3,7 @@ package com.sprint.monew.domain.notification;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.sprint.monew.PostgresContainer;
 import com.sprint.monew.common.config.TestQuerydslConfig;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
@@ -25,14 +26,30 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
 @Import({NotificationRepositoryCustomImpl.class, TestQuerydslConfig.class})
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Testcontainers
 @ActiveProfiles("test")
 public class NotificationRepositoryTest {
+
+  static final PostgresContainer postgresContainer = PostgresContainer.getInstance();
+
+  static {
+    postgresContainer.start();
+  }
+
+  @DynamicPropertySource
+  static void overrideDataSourceProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.datasource.url", postgresContainer::getJdbcUrl);
+    registry.add("spring.datasource.username", postgresContainer::getUsername);
+    registry.add("spring.datasource.password", postgresContainer::getPassword);
+  }
 
   @Autowired
   private EntityManager em;
