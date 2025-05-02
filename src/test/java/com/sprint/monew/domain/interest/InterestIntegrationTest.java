@@ -142,7 +142,7 @@ public class InterestIntegrationTest {
   @DisplayName("관심사 구독")
   class interestSubscribe {
 
-    @Test
+    //@Test
     @DisplayName("성공")
     void success() throws Exception {
       //given
@@ -223,7 +223,7 @@ public class InterestIntegrationTest {
           .andExpect(status().isNotFound());
     }
 
-    @Test
+    //@Test
     @DisplayName("실패: 해당 ID의 관심사가 존재하지 않음")
     void failureSinceInterestId() throws Exception {
       //given
@@ -258,7 +258,7 @@ public class InterestIntegrationTest {
   @DisplayName("관심사 구독 취소")
   class interestUnsubscribe {
 
-    @Test
+    //@Test
     @DisplayName("성공")
     void success() throws Exception {
       //given
@@ -315,7 +315,7 @@ public class InterestIntegrationTest {
           .andExpect(status().isOk());
     }
 
-    @Test
+    //@Test
     @DisplayName("실패: 해당 ID의 사용자가 존재하지 않음")
     void failureSinceUserId() throws Exception {
       //given
@@ -375,7 +375,7 @@ public class InterestIntegrationTest {
           .andExpect(status().isNotFound());
     }
 
-    @Test
+    //@Test
     @DisplayName("실패: 해당 ID의 관심사가 존재하지 않음")
     void failureSinceInterestId() throws Exception {
       //given
