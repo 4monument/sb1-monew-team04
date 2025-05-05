@@ -8,6 +8,7 @@ import com.sprint.monew.common.batch.support.InterestContainer;
 import com.sprint.monew.domain.article.api.ArticleApiClient;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -29,6 +30,7 @@ public class ArticleApiCallTaskletConfig {
       List<ArticleApiDto> articleApiDtos = articleApiClient.getNaverArticle();
       List<ArticleApiDto> filteredApiDtos = articleApiDtos.stream()
           .map(interestContainer::filter)
+          .filter(Objects::nonNull)
           .toList();
 
       ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();

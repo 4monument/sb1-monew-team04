@@ -131,6 +131,7 @@ public class ArticleChunkConfig {
     };
   }
 
+
   @Bean
   @StepScope
   public JdbcBatchItemWriter<Article> articleJdbcItemWriter() {
