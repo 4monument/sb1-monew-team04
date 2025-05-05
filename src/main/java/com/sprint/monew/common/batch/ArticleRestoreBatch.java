@@ -60,14 +60,12 @@ public class ArticleRestoreBatch {
   public Job articleRestoreJob(
       @Qualifier("articleRestoreStep") Step articleRestoreStep,
       @Qualifier("interestsAndSourceUrlFetchStep") Step interestsAndSourceUrlFetchStep,
-      @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener,
       @Qualifier("changeArticleIsDeletedStep") Step changeArticleIsDeletedStep) {
 
     return new JobBuilder("articleRestoreJob", jobRepository)
         .start(interestsAndSourceUrlFetchStep)  // 1. Interest 가져오기: ArticleInterest도 생성해야 하므로 Interest 객체 필요
         .next(changeArticleIsDeletedStep) // 2.  특정 날짜 기준 논리삭제된 것 전부 True
         .next(articleRestoreStep) // 3. 복구 : 기존에 있는거는 추가하지 않기
-        .listener(jobContextCleanupListener)
         .build();
   }
 

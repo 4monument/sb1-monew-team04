@@ -51,7 +51,6 @@ public class ArticleCollectBatch {
       @Qualifier("localBackupArticlesStep") Step localBackupStep,
       @Qualifier("uploadS3ArticleDtosStep") Step s3BackupStep,
       @Qualifier("naverArticleHandlerStep") Step naverArticleHandlerStep,
-      @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener,
       @Qualifier("interestContainerCleanupListener") JobExecutionListener interestContainerCleanupListener) {
 
     return new JobBuilder("articleCollectJob", jobRepository)
@@ -64,7 +63,6 @@ public class ArticleCollectBatch {
         .next(s3BackupStep)
         .next(naverArticleHandlerStep)
         .end()
-        .listener(jobContextCleanupListener)
         .listener(interestContainerCleanupListener)
         .build();
   }

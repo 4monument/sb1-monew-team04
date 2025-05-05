@@ -33,11 +33,6 @@ public class CleanupListenerConfig {
     return new stepExecutionContextCleanupListener(HANKYUNG_ARTICLE_DTOS.getKey());
   }
 
-  @Bean(name = "articleCollectJobContextCleanupListener")
-  public JobExecutionListener articleCollectJobContextCleanupListener() {
-    return new jobExecutionContextCleanupListener();
-  }
-
   @Bean(name = "interestContainerCleanupListener")
   public JobExecutionListener interestContainerCleanupListener(InterestContainer interestContainer) {
     return new interestContainerCleanupListener(interestContainer);
@@ -58,14 +53,6 @@ public class CleanupListenerConfig {
           .getExecutionContext();
       jobExecutionContext.remove(key);
       return stepExecution.getExitStatus();
-    }
-  }
-
-  public static class jobExecutionContextCleanupListener implements JobExecutionListener {
-
-    @AfterJob
-    public void afterJob(JobExecution jobExecution) {
-      jobExecution.getExecutionContext().remove(NAVER_ARTICLE_DTOS.getKey());
     }
   }
 

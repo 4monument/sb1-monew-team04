@@ -36,7 +36,6 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class ArticleChunkConfig {
 
-  private final EntityManagerFactory emf;
   private final DataSource dataSource;
 
   /**
@@ -68,14 +67,7 @@ public class ArticleChunkConfig {
   @StepScope
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor(
       InterestContainer interests) {
-    return item -> {
-      ArticleApiDto filteredDto = interests.filter(item);
-      if (filteredDto == null) {
-        // 메트릭
-        return null;
-      }
-      return interests.toArticleWithRelevantInterests(item);
-    };
+    return interests::toArticleWithRelevantInterests;
   }
 
   /**
@@ -97,9 +89,8 @@ public class ArticleChunkConfig {
         Article articleWithId = item.toArticleWithId();
 
         item.interestList().forEach(interest -> {
-          ArticleInterestJdbc articleInterestJdbc =
-              ArticleInterestJdbc.create(articleWithId, interest);
-          articleInterestsJdbc.add(articleInterestJdbc);
+          articleInterestsJdbc.add(
+              ArticleInterestJdbc.create(articleWithId.getId(), interest.getId()));
         });
 
         articlesWithId.add(articleWithId);
@@ -161,8 +152,9 @@ public class ArticleChunkConfig {
   @StepScope
   public JdbcBatchItemWriter<ArticleInterestJdbc> articleInterestJdbcItemWriter() {
 
-    String articleInterestInsertSql = "INSERT INTO articles_interests " +
-        "(id, article_id, interest_id, created_at) VALUES (?, ?, ?, ?)";
+    String articleInterestInsertSql =
+        "INSERT INTO articles_interests "
+            + "(id, article_id, interest_id, created_at) VALUES (?, ?, ?, ?)";
 
     return new JdbcBatchItemWriterBuilder<ArticleInterestJdbc>()
         .dataSource(dataSource)
@@ -177,3 +169,4 @@ public class ArticleChunkConfig {
         .build();
   }
 }
+
