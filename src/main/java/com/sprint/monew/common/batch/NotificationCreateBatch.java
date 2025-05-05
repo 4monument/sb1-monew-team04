@@ -39,7 +39,8 @@ public class NotificationCreateBatch {
   private final DataSource dataSource;
 
   @Bean
-  public Job notificationCreateJob(@Qualifier("notificationCreateStep") Step notificationCreateStep) {
+  public Job notificationCreateJob(
+      @Qualifier("notificationCreateStep") Step notificationCreateStep) {
     return new JobBuilder("notificationCreateJob", jobRepository)
         .start(notificationCreateStep)
         .build();
@@ -80,8 +81,7 @@ public class NotificationCreateBatch {
   public ItemWriter<NotificationJdbc> notificationCreateWriter() {
     String notificationInsertSql =
         "INSERT INTO notifications (id, user_id, resource_id, resource_type, content, created_at, updated_at, confirmed)"
-            +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     return new JdbcBatchItemWriterBuilder<NotificationJdbc>()
         .dataSource(dataSource)
