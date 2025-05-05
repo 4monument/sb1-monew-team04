@@ -19,7 +19,6 @@ public class InterestContainer {
 
   public void register(List<Interest> interests, List<String> sourceUrls) {
     clearBean();
-
     this.interests = interests;
     this.interests.stream()
         .map(Interest::getKeywords)
@@ -28,7 +27,6 @@ public class InterestContainer {
         .forEach(keywords::add);
     this.sourceUrlFilterSet.addAll(sourceUrls);
   }
-
 
   public ArticleApiDto filter(ArticleApiDto articleApiDto){
     if (isContainKeywords(articleApiDto) && isNewUrl(articleApiDto)) {
@@ -55,14 +53,12 @@ public class InterestContainer {
 
   public ArticleWithInterestList toArticleWithRelevantInterests(ArticleApiDto articleApiDto) {
     String summary = articleApiDto.summary();
-    log.info("Summary: {}", summary);
     List<Interest> interestList = interests.stream()
         .filter(interest ->
             interest.getKeywords().stream()
                 .anyMatch(summary::contains))
         .toList();
 
-    // 관련된 키워드가 없는 Aritcle은 필터링
     if (interestList.isEmpty()) {
       return null;
     }

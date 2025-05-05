@@ -72,7 +72,6 @@ public class ArticleCollectBatch {
   @Bean(name = "interestsAndUrlsFetchStep")
   @JobScope
   public Step interestsAndUrlsFetchStep(InterestRepository interestRepository,
-      @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener,
       InterestContainer interestContainer, ArticleRepository articleRepository) {
 
     return new StepBuilder("interestsFetchStep", jobRepository)
@@ -85,7 +84,6 @@ public class ArticleCollectBatch {
 
           return RepeatStatus.FINISHED;
         }, transactionManager)
-        .listener(promotionListener)
         .build();
   }
 
@@ -111,6 +109,9 @@ public class ArticleCollectBatch {
   }
 
 
+  /**
+   * Article 모두 처리
+   */
   @Bean
   @JobScope
   public Step naverArticleHandlerStep(

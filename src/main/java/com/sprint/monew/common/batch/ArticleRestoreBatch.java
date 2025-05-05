@@ -74,7 +74,6 @@ public class ArticleRestoreBatch {
   @Bean
   @JobScope
   public Step interestsAndSourceUrlFetchStep(InterestRepository interestRepository,
-      @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener,
       InterestContainer interestContainer) {
 
     return new StepBuilder("interestsFetchStep", jobRepository)
@@ -86,7 +85,6 @@ public class ArticleRestoreBatch {
 
           return RepeatStatus.FINISHED;
         }, transactionManager)
-        .listener(promotionListener)
         .build();
   }
 

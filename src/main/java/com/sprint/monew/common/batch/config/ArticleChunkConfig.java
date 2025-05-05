@@ -46,13 +46,12 @@ public class ArticleChunkConfig {
   @StepScope
   public ItemReader<ArticleApiDto> naverArticleCollectReader(
       @Value("#{JobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> naverArticleDtos) {
-    return new ListItemReader<>(naverArticleDtos);
-  }
 
-  @Bean(name = "chosunArticleCollectReader")
-  @StepScope
-  public ItemReader<Object> chosunArticleCollectReader() {
-    return null;
+    List<ArticleApiDto> articleApiDtos = new ArrayList<>();
+    articleApiDtos.addAll(naverArticleDtos);
+    //articleApiDtos.addAll(chosunArticleDtos);
+//    articleApiDtos.addAll(hankyungArticleDtos);
+    return new ListItemReader<>(articleApiDtos);
   }
 
   /**
@@ -111,7 +110,8 @@ public class ArticleChunkConfig {
           .getExecutionContext();
 
       List<UUID> articleIdList = articlesWithId.stream()
-          .map(Article::getId).toList();
+          .map(Article::getId)
+          .toList();
 
       stepContext.put(ARTICLE_IDS.getKey(), articleIdList);
 

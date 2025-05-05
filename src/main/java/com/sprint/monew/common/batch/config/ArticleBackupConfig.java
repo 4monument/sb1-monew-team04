@@ -3,6 +3,7 @@ package com.sprint.monew.common.batch.config;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.global.config.S3ConfigProperties;
 import java.io.File;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +80,7 @@ public class ArticleBackupConfig {
         .delimited()                          // , 로 구분
         .delimiter(",")
         .names(header)
-        .headerCallback(w ->                  // BOM + 헤더 한 줄 쓰기
+        .headerCallback(w ->
             w.write("\uFEFFsource,sourceUrl,title,publishDate,summary"))
         .build();
   }
@@ -105,7 +106,7 @@ public class ArticleBackupConfig {
 
           s3Client.putObject(putObjectRequest, requestBody);
 
-          //Files.delete(localCsvFile.toPath());
+          Files.delete(localCsvFile.toPath());
           return RepeatStatus.FINISHED;
 
         }, transactionManager)

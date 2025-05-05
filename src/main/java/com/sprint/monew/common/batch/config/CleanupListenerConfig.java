@@ -65,7 +65,7 @@ public class CleanupListenerConfig {
 
     @AfterJob
     public void afterJob(JobExecution jobExecution) {
-      jobExecution.getExecutionContext().remove(INTERESTS.getKey());
+      jobExecution.getExecutionContext().remove(NAVER_ARTICLE_DTOS.getKey());
     }
   }
 
