@@ -5,6 +5,7 @@ import com.sprint.monew.common.batch.support.NotificationJdbc;
 import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;
 import com.sprint.monew.domain.notification.NotificationService;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -38,7 +39,8 @@ public class NotificationCreateBatch {
   private final DataSource dataSource;
 
   @Bean
-  public Job notificationCreateJob(@Qualifier("notificationCreateStep") Step notificationCreateStep) {
+  public Job notificationCreateJob(
+      @Qualifier("notificationCreateStep") Step notificationCreateStep) {
     return new JobBuilder("notificationCreateJob", jobRepository)
         .start(notificationCreateStep)
         .build();
@@ -79,14 +81,23 @@ public class NotificationCreateBatch {
   public ItemWriter<NotificationJdbc> notificationCreateWriter() {
     String notificationInsertSql =
         "INSERT INTO notifications (id, user_id, resource_id, resource_type, content, created_at, updated_at, confirmed)"
-            +
-            " VALUES (:id, userId, resourceId, resourceType, content, createdAt, updatedAt, confirmed)";
+            + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     return new JdbcBatchItemWriterBuilder<NotificationJdbc>()
         .dataSource(dataSource)
         .assertUpdates(false)
         .sql(notificationInsertSql)
-        .columnMapped()
+        .itemPreparedStatementSetter((item, ps) -> {
+          ps.setObject(1, item.id());
+          ps.setObject(2, item.userId());
+          ps.setObject(3, item.resourceId());
+          ps.setString(4, item.resourceType().name());
+          ps.setString(5, item.content());
+          ps.setTimestamp(6, Timestamp.from(item.createdAt()));
+          ps.setTimestamp(7, Timestamp.from(item.updatedAt()));
+          ps.setBoolean(8, item.confirmed());
+        })
+        .beanMapped()
         .build();
   }
 }

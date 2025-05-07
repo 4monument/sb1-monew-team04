@@ -40,3 +40,5 @@ logging:
   level:
     root: info
 
+log:
+  directory: ./logs

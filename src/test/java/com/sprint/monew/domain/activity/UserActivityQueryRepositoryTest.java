@@ -8,9 +8,9 @@ import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.article.articleview.ArticleView;
 import com.sprint.monew.domain.comment.Comment;
+import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.subscription.Subscription;
-import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.user.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,6 +23,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -35,6 +36,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
 @Import({UserActivityQueryRepository.class, TestQuerydslConfig.class})
+@AutoConfigureDataMongo
 class UserActivityQueryRepositoryTest {
 
   @Container

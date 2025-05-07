@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -25,15 +26,18 @@ public class NotificationService {
   private final NotificationRepository notificationRepository;
   private final UserRepository userRepository;
 
-  //알림 등록 - 일괄 등록
-  public NotificationJdbc createArticleInterestNotifications(UnreadInterestArticleCount unreadInterestArticleCounts) {
+  //알림 등록
+  public NotificationJdbc createArticleInterestNotifications(
+      UnreadInterestArticleCount unreadInterestArticleCounts) {
     return NotificationJdbc.create(unreadInterestArticleCounts);
   }
 
   //알림 수정 - 전체 알림 확인
+  @Transactional
   public void checkAllNotifications(UUID userId) {
 
-    User user = userRepository.findById(userId).orElseThrow();
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     List<Notification> notifications = notificationRepository.findByUser(user);
     Instant updatedAt = Instant.now();
@@ -46,6 +50,7 @@ public class NotificationService {
   }
 
   //알림 수정 - 알림 확인(단일)
+  @Transactional
   public void checkNotification(UUID notificationId, UUID userId) {
 
     User user = userRepository.findById(userId)
@@ -59,12 +64,13 @@ public class NotificationService {
   }
 
   //알림 목록 조회
+  @Transactional(readOnly = true)
   public CursorPageResponseDto<NotificationDto> getAllNotifications(
       NotificationSearchRequest request, UUID userId) {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> UserNotFoundException.withId(userId));
 
-    int limit = request.limit();
+    int limit = request.limit() == null ? 30 : request.limit();
     UUID cursor = request.cursor();
     Instant after = request.after();
 
