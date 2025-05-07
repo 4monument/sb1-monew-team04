@@ -56,11 +56,23 @@ public class ArticleBackupConfig {
   @Bean
   @StepScope
   public ItemReader<ArticleApiDto> backupContextReader(
-      @Value("#{jobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> naverArticleApiDtos) {
+      @Value("#{jobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> naver,
+      @Value("#{jobExecutionContext['chosunArticleDtos']}") List<ArticleApiDto> chosun,
+      @Value("#{jobExecutionContext['hankyungArticleDtos']}") List<ArticleApiDto> hankyung) {
     // 신문사 추가할떄마다 추가할 곳
     List<ArticleApiDto> allDtos = new ArrayList<>();
-    //allDtos.addAll(chosunArticleDtos);
-    allDtos.addAll(naverArticleApiDtos);
+    if (naver != null) {
+      allDtos.addAll(naver);
+    }
+
+    if (chosun != null) {
+      allDtos.addAll(chosun);
+    }
+
+    if (hankyung != null) {
+      allDtos.addAll(hankyung);
+    }
+
     log.info("backup read start : dto size = {}", allDtos.size());
     return new ListItemReader<>(allDtos);
   }
@@ -120,21 +132,4 @@ public class ArticleBackupConfig {
     LocalDateTime now = LocalDateTime.now();
     return String.format("%s-%s.csv", now.toLocalDate(), now.getHour());
   }
-
-
-
-//  @Bean
-//  @StepScope
-//  public ItemProcessor<ArticleApiDto, ArticleApiDto> backupArticleFilterProcessor(
-//      InterestSingleton interests) {
-//
-//    return item -> {
-//      ArticleApiDto filteredDto = interests.filter(item);
-//      if (filteredDto == null) {
-//        // metric 증가하도록 설계하기
-//        return null;
-//      }
-//      return filteredDto;
-//    };
-//  }
 }

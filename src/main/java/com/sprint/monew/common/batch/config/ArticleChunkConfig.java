@@ -43,14 +43,23 @@ public class ArticleChunkConfig {
   @Bean
   @StepScope
   public ItemReader<ArticleApiDto> articleCollectionsReader(
-      @Value("#{JobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> naverArticleDtos,
-      @Value("#{JobExecutionContext['chosunArticleDtos']}") List<ArticleApiDto> chosunArticleDtos,
-      @Value("#{JobExecutionContext['hankyungArticleDtos']}") List<ArticleApiDto> hankyungArticleDtos) {
+      @Value("#{JobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> naver,
+      @Value("#{JobExecutionContext['chosunArticleDtos']}") List<ArticleApiDto> chosun,
+      @Value("#{JobExecutionContext['hankyungArticleDtos']}") List<ArticleApiDto> hankyung) {
 
     List<ArticleApiDto> articleApiDtos = new ArrayList<>();
-    articleApiDtos.addAll(naverArticleDtos);
-    articleApiDtos.addAll(chosunArticleDtos);
-    articleApiDtos.addAll(hankyungArticleDtos);
+
+    if (naver != null) {
+      articleApiDtos.addAll(naver);
+    }
+
+    if (chosun != null) {
+      articleApiDtos.addAll(chosun);
+    }
+
+    if (hankyung != null) {
+      articleApiDtos.addAll(hankyung);
+    }
 
     return new ListItemReader<>(articleApiDtos);
   }
