@@ -18,14 +18,12 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         
-    - name: 환경 변수 설정
+    - name: set env and run
       env:
         SPRING_PROFILES_ACTIVE: test
         aws-region: ap-northeast-2
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-    - name: Run Tests
       run: |
         # 환경 변수 디버깅
         echo "aws-access-key-id : ${{ secrets.AWS_ACCESS_KEY_ID }}"
