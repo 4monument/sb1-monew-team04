@@ -35,13 +35,7 @@ public class InterestContainer {
     return null;
   }
 
-  //  public Optional<ArticleApiDto> filter(ArticleApiDto articleApiDto){
-//    if (isContainKeywords(articleApiDto) && !isDuplicateUrl(articleApiDto)) {
-//      return Optional.of(articleApiDto);
-//    }
-//    return Optional.empty();
-//  }
-  public boolean isNewUrl(String sourceUrl) {
+  private boolean isNewUrl(String sourceUrl) {
     return sourceUrlFilterSet.add(sourceUrl);
   }
 
