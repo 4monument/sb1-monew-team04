@@ -7,7 +7,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment: TEST
     permissions:
       contents: read
     steps:
