@@ -12,7 +12,9 @@ import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -97,7 +99,7 @@ public class ArticleRestoreBatch {
       @Value("#{jobParameters['from']}") String fromStr,
       @Value("#{jobParameters['to']}") String toStr) {
 
-    return new StepBuilder("  changeArticleIsDeltedStep", jobRepository)
+    return new StepBuilder("changeArticleIsDeltedStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
 
           Instant from = getStartOfDateInstant(fromStr);
@@ -144,6 +146,7 @@ public class ArticleRestoreBatch {
     LocalDate to = getLocalDate(toStr);
     List<LocalDate> dateRange = from.datesUntil(to.plusDays(1)).toList();
 
+    log.info("복구할 날짜 범위 : {}", dateRange);
     List<S3Object> s3Objects = getS3Objects(dateRange);
     List<Resource> resources = getS3InputStreamResources(s3Objects);
 

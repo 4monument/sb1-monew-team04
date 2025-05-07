@@ -60,6 +60,7 @@ public class ArticleChunkConfig {
     if (hankyung != null) {
       articleApiDtos.addAll(hankyung);
     }
+    log.info("[백업 후] Collect Chunk Reader Start : context에 저장된 articleDto 개수 = {}", articleApiDtos.size());
 
     return new ListItemReader<>(articleApiDtos);
   }
@@ -119,13 +120,13 @@ public class ArticleChunkConfig {
       log.info("articleIdList : {}", articleIdList);
       log.info("articleInterestJdbc : {}", articleInterestsJdbc);
 
+      log.info("저장 될 Article size : {}", articlesWithId.size());
+      log.info("저장 될 Article Interest size : {}", articleInterestsJdbc.size());
+
       Chunk<Article> chunkArticles = new Chunk<>();
       chunkArticles.addAll(articlesWithId);
       Chunk<ArticleInterestJdbc> chunkArticleInterests = new Chunk<>();
       chunkArticleInterests.addAll(articleInterestsJdbc);
-
-      log.info("저장 될 Article size : {}", articlesWithId.size());
-      log.info("저장 될 Article Interest size : {}", articleInterestsJdbc.size());
 
       articleJdbcItemWriter.write(chunkArticles);
       articleInterestJdbcItemWriter.write(chunkArticleInterests);

@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -36,6 +37,7 @@ public class NotificationDeleteBatch {
   }
 
   @Bean(name = "notificationChunkDeleteStep")
+  @JobScope
   public Step notificationChunkDeleteStep(
       @Qualifier("notificationDeleteReader") ListItemReader<Instant> reader) {
     return new StepBuilder("notificationChunkDeleteStep", jobRepository)
