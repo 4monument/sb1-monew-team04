@@ -41,6 +41,11 @@ jobs:
       - name: 테스트 및 빌드하기
         run: ./gradlew clean build
 
+      - name: Codecov에 coverage reports 업로드 
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: ECR에 로그인하기
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
