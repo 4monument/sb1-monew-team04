@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: TEST 
 
     steps:
       - uses: actions/checkout@v3
@@ -39,7 +40,7 @@ jobs:
           # API
           ARTICLE_API_NAVER_ID: ${{ secrets.ARTICLE_API_NAVER_ID }}
           ARTICLE_API_NAVER_SECRET: ${{ secrets.ARTICLE_API_NAVER_SECRET }}
-        run: ./gradlew test
+        run: ./gradlew clean test --stacktrace
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
