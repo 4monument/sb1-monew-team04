@@ -1,48 +1,54 @@
 package com.sprint.monew.common.batch.support;
 
-
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.interest.Interest;
-import java.io.Serializable;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
-public class Interests implements Serializable {
+@Slf4j
+@Component
+public class InterestContainer {
 
-  private static final long serialVersionUID = 1L;
-  private final List<Interest> interests;
+  private List<Interest> interests = new ArrayList<>();
   private final Set<String> keywords = ConcurrentHashMap.newKeySet();
   private final Set<String> sourceUrlFilterSet = ConcurrentHashMap.newKeySet();
 
-  public Interests(List<Interest> interests) {
-    this.interests = Collections.unmodifiableList(interests);
-    interests.stream()
+  public void register(List<Interest> interests, List<String> sourceUrls) {
+    clearBean();
+    this.interests = interests;
+    this.interests.stream()
         .map(Interest::getKeywords)
         .flatMap(List::stream)
+        .map(String::toLowerCase)
         .forEach(keywords::add);
+    this.sourceUrlFilterSet.addAll(sourceUrls);
   }
 
   public ArticleApiDto filter(ArticleApiDto articleApiDto){
-    if (isContainKeywords(articleApiDto) && !isDuplicateUrl(articleApiDto)) {
+    if (isContainKeywords(articleApiDto) && isNewUrl(articleApiDto)) {
       return articleApiDto;
     }
     return null;
   }
 
-  public void addSourceUrls(List<String> sourceUrls) {
-    sourceUrlFilterSet.addAll(sourceUrls);
-  }
-
-  public boolean isDuplicateUrl(ArticleApiDto articleApiDto) {
+//  public Optional<ArticleApiDto> filter(ArticleApiDto articleApiDto){
+//    if (isContainKeywords(articleApiDto) && !isDuplicateUrl(articleApiDto)) {
+//      return Optional.of(articleApiDto);
+//    }
+//    return Optional.empty();
+//  }
+  public boolean isNewUrl(ArticleApiDto articleApiDto) {
     return sourceUrlFilterSet.add(articleApiDto.sourceUrl());
   }
 
   private boolean isContainKeywords(ArticleApiDto articleApiDto) {
-    String summary = articleApiDto.summary();
+    String lowerCaseSummary = articleApiDto.summary().toLowerCase();
     return keywords.stream()
-        .anyMatch(summary::contains);
+        .anyMatch(lowerCaseSummary::contains);
   }
 
   public ArticleWithInterestList toArticleWithRelevantInterests(ArticleApiDto articleApiDto) {
@@ -53,7 +59,6 @@ public class Interests implements Serializable {
                 .anyMatch(summary::contains))
         .toList();
 
-    // 관련된 키워드가 없는 Aritcle은 필터링
     if (interestList.isEmpty()) {
       return null;
     }
@@ -66,5 +71,10 @@ public class Interests implements Serializable {
         articleApiDto.summary(),
         interestList
     );
+  }
+  public void clearBean() {
+    this.interests.clear();
+    this.keywords.clear();
+    this.sourceUrlFilterSet.clear();
   }
 }

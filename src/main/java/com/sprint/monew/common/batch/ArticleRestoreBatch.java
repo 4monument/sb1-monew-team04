@@ -1,12 +1,11 @@
 package com.sprint.monew.common.batch;
 
-import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.INTERESTS;
-
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
-import com.sprint.monew.common.batch.support.Interests;
+import com.sprint.monew.common.batch.support.InterestContainer;
 import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
+import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.InterestRepository;
 import com.sprint.monew.global.config.S3ConfigProperties;
 import java.time.Duration;
@@ -25,7 +24,6 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.MultiResourceItemReader;
@@ -62,35 +60,29 @@ public class ArticleRestoreBatch {
   public Job articleRestoreJob(
       @Qualifier("articleRestoreStep") Step articleRestoreStep,
       @Qualifier("interestsAndSourceUrlFetchStep") Step interestsAndSourceUrlFetchStep,
-      @Qualifier("articleCollectJobContextCleanupListener") JobExecutionListener jobContextCleanupListener,
       @Qualifier("changeArticleIsDeletedStep") Step changeArticleIsDeletedStep) {
 
     return new JobBuilder("articleRestoreJob", jobRepository)
         .start(interestsAndSourceUrlFetchStep)  // 1. Interest 가져오기: ArticleInterest도 생성해야 하므로 Interest 객체 필요
         .next(changeArticleIsDeletedStep) // 2.  특정 날짜 기준 논리삭제된 것 전부 True
         .next(articleRestoreStep) // 3. 복구 : 기존에 있는거는 추가하지 않기
-        .listener(jobContextCleanupListener)
         .build();
   }
 
   @Bean
   @JobScope
   public Step interestsAndSourceUrlFetchStep(InterestRepository interestRepository,
-      @Qualifier("interestsFetchPromotionListener") ExecutionContextPromotionListener promotionListener) {
+      InterestContainer interestContainer) {
 
     return new StepBuilder("interestsFetchStep", jobRepository)
         .tasklet((contribution, chunkContext) -> {
 
-          ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
-
-          Interests interests = new Interests(interestRepository.findAll());
-          interests.addSourceUrls(articleRepository.findAllSourceUrl());
-
-          stepContext.put(INTERESTS.getKey(), interests);
+          List<Interest> interests = interestRepository.findAll();
+          List<String> sourceUrls = articleRepository.findAllSourceUrl();
+          interestContainer.register(interests, sourceUrls);
 
           return RepeatStatus.FINISHED;
         }, transactionManager)
-        .listener(promotionListener)
         .build();
   }
 
