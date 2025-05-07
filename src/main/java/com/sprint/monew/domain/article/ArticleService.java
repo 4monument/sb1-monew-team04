@@ -44,7 +44,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ArticleService {
 
-
   @Resource(name = "articleRestoreJob")
   private final Job articleRestoreJob;
   private final JobLauncher jobLauncher;
@@ -106,6 +105,7 @@ public class ArticleService {
         .addString("to", to.toString())
         .toJobParameters();
 
+    log.info("Article Restore Start");
     JobExecution jobExecution = jobLauncher.run(articleRestoreJob, jobParameters);
 
     ExecutionContext jobContext = jobExecution.getExecutionContext();
@@ -114,13 +114,14 @@ public class ArticleService {
       throw new RuntimeException("ExecutionContext로부터 Article Ids를 가져오는 데 실패했습니다.");
     }
 
-    ArticleRestoreResultDto result = new ArticleRestoreResultDto(
+    ArticleRestoreResultDto resultDto = new ArticleRestoreResultDto(
         Instant.now(),
         articleIds,
         (long) articleIds.size()
     );
+    List<ArticleRestoreResultDto> result = List.of(resultDto);
     jobContext.remove(ARTICLE_IDS.getKey());
-    return List.of(result);
+    return result;
   }
 
   public void deleteArticle(UUID id) {
@@ -130,6 +131,4 @@ public class ArticleService {
   public void hardDeleteArticle(UUID id) {
     articleRepository.findById(id).ifPresent(articleRepository::delete);
   }
-
-
 }

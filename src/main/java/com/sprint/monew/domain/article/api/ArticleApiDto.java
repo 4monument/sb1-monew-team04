@@ -3,6 +3,7 @@ package com.sprint.monew.domain.article.api;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.time.Instant;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

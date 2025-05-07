@@ -28,14 +28,14 @@ public class InterestContainer {
     this.sourceUrlFilterSet.addAll(sourceUrls);
   }
 
-  public ArticleApiDto filter(ArticleApiDto articleApiDto){
+  public ArticleApiDto filter(ArticleApiDto articleApiDto) {
     if (isContainKeywords(articleApiDto) && isNewUrl(articleApiDto)) {
       return articleApiDto;
     }
     return null;
   }
 
-//  public Optional<ArticleApiDto> filter(ArticleApiDto articleApiDto){
+  //  public Optional<ArticleApiDto> filter(ArticleApiDto articleApiDto){
 //    if (isContainKeywords(articleApiDto) && !isDuplicateUrl(articleApiDto)) {
 //      return Optional.of(articleApiDto);
 //    }
@@ -72,6 +72,7 @@ public class InterestContainer {
         interestList
     );
   }
+
   public void clearBean() {
     this.interests.clear();
     this.keywords.clear();

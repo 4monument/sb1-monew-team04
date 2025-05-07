@@ -8,6 +8,7 @@ import com.sprint.monew.domain.article.repository.ArticleRepository;
 import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.InterestRepository;
 import com.sprint.monew.global.config.S3ConfigProperties;
+import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -15,8 +16,8 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -46,6 +47,7 @@ import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class ArticleRestoreBatch {
@@ -59,11 +61,11 @@ public class ArticleRestoreBatch {
   @Bean
   public Job articleRestoreJob(
       @Qualifier("articleRestoreStep") Step articleRestoreStep,
-      @Qualifier("interestsAndSourceUrlFetchStep") Step interestsAndSourceUrlFetchStep,
+      @Qualifier("interestsAndSourceUrlsFetchStep") Step interestsAndSourceUrlsFetchStep,
       @Qualifier("changeArticleIsDeletedStep") Step changeArticleIsDeletedStep) {
 
     return new JobBuilder("articleRestoreJob", jobRepository)
-        .start(interestsAndSourceUrlFetchStep)  // 1. Interest 가져오기: ArticleInterest도 생성해야 하므로 Interest 객체 필요
+        .start(interestsAndSourceUrlsFetchStep)  // 1. Interest 가져오기: ArticleInterest도 생성해야 하므로 Interest 객체 필요
         .next(changeArticleIsDeletedStep) // 2.  특정 날짜 기준 논리삭제된 것 전부 True
         .next(articleRestoreStep) // 3. 복구 : 기존에 있는거는 추가하지 않기
         .build();
@@ -71,7 +73,7 @@ public class ArticleRestoreBatch {
 
   @Bean
   @JobScope
-  public Step interestsAndSourceUrlFetchStep(InterestRepository interestRepository,
+  public Step interestsAndSourceUrlsFetchStep(InterestRepository interestRepository,
       InterestContainer interestContainer) {
 
     return new StepBuilder("interestsFetchStep", jobRepository)
@@ -100,7 +102,8 @@ public class ArticleRestoreBatch {
 
           Instant from = getStartOfDateInstant(fromStr);
           Instant to = getStartOfDateInstant(toStr).plus(Duration.ofDays(1));
-          articleRepository.restoreArticleDeletionBetweenDates(from, to);
+          int restoredSoftDeletedArticlesCount = articleRepository.restoreArticleDeletionBetweenDates(from, to);
+          log.info("논리삭제된 기사 복구 수 : {}", restoredSoftDeletedArticlesCount);
 
           return RepeatStatus.FINISHED;
         }, transactionManager)
@@ -115,14 +118,14 @@ public class ArticleRestoreBatch {
   @Bean
   @JobScope
   public Step articleRestoreStep(
-      @Qualifier("articleRestoreS3ItemReader") MultiResourceItemReader<ArticleApiDto> mrir,
+      @Qualifier("articleRestoreS3ItemReader") MultiResourceItemReader<ArticleApiDto> multiResourceItemReader,
       @Qualifier("restoreArticleProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor,
       @Qualifier("articleWithInterestsJdbcItemWriter") ItemWriter<ArticleWithInterestList> articleJdbcItemWriter,
       @Qualifier("restoreArticleIdsPromotionListener") ExecutionContextPromotionListener restoreArticleIdsListener) {
 
     return new StepBuilder("articleRestoreStep", jobRepository)
         .<ArticleApiDto, ArticleWithInterestList>chunk(500, transactionManager)
-        .reader(mrir)
+        .reader(multiResourceItemReader)
         .processor(restoreArticleProcessor)
         .writer(articleJdbcItemWriter)
         .listener(restoreArticleIdsListener)

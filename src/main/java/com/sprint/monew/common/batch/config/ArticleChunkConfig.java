@@ -7,7 +7,6 @@ import com.sprint.monew.common.batch.support.ArticleWithInterestList;
 import com.sprint.monew.common.batch.support.InterestContainer;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
-import jakarta.persistence.EntityManagerFactory;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,15 +40,18 @@ public class ArticleChunkConfig {
   /**
    * Reader
    */
-  @Bean(name = "naverArticleCollectReader")
+  @Bean
   @StepScope
-  public ItemReader<ArticleApiDto> naverArticleCollectReader(
-      @Value("#{JobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> naverArticleDtos) {
+  public ItemReader<ArticleApiDto> articleCollectionsReader(
+      @Value("#{JobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> naverArticleDtos,
+      @Value("#{JobExecutionContext['chosunArticleDtos']}") List<ArticleApiDto> chosunArticleDtos,
+      @Value("#{JobExecutionContext['hankyungArticleDtos']}") List<ArticleApiDto> hankyungArticleDtos) {
 
     List<ArticleApiDto> articleApiDtos = new ArrayList<>();
     articleApiDtos.addAll(naverArticleDtos);
-    //articleApiDtos.addAll(chosunArticleDtos);
-//    articleApiDtos.addAll(hankyungArticleDtos);
+    articleApiDtos.addAll(chosunArticleDtos);
+    articleApiDtos.addAll(hankyungArticleDtos);
+
     return new ListItemReader<>(articleApiDtos);
   }
 
@@ -58,7 +60,7 @@ public class ArticleChunkConfig {
    */
   @Bean
   @StepScope
-  public ItemProcessor<ArticleApiDto, ArticleWithInterestList> articleCollectProcessor(
+  public ItemProcessor<ArticleApiDto, ArticleWithInterestList> collectArticleProcessor(
       InterestContainer interests) {
     return interests::toArticleWithRelevantInterests;
   }
@@ -73,7 +75,6 @@ public class ArticleChunkConfig {
   /**
    * Writer
    */
-
   @Bean
   @StepScope
   public ItemWriter<ArticleWithInterestList> articleWithInterestsJdbcItemWriter(
