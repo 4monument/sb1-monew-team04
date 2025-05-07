@@ -243,9 +243,6 @@ public class CommentRepositoryTest {
 
     List<CommentDto> content = page.getContent();
 
-    for (CommentDto commentDto : content) {
-      System.out.println("commentDto = " + commentDto);
-    }
     assertThat(content.size()).isEqualTo(1);
     assertThat(content).extracting("content")
         .containsExactly("test comment2");
