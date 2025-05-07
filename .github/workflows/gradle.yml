@@ -12,35 +12,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
-      env:
-        SPRING_PROFILES_ACTIVE: test  
-        AWS_ACCESS_KEY: ${{ secrets.AWS_S3_ACCESS_KEY }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_S3_SECRET_KEY }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_ACCESS_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_SECRET_KEY }}
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_S3_REGION }}
-        AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
-        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-        ARTICLE_API_NAVER_ID: ${{ secrets.ARTICLE_API_NAVER_ID }}
-        ARTICLE_API_NAVER_SECRET: ${{ secrets.ARTICLE_API_NAVER_SECRET }}
       uses: actions/setup-java@v4
       
       with:
         java-version: '17'
         distribution: 'temurin'
+        
+    - name: 환경 변수 설정
+      env:
+        aws-region: ap-northeast-2
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     - name: Run Tests
       run: |
         # 환경 변수 디버깅
-        echo "AWS_ACCESS_KEY 설정됨: $([ ! -z "$AWS_ACCESS_KEY" ] && echo '예' || echo '아니오')"
-        echo "AWS_SECRET_KEY 설정됨: $([ ! -z "$AWS_SECRET_KEY" ] && echo '예' || echo '아니오')"
-        echo "AWS_ACCESS_KEY_ID 설정됨: $([ ! -z "$AWS_ACCESS_KEY_ID" ] && echo '예' || echo '아니오')"
-        echo "AWS_SECRET_ACCESS_KEY 설정됨: $([ ! -z "$AWS_SECRET_ACCESS_KEY" ] && echo '예' || echo '아니오')"
-        echo "AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
-        echo "AWS_S3_REGION: $AWS_S3_REGION"
-        echo "AWS_S3_BUCKET: $AWS_S3_BUCKET"
-        echo "ARTICLE_API_NAVER_ID 설정됨: $([ ! -z "$ARTICLE_API_NAVER_ID" ] && echo '예' || echo '아니오')"
-        echo "ARTICLE_API_NAVER_SECRET 설정됨: $([ ! -z "$ARTICLE_API_NAVER_SECRET" ] && echo '예' || echo '아니오')"
+        echo "aws-access-key-id : ${{ secrets.AWS_ACCESS_KEY_ID }}"
+        echo "aws-secret-access-key : ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
         
         # 테스트 실행
         ./gradlew test
