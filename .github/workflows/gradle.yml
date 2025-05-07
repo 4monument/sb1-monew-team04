@@ -81,6 +81,8 @@ jobs:
           AWS_S3_REGION: ap-northeast-2
           AWS_S3_BUCKET: monew-backup
           AWS_ENDPOINT_URL: http://localhost:4566
+          AWS_TEST_MODE: true  # 테스트 모드 플래그 추가
+
           
           # API
           ARTICLE_API_NAVER_ID: ${{ secrets.ARTICLE_API_NAVER_ID }}
