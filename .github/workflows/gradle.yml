@@ -9,8 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment: TEST 
-
     steps:
       - uses: actions/checkout@v3
       
@@ -22,15 +20,6 @@ jobs:
           
       - name: Run Tests with Gradle
         env:
-          # DB
-          SPRING_PROFILES_ACTIVE: test
-          SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/monew_test
-          SPRING_DATASOURCE_USERNAME: monew
-          SPRING_DATASOURCE_PASSWORD: monew1234
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
-          MONGODB_DATABASE: ${{ secrets.MONGODB_DB_NAME }}
-
           # AWS
           AWS_S3_ACCESS_KEY: ${{ secrets.AWS_S3_ACCESS_KEY }}
           AWS_S3_SECRET_KEY: ${{ secrets.AWS_S3_SECRET_KEY }}
