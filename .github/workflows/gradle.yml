@@ -9,6 +9,41 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: TEST
+    
+    services:
+      # PostgreSQL 서비스
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: monew
+          POSTGRES_PASSWORD: monew1234
+          POSTGRES_DB: monew_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      # LocalStack 서비스 추가
+      localstack:
+        image: localstack/localstack:latest
+        env:
+          SERVICES: s3
+          DEFAULT_REGION: ap-northeast-2
+          AWS_DEFAULT_REGION: ap-northeast-2
+          EDGE_PORT: 4566
+          DOCKER_HOST: unix:///var/run/docker.sock
+        ports:
+          - 4566:4566
+        options: >-
+          --health-cmd "curl -f http://localhost:4566/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+    
     steps:
       - uses: actions/checkout@v3
       
@@ -17,20 +52,41 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      
+      - name: Create S3 bucket in LocalStack
+        run: |
+          # AWS CLI 설치
+          pip install awscli-local
+          
+          # LocalStack에 S3 버킷 생성
+          awslocal s3 mb s3://monew-backup
+          
+          # 생성된 버킷 확인
+          awslocal s3 ls
           
       - name: Run Tests with Gradle
         env:
-          # AWS
-          AWS_S3_ACCESS_KEY: ${{ secrets.AWS_S3_ACCESS_KEY }}
-          AWS_S3_SECRET_KEY: ${{ secrets.AWS_S3_SECRET_KEY }}
-          AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-
+          # DB
+          SPRING_PROFILES_ACTIVE: test
+          SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/monew_test
+          SPRING_DATASOURCE_USERNAME: monew
+          SPRING_DATASOURCE_PASSWORD: monew1234
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DATABASE: ${{ secrets.MONGODB_DB_NAME }}
+          
+          # AWS - LocalStack 설정
+          AWS_S3_ACCESS_KEY: test
+          AWS_S3_SECRET_KEY: test
+          AWS_S3_REGION: ap-northeast-2
+          AWS_S3_BUCKET: monew-backup
+          AWS_ENDPOINT_URL: http://localhost:4566
+          
           # API
           ARTICLE_API_NAVER_ID: ${{ secrets.ARTICLE_API_NAVER_ID }}
           ARTICLE_API_NAVER_SECRET: ${{ secrets.ARTICLE_API_NAVER_SECRET }}
-        run: ./gradlew clean test --stacktrace
-
+        run: ./gradlew test --info
+        
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
         with:
