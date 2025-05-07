@@ -3,7 +3,6 @@ package com.sprint.monew.common.batch.config;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.ARTICLE_IDS;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.CHOSUN_ARTICLE_DTOS;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.DB_SOURCEURS;
-import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.INTERESTS;
 import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.NAVER_ARTICLE_DTOS;
 
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
@@ -12,13 +11,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class PromotionListenerConfig {
-
-  @Bean
-  public ExecutionContextPromotionListener interestsFetchPromotionListener() {
-    ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-    listener.setKeys(new String[]{INTERESTS.getKey()});
-    return listener;
-  }
 
   @Bean
   public ExecutionContextPromotionListener naverPromotionListener() {

@@ -3,13 +3,22 @@ name: Deploy to ECS
 on:
   push:
     branches:
-      - feature/cicd
+      - release
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      APPLICATION_TEST_PROPERTIES: ${{ secrets.APPLICATION_TEST_PROPERTIES }}
+
     steps:
+      - name: 도커 컨테이너 다 삭제
+        run: docker ps -aq | xargs -r docker rm -f
+
+      - name: 도커 이미지 다 삭제
+        run: docker images -aq | xargs -r docker rmi -f
+
       - name: Github Repository 파일 불러오기
         uses: actions/checkout@v4
 
@@ -19,15 +28,23 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: 테스트 및 빌드하기 (일단 테스트 없이 빌드)
-        run: ./gradlew clean build -x test
-
       - name: AWS Resource에 접근할 수 있게 AWS credentials 설정
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ap-northeast-2
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: application-test.yaml 파일 생성
+        run: echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > src/test/resources/application-test.yaml
+
+      - name: 테스트 및 빌드하기
+        run: ./gradlew clean build
+
+      - name: Codecov에 coverage reports 업로드 
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: ECR에 로그인하기
         id: login-ecr
@@ -47,11 +64,12 @@ jobs:
       - name: S3에 프로젝트 폴더 업로드하기
         run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://monew-codedeploy-settings-file/$GITHUB_SHA.zip
 
+
       - name: CodeDeploy를 통해 ECS에 배포 트리거
         run: |
-            aws deploy create-deployment \
-              --application-name monew-CodeDeploy \
-              --deployment-group-name Production \
-              --s3-location bucket=monew-codedeploy-settings-file,bundleType=zip,key=${GITHUB_SHA}.zip \
-              --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
-              --region ap-northeast-2
+          aws deploy create-deployment \
+            --application-name monew-CodeDeploy \
+            --deployment-group-name Production \
+            --s3-location bucket=monew-codedeploy-settings-file,bundleType=zip,key=${GITHUB_SHA}.zip \
+            --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
+            --region ap-northeast-2
