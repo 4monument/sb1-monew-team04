@@ -17,19 +17,32 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-      
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-    
-    - name: Run Tests Only
+
+    - name: Run Tests with Environment Variables
       env:
-        AWS_ACCESS_KEY_ID: ${{ env.AWS_S3_ACCESS_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ env.AWS_S3_SECRET_KEY }}
-        AWS_DEFAULT_REGION: ${{ env.AWS_S3_REGION }}
-        AWS_S3_BUCKET: ${{ env.AWS_S3_BUCKET }}
-        ARTICLE_API_NAVER_ID: ${{ env.ARTICLE_API_NAVER_ID }}
-        ARTICLE_API_NAVER_SECRET: ${{ env.ARTICLE_API_NAVER_SECRET }}
-      run: ./gradlew test
+        AWS_ACCESS_KEY: ${{ secrets.AWS_S3_ACCESS_KEY }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_S3_SECRET_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_SECRET_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_S3_REGION }}
+        AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
+        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+        ARTICLE_API_NAVER_ID: ${{ secrets.ARTICLE_API_NAVER_ID }}
+        ARTICLE_API_NAVER_SECRET: ${{ secrets.ARTICLE_API_NAVER_SECRET }}
+      run: |
+        # 환경 변수 디버깅
+        echo "AWS_ACCESS_KEY 설정됨: $([ ! -z "$AWS_ACCESS_KEY" ] && echo '예' || echo '아니오')"
+        echo "AWS_SECRET_KEY 설정됨: $([ ! -z "$AWS_SECRET_KEY" ] && echo '예' || echo '아니오')"
+        echo "AWS_ACCESS_KEY_ID 설정됨: $([ ! -z "$AWS_ACCESS_KEY_ID" ] && echo '예' || echo '아니오')"
+        echo "AWS_SECRET_ACCESS_KEY 설정됨: $([ ! -z "$AWS_SECRET_ACCESS_KEY" ] && echo '예' || echo '아니오')"
+        echo "AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
+        echo "AWS_S3_REGION: $AWS_S3_REGION"
+        echo "AWS_S3_BUCKET: $AWS_S3_BUCKET"
+        echo "ARTICLE_API_NAVER_ID 설정됨: $([ ! -z "$ARTICLE_API_NAVER_ID" ] && echo '예' || echo '아니오')"
+        echo "ARTICLE_API_NAVER_SECRET 설정됨: $([ ! -z "$ARTICLE_API_NAVER_SECRET" ] && echo '예' || echo '아니오')"
+        
+        # 테스트 실행
+        ./gradlew test
       
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4
@@ -38,6 +51,7 @@ jobs:
   
   dependency-submission:
     runs-on: ubuntu-latest
+    environment: TEST
     permissions:
       contents: write
     steps:
