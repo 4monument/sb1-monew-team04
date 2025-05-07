@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,17 +48,16 @@ public class InterestContainerTest {
     setField(develop, "id", UUID.randomUUID());
 
     sourceUrls = Arrays.asList(
-        "https://www.example.com/programming",
-        "https://www.example.com/music",
-        "https://www.example.com/travel",
-        "https://www.example.com/develop"
+        "https://www.naver.com/programming",
+        "https://www.mnet.com/music",
+        "https://www.traveler.com/travel",
+        "https://www.codeit.com/develop"
     );
-    // 공통
     interestContainer.register(interests, sourceUrls);
   }
 
   @Test
-  @DisplayName("InterestContainer를 초기화한다.")
+  @DisplayName("초기화 후 필드 테스트")
   void register() {
     // then
     List<Interest> savedInterests = (List<Interest>) getField(interestContainer, "interests");
@@ -81,15 +79,15 @@ public class InterestContainerTest {
   }
 
   @Test
-  @DisplayName("InterestContainer의 키워드 필터링된 경우")
+  @DisplayName("InterestContainer의 필터링된 경우 - 키워드 미포함")
   void filterWithKeyword() {
 
     ArticleApiDto articleApiDto = new ArticleApiDto(
-        Source.NAVER,
-        "https://www.naver.com/programming",
+        Source.CHOSUN,
+        "https://www.chosun.com/programming",
         "프로그래밍의 기초",
         Instant.now(),
-        "최대한글자안겹치게 만들어놓은문장"
+        "글자 포함 안되는 문장"
     );
 
     // when
@@ -105,12 +103,13 @@ public class InterestContainerTest {
   @DisplayName("InterestContainer의 키워드 필터링된 경우 - URL이 겹치는 경우")
   void filterWithUrl() {
 
+    // given
     ArticleApiDto articleApiDto = new ArticleApiDto(
         Source.NAVER,
-        "https://www.example.com/programming",
+        "https://www.naver.com/programming",
         "프로그래밍의 기초",
         Instant.now(),
-        "개발 자들에 대한 이야기"
+        "개발자들에 대한 이야기"
     );
 
     // when
@@ -123,16 +122,16 @@ public class InterestContainerTest {
   }
 
   @Test
-  @DisplayName("InterestContainer의 키워드 필터링되지 않은 경우")
+  @DisplayName("InterestContainer의 filtering을 견뎌낸 기사")
   void filterNot() {
 
     // given
     ArticleApiDto articleApiDto = new ArticleApiDto(
         Source.NAVER,
-        "https://newUrl",
+        "https://newUrl.com/newProgramming",
         "프로그래밍의 기초",
         Instant.now(),
-        "개발 + 배낭여행 ..."
+        "개발+배낭여행 ..."
     );
 
     // when
@@ -142,6 +141,4 @@ public class InterestContainerTest {
     assertThat(filter)
         .isEqualTo(articleApiDto);
   }
-
-
 }
