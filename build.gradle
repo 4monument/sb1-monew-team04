@@ -103,7 +103,14 @@ jacocoTestReport {
     }
     afterEvaluate {
         classDirectories = files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: '**/Q*')
+            fileTree(dir: it, exclude: [
+                    '**/MonewApplication.class',    // 메인 애플리케이션 클래스
+                    '**/Q*',                        // Q 클래스
+                    '**/*$*.class',      // Lombok이 생성한 내부 클래스
+                    '**/*$*$*.class',    // 중첩된 Lombok 생성 클래스
+                    '**/com/sprint/monew/domain/**/dto/**', // DTO 클래스
+                    '**/com/sprint/monew/common/batch/**'   // 배치 관련 클래스
+            ])
         })
     }
 }
