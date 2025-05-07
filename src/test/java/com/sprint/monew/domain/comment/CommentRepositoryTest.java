@@ -61,6 +61,7 @@ public class CommentRepositoryTest {
   UUID articleId;
   UUID commentId1;
   Instant createdAtCursorComment2 = Instant.parse("2025-01-02T00:00:00Z");
+  long likeCountCursor = 1L;
 
   @BeforeEach
   void init() {
@@ -209,6 +210,42 @@ public class CommentRepositoryTest {
     assertThat(content.size()).isEqualTo(3);
     assertThat(content).extracting("content")
         .containsExactly("test comment3", "test comment4", "test comment5");
+  }
+
+  @Test
+  @DisplayName("cursor가 likeCount이고 내림차순 정렬")
+  void getComments_sortByLikeCountDesc() {
+    CommentRequest request = new CommentRequest(articleId, String.valueOf(likeCountCursor),
+        createdAtCursorComment2.plusSeconds(2000));
+    PageRequest pageRequest = PageRequest.of(0, 3, Direction.DESC, "likeCount");
+
+    Slice<CommentDto> page = commentRepository.getComments(request, userId, pageRequest);
+
+    assertThat(page.hasNext()).isTrue();
+    assertThat(page.getSize()).isEqualTo(3);
+
+    List<CommentDto> content = page.getContent();
+    assertThat(content.size()).isEqualTo(3);
+    assertThat(content).extracting("content")
+        .containsExactly("test comment2", "test comment5", "test comment3");
+  }
+
+  @Test
+  @DisplayName("cursor가 likeCount이고 오름차순 정렬")
+  void getComments_sortByLikeCountAsc() {
+    CommentRequest request = new CommentRequest(articleId, String.valueOf(1L), createdAtCursorComment2.plusSeconds(2000));
+    PageRequest pageRequest = PageRequest.of(0, 3, Direction.ASC, "likeCount");
+
+    Slice<CommentDto> page = commentRepository.getComments(request, userId, pageRequest);
+
+    assertThat(page.hasNext()).isFalse();
+    assertThat(page.getSize()).isEqualTo(3);
+
+    List<CommentDto> content = page.getContent();
+
+    assertThat(content.size()).isEqualTo(1);
+    assertThat(content).extracting("content")
+        .containsExactly("test comment2");
   }
 
 }

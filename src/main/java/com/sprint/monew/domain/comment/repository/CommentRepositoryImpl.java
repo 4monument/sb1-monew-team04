@@ -44,6 +44,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         .leftJoin(comment.likes, likeAll)
         .leftJoin(comment.likes, likeMe).on(likeMe.user.id.eq(userId))
         .where(
+            comment.deleted.isFalse(),
             articleIdEq(condition.articleId()),
             createdAtCursor(condition.cursor(), pageable.getSort())
         )
@@ -110,11 +111,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         countExpr.gt(likeCount) :
         countExpr.lt(likeCount);
 
-    BooleanExpression secondary = order.isAscending() ?
-        comment.createdAt.gt(after) :
-        comment.createdAt.lt(after);
-
-    return primary.or(countExpr.eq(likeCount).and(secondary));
+    return primary.or(countExpr.eq(likeCount).and(comment.createdAt.lt(after)));
   }
 
   private OrderSpecifier<?>[] getOrderSpecifiers(Sort sort, QLike likeAll) {
