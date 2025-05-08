@@ -15,15 +15,16 @@ import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.interest.Interest;
+import com.sprint.monew.domain.notification.dto.NotificationDto;
 import com.sprint.monew.domain.notification.dto.NotificationSearchRequest;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.notification.exception.NotificationNotFoundException;
+import com.sprint.monew.domain.notification.repository.NotificationRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.domain.user.exception.UserNotFoundException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,7 +37,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("알림 서비스 테스트")

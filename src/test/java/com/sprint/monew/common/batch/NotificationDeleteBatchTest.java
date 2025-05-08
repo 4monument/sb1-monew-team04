@@ -5,7 +5,7 @@
 //import static org.mockito.Mockito.*;
 //
 //import com.sprint.monew.common.batch.config.BatchTestConfig;
-//import com.sprint.monew.domain.notification.NotificationRepository;
+//import com.sprint.monew.domain.notification.repository.NotificationRepository;
 //import java.util.List;
 //import org.jetbrains.annotations.NotNull;
 //import org.junit.jupiter.api.BeforeAll;
@@ -33,10 +33,8 @@
 //import org.testcontainers.utility.DockerImageName;
 //
 //
-////@Transactional
-////properties = {
-////        "spring.main.allow-bean-definition-overriding=true",
-////    }
+/// /@Transactional /properties = { /        "spring.main.allow-bean-definition-overriding=true", /
+///   }
 //@BatchTestConfig
 //@SpringBootTest(classes = {NotificationDeleteBatch.class})
 //@ActiveProfiles("test")

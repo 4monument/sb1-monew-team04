@@ -38,8 +38,10 @@ FROM u1,
 --      i2;
 
 -- ARTICLES (기사)
-INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date", "created_at")
-VALUES (gen_random_uuid(), 'NAVER', 'https://site.com/ai', '인공지능의 미래', 'AI가 바꾸는 세상에 대한 이야기', now(), now()),
+INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date",
+                        "created_at")
+VALUES (gen_random_uuid(), 'NAVER', 'https://site.com/ai', '인공지능의 미래', 'AI가 바꾸는 세상에 대한 이야기', now(),
+        now()),
        (gen_random_uuid(), 'CHOSUN', 'https://site.com/health', '건강하게 사는 법', '건강을 유지하는 실용적인 팁',
         now(), now());
 
@@ -111,7 +113,7 @@ INSERT
 INTO "notifications" ("id", "user_id", "resource_id", "resource_type", "content", "confirmed",
                       "created_at", "updated_at")
 SELECT '123e4567-e89b-12d3-a456-426614174000'::uuid,
-       u1.user_id,
+        u1.user_id,
        c1.resource_id,
        'COMMENT',
        '누군가 내 댓글에 좋아요를 눌렀어요.',
@@ -122,7 +124,7 @@ FROM u1,
      c1
 UNION
 SELECT '987e6543-e21b-12d3-b456-426614174000'::uuid,
-       u2.user_id,
+        u2.user_id,
        c2.resource_id,
        'COMMENT',
        '새로운 댓글이 달렸어요.',
@@ -138,7 +140,8 @@ WHERE conrelid = 'notifications'::regclass;
 
 
 -- 추가 기사 데이터
-INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date", "created_at")
+INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date",
+                        "created_at")
 VALUES
     -- 기술 관련 기사
     (gen_random_uuid(), 'NAVER', 'https://zdnet.com/quantum', '양자 컴퓨팅의 혁신적 발전',
@@ -153,7 +156,6 @@ VALUES
      '올바른 영양 섭취로 건강한 삶을 유지하는 방법', now(), now()),
     (gen_random_uuid(), 'YONHAP', 'https://medjournal.com/mental', '정신 건강의 중요성',
      '현대 사회에서 정신 건강을 유지하는 실용적 방법', now(), now());
-
 
 -- 새 기사와 관심사 연결
 WITH a1 AS (SELECT id AS article_id FROM articles WHERE title = '양자 컴퓨팅의 혁신적 발전'),

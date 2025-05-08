@@ -16,7 +16,6 @@ public record InterestSearchRequest(
     // 기본값 설정
     orderBy = (orderBy == null) ? "createdAt" : orderBy;
     direction = (direction == null) ? "DESC" : direction;
-    limit = (limit == null || limit <= 0) ? 50 : limit;
   }
 
   public static InterestSearchRequest of(String keyword, String orderBy, String direction,

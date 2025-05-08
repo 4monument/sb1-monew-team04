@@ -38,8 +38,10 @@ FROM u1,
 --      i2;
 
 -- ARTICLES (기사)
-INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date", "created_at")
-VALUES (gen_random_uuid(), 'NAVER', 'https://site.com/ai', '인공지능의 미래', 'AI가 바꾸는 세상에 대한 이야기', now(), now()),
+INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date",
+                        "created_at")
+VALUES (gen_random_uuid(), 'NAVER', 'https://site.com/ai', '인공지능의 미래', 'AI가 바꾸는 세상에 대한 이야기', now(),
+        now()),
        (gen_random_uuid(), 'CHOSUN', 'https://site.com/health', '건강하게 사는 법', '건강을 유지하는 실용적인 팁',
         now(), now());
 
@@ -110,7 +112,7 @@ WITH u1 AS (SELECT id AS user_id FROM users WHERE email = 'minji@example.com'),
 INSERT
 INTO "notifications" ("id", "user_id", "resource_id", "resource_type", "content", "confirmed",
                       "created_at", "updated_at")
-SELECT gen_random_uuid(),
+SELECT '123e4567-e89b-12d3-a456-426614174000'::uuid,
        u1.user_id,
        c1.resource_id,
        'COMMENT',
@@ -121,7 +123,7 @@ SELECT gen_random_uuid(),
 FROM u1,
      c1
 UNION
-SELECT gen_random_uuid(),
+SELECT '987e6543-e21b-12d3-b456-426614174000'::uuid,
        u2.user_id,
        c2.resource_id,
        'COMMENT',
@@ -138,21 +140,22 @@ WHERE conrelid = 'notifications'::regclass;
 
 
 -- 추가 기사 데이터
-INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date")
+INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date",
+                        "created_at")
 VALUES
     -- 기술 관련 기사
     (gen_random_uuid(), 'NAVER', 'https://zdnet.com/quantum', '양자 컴퓨팅의 혁신적 발전',
-     '최신 양자 컴퓨팅 기술의 발전과 산업 적용 사례', now()),
+     '최신 양자 컴퓨팅 기술의 발전과 산업 적용 사례', now(), now()),
     (gen_random_uuid(), 'YONHAP', 'https://techcrunch.com/blockchain', '블록체인이 바꾸는 금융의 미래',
-     '블록체인 기술의 금융권 적용과 미래 전망', now()),
+     '블록체인 기술의 금융권 적용과 미래 전망', now(), now()),
     (gen_random_uuid(), 'YONHAP', 'https://mittr.com/robotics', '로봇 공학의 최신 동향',
-     '자율주행 로봇과 산업용 로봇의 최신 기술 동향', now()),
+     '자율주행 로봇과 산업용 로봇의 최신 기술 동향', now(), now()),
 
     -- 건강 관련 기사
     (gen_random_uuid(), 'YONHAP', 'https://healthtoday.com/nutrition', '영양소의 균형과 장수',
-     '올바른 영양 섭취로 건강한 삶을 유지하는 방법', now()),
+     '올바른 영양 섭취로 건강한 삶을 유지하는 방법', now(), now()),
     (gen_random_uuid(), 'YONHAP', 'https://medjournal.com/mental', '정신 건강의 중요성',
-     '현대 사회에서 정신 건강을 유지하는 실용적 방법', now());
+     '현대 사회에서 정신 건강을 유지하는 실용적 방법', now(), now());
 
 -- 새 기사와 관심사 연결
 WITH a1 AS (SELECT id AS article_id FROM articles WHERE title = '양자 컴퓨팅의 혁신적 발전'),

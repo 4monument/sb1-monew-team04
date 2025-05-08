@@ -1,5 +1,6 @@
-package com.sprint.monew.domain.notification;
+package com.sprint.monew.domain.notification.repository;
 
+import com.sprint.monew.domain.notification.Notification;
 import com.sprint.monew.domain.user.User;
 import java.time.Instant;
 import java.util.List;
