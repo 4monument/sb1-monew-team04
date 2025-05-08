@@ -99,7 +99,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
 
   private BooleanExpression searchKeyword(String keyword) {
     return keyword == null ? null :
-        article.summary.like("%" + keyword + "%").or(article.title.like("%" + keyword + "%"));
+        article.summary.containsIgnoreCase(keyword).or(article.title.containsIgnoreCase(keyword));
   }
 
   private BooleanExpression interestIdEq(UUID interestId) {
