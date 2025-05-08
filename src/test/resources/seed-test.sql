@@ -112,7 +112,7 @@ WITH u1 AS (SELECT id AS user_id FROM users WHERE email = 'minji@example.com'),
 INSERT
 INTO "notifications" ("id", "user_id", "resource_id", "resource_type", "content", "confirmed",
                       "created_at", "updated_at")
-SELECT gen_random_uuid(),
+SELECT '123e4567-e89b-12d3-a456-426614174000'::uuid,
        u1.user_id,
        c1.resource_id,
        'COMMENT',
@@ -123,7 +123,7 @@ SELECT gen_random_uuid(),
 FROM u1,
      c1
 UNION
-SELECT gen_random_uuid(),
+SELECT '987e6543-e21b-12d3-b456-426614174000'::uuid,
        u2.user_id,
        c2.resource_id,
        'COMMENT',
