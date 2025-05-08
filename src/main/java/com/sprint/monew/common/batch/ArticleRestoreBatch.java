@@ -6,7 +6,7 @@ import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
 import com.sprint.monew.domain.interest.Interest;
-import com.sprint.monew.domain.interest.InterestRepository;
+import com.sprint.monew.domain.interest.repository.InterestRepository;
 import com.sprint.monew.global.config.S3ConfigProperties;
 import java.time.Duration;
 import java.time.Instant;
@@ -64,7 +64,8 @@ public class ArticleRestoreBatch {
       @Qualifier("changeArticleIsDeletedStep") Step changeArticleIsDeletedStep) {
 
     return new JobBuilder("articleRestoreJob", jobRepository)
-        .start(interestsAndSourceUrlsFetchStep)  // 1. Interest 가져오기: ArticleInterest도 생성해야 하므로 Interest 객체 필요
+        .start(
+            interestsAndSourceUrlsFetchStep)  // 1. Interest 가져오기: ArticleInterest도 생성해야 하므로 Interest 객체 필요
         .next(changeArticleIsDeletedStep) // 2.  특정 날짜 기준 논리삭제된 것 전부 True
         .next(articleRestoreStep) // 3. 복구 : 기존에 있는거는 추가하지 않기
         .build();
@@ -88,7 +89,7 @@ public class ArticleRestoreBatch {
   }
 
   /**
-  복구 요청 범위에서 -> 논리삭제 기사의 deleted 필드 변경
+   * 복구 요청 범위에서 -> 논리삭제 기사의 deleted 필드 변경
    **/
   @Bean
   @JobScope
@@ -101,7 +102,8 @@ public class ArticleRestoreBatch {
 
           Instant from = getStartOfDateInstant(fromStr);
           Instant to = getStartOfDateInstant(toStr).plus(Duration.ofDays(1));
-          int restoredSoftDeletedArticlesCount = articleRepository.restoreArticleDeletionBetweenDates(from, to);
+          int restoredSoftDeletedArticlesCount = articleRepository.restoreArticleDeletionBetweenDates(
+              from, to);
           log.info("논리삭제된 기사 복구 수 : {}", restoredSoftDeletedArticlesCount);
 
           return RepeatStatus.FINISHED;
@@ -110,9 +112,8 @@ public class ArticleRestoreBatch {
   }
 
   /**
-   * Reader : S3에서 여러 파일리소스를 ArticleApiDto로 읽어오는 reader
-   * processor : db에 저장되어있는 sourceUrl겹치는거 필터링 + 해당 기사의 관심사 매핑
-   * wirter : 기사 + 기사 관심사 저장
+   * Reader : S3에서 여러 파일리소스를 ArticleApiDto로 읽어오는 reader processor : db에 저장되어있는 sourceUrl겹치는거 필터링 +
+   * 해당 기사의 관심사 매핑 wirter : 기사 + 기사 관심사 저장
    */
   @Bean
   @JobScope

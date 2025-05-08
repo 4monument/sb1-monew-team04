@@ -1,7 +1,9 @@
-package com.sprint.monew.domain.notification;
+package com.sprint.monew.domain.notification.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sprint.monew.domain.notification.Notification;
+import com.sprint.monew.domain.notification.QNotification;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;

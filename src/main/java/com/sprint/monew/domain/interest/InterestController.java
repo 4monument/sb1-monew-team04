@@ -7,6 +7,7 @@ import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
+import jakarta.validation.Valid;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +51,7 @@ public class InterestController implements InterestApi {
   //관심사 등록
   @PostMapping
   public ResponseEntity<InterestDto> addInterest(
-      @RequestBody InterestCreateRequest interestCreateRequest) {
+      @RequestBody @Valid InterestCreateRequest interestCreateRequest) {
     InterestDto interestDto = interestService.createInterest(interestCreateRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(interestDto);
   }

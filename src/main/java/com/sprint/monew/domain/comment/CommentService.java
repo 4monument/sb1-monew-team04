@@ -17,8 +17,8 @@ import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.comment.like.LikeRepository;
 import com.sprint.monew.domain.comment.repository.CommentRepository;
 import com.sprint.monew.domain.notification.Notification;
-import com.sprint.monew.domain.notification.NotificationRepository;
 import com.sprint.monew.domain.notification.ResourceType;
+import com.sprint.monew.domain.notification.repository.NotificationRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.domain.user.exception.UserNotFoundException;
@@ -133,7 +133,8 @@ public class CommentService {
   }
 
   //댓글 내용 수정 메서드
-  public CommentDto updateCommentContent(UUID commentId, UUID userId, CommentUpdateRequest commentUpdateRequest) {
+  public CommentDto updateCommentContent(UUID commentId, UUID userId,
+      CommentUpdateRequest commentUpdateRequest) {
     String content = commentUpdateRequest.content();
     Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
         .orElseThrow(() -> CommentNotFoundException.withId(commentId));
