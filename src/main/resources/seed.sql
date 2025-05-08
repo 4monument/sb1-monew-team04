@@ -38,10 +38,10 @@ FROM u1,
 --      i2;
 
 -- ARTICLES (기사)
-INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date")
-VALUES (gen_random_uuid(), 'NAVER', 'https://site.com/ai', '인공지능의 미래', 'AI가 바꾸는 세상에 대한 이야기', now()),
+INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date", "created_at")
+VALUES (gen_random_uuid(), 'NAVER', 'https://site.com/ai', '인공지능의 미래', 'AI가 바꾸는 세상에 대한 이야기', now(), now()),
        (gen_random_uuid(), 'CHOSUN', 'https://site.com/health', '건강하게 사는 법', '건강을 유지하는 실용적인 팁',
-        now());
+        now(), now());
 
 -- ARTICLES_INTERESTS (기사-관심사 연결)
 WITH a1 AS (SELECT id AS article_id FROM articles WHERE title = '인공지능의 미래'),

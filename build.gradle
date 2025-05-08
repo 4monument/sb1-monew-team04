@@ -1,110 +1,128 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.4.4'
-	id 'io.spring.dependency-management' version '1.1.7'
-	id 'jacoco'
+    id 'java'
+    id 'org.springframework.boot' version '3.4.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
 
 group = 'com.sprint'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 ext {
-	set('springAiVersion', "1.0.0-M7")
-	springDataVersion = "3.4.4"
-	queryDslVersion = "5.0.0"
+    set('springAiVersion', "1.0.0-M7")
+    springDataVersion = "3.4.4"
+    queryDslVersion = "5.0.0"
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-batch'
-	implementation "org.springframework.batch:spring-batch-integration:5.2.2"
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
-	implementation "io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0"
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+    implementation "org.springframework.batch:spring-batch-integration:5.2.2"
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+    implementation "io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0"
 
-	//fly way 의존성 추가
-	implementation "org.flywaydb:flyway-core:10.10.0"
-	implementation "org.flywaydb:flyway-database-postgresql"
+    //s3 aws sdk 추가
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.472'
+
+    //fly way 의존성 추가
+    implementation "org.flywaydb:flyway-core:10.10.0"
+    implementation "org.flywaydb:flyway-database-postgresql"
 
 
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'org.postgresql:postgresql'
-	annotationProcessor 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'org.postgresql:postgresql'
+    annotationProcessor 'org.projectlombok:lombok'
 
-	//querydsl
-	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
-	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"
-	implementation 'org.springframework.batch:spring-batch-infrastructure:5.2.2'
-	//implementation "org.springframework.data:spring-data-commons:${springDataVersion}:querydsl"
-	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
-	annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+    //querydsl
+    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"
+    implementation 'org.springframework.batch:spring-batch-infrastructure:5.2.2'
+    //implementation "org.springframework.data:spring-data-commons:${springDataVersion}:querydsl"
+    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.batch:spring-batch-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testImplementation "org.junit.jupiter:junit-jupiter:5.8.1"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.batch:spring-batch-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation "org.junit.jupiter:junit-jupiter:5.8.1"
 
-	// mongo db 테스트 컨테이너
-	testImplementation 'org.testcontainers:mongodb:1.19.3'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    // mongo db 테스트 컨테이너
+    testImplementation 'org.testcontainers:mongodb:1.19.3'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
-	// S3 테스트 컨테이너
-	testImplementation "org.testcontainers:testcontainers:1.20.6"
-	testImplementation "org.testcontainers:postgresql:1.20.6"
-	testImplementation "cloud.localstack:localstack-utils:0.2.23"
-	testImplementation "org.testcontainers:junit-jupiter:1.20.6"
-	testImplementation "org.testcontainers:localstack:1.20.6"
+    // S3 테스트 컨테이너
+    testImplementation "org.testcontainers:testcontainers:1.20.6"
+    testImplementation "org.testcontainers:postgresql:1.20.6"
+    testImplementation "cloud.localstack:localstack-utils:0.2.23"
+    testImplementation "org.testcontainers:junit-jupiter:1.20.6"
+    testImplementation "org.testcontainers:localstack:1.20.6"
+
+    //OpenAPI 문서
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
 }
 
 dependencyManagement {
-	imports {
-		mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
-	}
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+    }
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 test {
-	finalizedBy jacocoTestReport
+    finalizedBy jacocoTestReport
 }
 
 jacocoTestReport {
-	dependsOn test
-	reports {
-		xml.required = true
-		html.required = true
-	}
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    '**/MonewApplication.class',    // 메인 애플리케이션 클래스
+                    '**/Q*',                        // Q 클래스
+                    '**/*$*.class',      // Lombok이 생성한 내부 클래스
+                    '**/*$*$*.class',    // 중첩된 Lombok 생성 클래스
+                    '**/com/sprint/monew/domain/**/dto/**', // DTO 클래스
+                    '**/com/sprint/monew/common/batch/**'   // 배치 관련 클래스
+            ])
+        })
+    }
 }
 
 def querydslDir = "build/generated/querydsl"
 
 tasks.withType(JavaCompile) {
-	options.generatedSourceOutputDirectory = file(querydslDir)
+    options.generatedSourceOutputDirectory = file(querydslDir)
 //	options.compilerArgs << "-parameters"
 }
 
 clean {
-	delete file(querydslDir)
+    delete file(querydslDir)
 }
 

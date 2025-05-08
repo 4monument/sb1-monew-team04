@@ -61,7 +61,6 @@ public class InterestContainerTest {
   void register() {
     // then
     List<Interest> savedInterests = (List<Interest>) getField(interestContainer, "interests");
-
     assertThat(savedInterests)
         .isEqualTo(interests)
         .hasSize(interests.size())

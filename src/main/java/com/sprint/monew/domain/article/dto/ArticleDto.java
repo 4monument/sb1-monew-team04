@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public record ArticleDto(
     UUID id,
+    Instant createdAt,
     String source,
     String sourceUrl,
     String title,
@@ -20,6 +21,7 @@ public record ArticleDto(
       boolean viewedByMe) {
     return new ArticleDto(
         article.getId(),
+        article.getCreatedAt(),
         article.getSource().name(),
         article.getSourceUrl(),
         article.getTitle(),
