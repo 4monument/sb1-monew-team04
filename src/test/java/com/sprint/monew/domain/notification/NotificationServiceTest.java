@@ -357,6 +357,12 @@ class NotificationServiceTest {
       Notification notification2 = new Notification(user, interests.get(1).getId(),
           ResourceType.INTEREST, interests.get(1).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
 
+      notification1.setCreatedAt(Instant.now());
+      notification1.setUpdatedAt(Instant.now());
+
+      notification2.setCreatedAt(Instant.now());
+      notification2.setUpdatedAt(Instant.now());
+
       UUID notificationId1 = UUID.randomUUID();
       UUID notificationId2 = UUID.randomUUID();
 
@@ -399,6 +405,12 @@ class NotificationServiceTest {
 
       UUID notificationId1 = UUID.randomUUID();
       UUID notificationId2 = UUID.randomUUID();
+
+      notification1.setCreatedAt(Instant.now());
+      notification1.setUpdatedAt(Instant.now());
+
+      notification2.setCreatedAt(Instant.now());
+      notification2.setUpdatedAt(Instant.now());
 
       UUID cursor = notification2.getId();
       Instant afterAt = notification2.getCreatedAt();
