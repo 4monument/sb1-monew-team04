@@ -25,6 +25,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +36,7 @@ public class InterestService {
   private final SubscriptionRepository subscriptionRepository;
 
   //관심사 목록 조회 - queryDsl 사용
+  @Transactional(readOnly = true)
   public CursorPageResponseDto<InterestDto> getInterestsWithSubscriberInfo(
       InterestSearchRequest request, UUID requestUserId) {
 
@@ -79,6 +81,7 @@ public class InterestService {
   }
 
   //관심사 등록
+  @Transactional
   public InterestDto createInterest(InterestCreateRequest request) {
 
     boolean existsSimilarName = interestRepository.existsByName(request.name());
@@ -89,8 +92,6 @@ public class InterestService {
 
     Interest interest = new Interest(request.name(), request.keywords());
 
-    //findAll()해서 매번 다 비교하면 너무 오래걸리지 않을까?
-    //그렇다고 키워드 하나씩 검사해서 가져오는건 무리가 있을 것 같음. -> QueryDSL 적용할 때 고려해보자.
     List<Interest> allInterests = interestRepository.findAll();
 
     for (Interest i : allInterests) {
@@ -109,6 +110,7 @@ public class InterestService {
   }
 
   //관심사 구독
+  @Transactional
   public SubscriptionDto subscribeToInterest(UUID interestId, UUID userId) {
     Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> InterestNotFoundException.withId(interestId));
@@ -124,6 +126,7 @@ public class InterestService {
 
 
   //관심사 구독 취소
+  @Transactional
   public boolean unsubscribeFromInterest(UUID interestId, UUID userId) {
     Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> InterestNotFoundException.withId(interestId));
@@ -139,6 +142,7 @@ public class InterestService {
   }
 
   //관심사 물리 삭제
+  @Transactional
   public boolean deleteInterest(UUID interestId) {
 
     Interest interest = interestRepository.findById(interestId)
@@ -150,6 +154,7 @@ public class InterestService {
   }
 
   //관심사 정보 수정
+  @Transactional
   public InterestDto updateInterest(UUID requestUserId, UUID interestId,
       InterestUpdateRequest request) {
 
