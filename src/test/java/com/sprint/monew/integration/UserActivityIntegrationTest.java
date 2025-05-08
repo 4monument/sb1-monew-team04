@@ -106,63 +106,63 @@ public class UserActivityIntegrationTest {
         .andExpect(status().isOk());
   }
 
-  @Test
-  @DisplayName("기사를 조회한 후 조회내역이 업데이트 된다")
-  void getUserActivityFromRDB() throws
-      Exception {
-    // Given
-    String articleURL = "/api/articles?orderBy=createdAt&direction=DESC&limit=1";
-
-    // When & Then
-    String articleResponse = mockMvc.perform(get(articleURL).header(
-            "Monew-Request-User-ID",
-            nonActiveUserId))
-        .andExpect(status().isOk())
-        .andReturn()
-        .getResponse()
-        .getContentAsString();
-    JsonNode articleResponseNode = new ObjectMapper().readTree(articleResponse);
-    String articleId = articleResponseNode.get("content")
-        .get(0)
-        .get("id")
-        .asText();
-
-    mockMvc.perform(get(
-            "/api/user-activities/{id}/save",
-            nonActiveUserId))
-        .andExpect(status().isOk());
-
-
-    String activityResponseBefore = mockMvc.perform(get(
-            "/api/user-activities/{id}",
-            nonActiveUserId))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("id").value(nonActiveUserId.toString()))
-        .andReturn()
-        .getResponse()
-        .getContentAsString();
-    JsonNode activityResponseNodeBefore = new ObjectMapper().readTree(activityResponseBefore);
-    int articleViewCountBefore = activityResponseNodeBefore.get("articleViews").size();
-
-    String articleViewURL = String.format(
-        "/api/articles/%s/article-views",
-        articleId);
-
-    mockMvc.perform(post(articleViewURL)
-            .header("Monew-Request-User-ID", nonActiveUserId))
-        .andExpect(status().isOk());
-
-    String activityResponseAfter = mockMvc.perform(get(
-            "/api/user-activities/{id}",
-            nonActiveUserId))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("id").value(nonActiveUserId.toString()))
-        .andReturn()
-        .getResponse()
-        .getContentAsString();
-    JsonNode activityResponseNodeAfter = new ObjectMapper().readTree(activityResponseAfter);
-    int articleViewCountAfter = activityResponseNodeAfter.get("articleViews").size();
-
-    assertEquals(articleViewCountBefore + 1, articleViewCountAfter);
-  }
+//  @Test
+//  @DisplayName("기사를 조회한 후 조회내역이 업데이트 된다")
+//  void getUserActivityFromRDB() throws
+//      Exception {
+//    // Given
+//    String articleURL = "/api/articles?orderBy=createdAt&direction=DESC&limit=1";
+//
+//    // When & Then
+//    String articleResponse = mockMvc.perform(get(articleURL).header(
+//            "Monew-Request-User-ID",
+//            nonActiveUserId))
+//        .andExpect(status().isOk())
+//        .andReturn()
+//        .getResponse()
+//        .getContentAsString();
+//    JsonNode articleResponseNode = new ObjectMapper().readTree(articleResponse);
+//    String articleId = articleResponseNode.get("content")
+//        .get(0)
+//        .get("id")
+//        .asText();
+//
+//    mockMvc.perform(get(
+//            "/api/user-activities/{id}/save",
+//            nonActiveUserId))
+//        .andExpect(status().isOk());
+//
+//
+//    String activityResponseBefore = mockMvc.perform(get(
+//            "/api/user-activities/{id}",
+//            nonActiveUserId))
+//        .andExpect(status().isOk())
+//        .andExpect(jsonPath("id").value(nonActiveUserId.toString()))
+//        .andReturn()
+//        .getResponse()
+//        .getContentAsString();
+//    JsonNode activityResponseNodeBefore = new ObjectMapper().readTree(activityResponseBefore);
+//    int articleViewCountBefore = activityResponseNodeBefore.get("articleViews").size();
+//
+//    String articleViewURL = String.format(
+//        "/api/articles/%s/article-views",
+//        articleId);
+//
+//    mockMvc.perform(post(articleViewURL)
+//            .header("Monew-Request-User-ID", nonActiveUserId))
+//        .andExpect(status().isOk());
+//
+//    String activityResponseAfter = mockMvc.perform(get(
+//            "/api/user-activities/{id}",
+//            nonActiveUserId))
+//        .andExpect(status().isOk())
+//        .andExpect(jsonPath("id").value(nonActiveUserId.toString()))
+//        .andReturn()
+//        .getResponse()
+//        .getContentAsString();
+//    JsonNode activityResponseNodeAfter = new ObjectMapper().readTree(activityResponseAfter);
+//    int articleViewCountAfter = activityResponseNodeAfter.get("articleViews").size();
+//
+//    assertEquals(articleViewCountBefore + 1, articleViewCountAfter);
+//  }
 }

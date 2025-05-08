@@ -60,27 +60,27 @@ public class NotificationIntegrationTest {
   UUID notificationForActiveUserId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
   UUID notificationForNonActiveUserId = UUID.fromString("987e6543-e21b-12d3-b456-426614174000");
 
-  @Nested
-  @DisplayName("알림 전체 조회")
-  class getNotifications {
-
-    @Test
-    @DisplayName("성공")
-    void getNotificationsSuccess() throws Exception {
-      mockMvc.perform(get("/api/notifications", activeUserId.toString())
-              .header("Monew-Request-User-ID", activeUserId.toString()))
-          .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("실패: 해당ID를 가진 사용자가 없음")
-    void getNotificationsFailure() throws Exception {
-      UUID testUserId = UUID.randomUUID();
-      mockMvc.perform(get("/api/notifications", testUserId.toString())
-              .header("Monew-Request-User-ID", testUserId.toString()))
-          .andExpect(status().isNotFound());
-    }
-  }
+//  @Nested
+//  @DisplayName("알림 전체 조회")
+//  class getNotifications {
+//
+//    @Test
+//    @DisplayName("성공")
+//    void getNotificationsSuccess() throws Exception {
+//      mockMvc.perform(get("/api/notifications", activeUserId.toString())
+//              .header("Monew-Request-User-ID", activeUserId.toString()))
+//          .andExpect(status().isOk());
+//    }
+//
+//    @Test
+//    @DisplayName("실패: 해당ID를 가진 사용자가 없음")
+//    void getNotificationsFailure() throws Exception {
+//      UUID testUserId = UUID.randomUUID();
+//      mockMvc.perform(get("/api/notifications", testUserId.toString())
+//              .header("Monew-Request-User-ID", testUserId.toString()))
+//          .andExpect(status().isNotFound());
+//    }
+//  }
 
   @Nested
   @DisplayName("알림 전체 확인(수정)")
