@@ -32,6 +32,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -44,31 +45,41 @@ public class ArticleCollectBatch {
   private final PlatformTransactionManager transactionManager;
   private final JobRepository jobRepository;
 
+  @Primary
   @Bean(name = "articleCollectJob")
   public Job articleCollectJob(
       @Qualifier("interestsAndUrlsFetchStep") Step interestsAndUrlsFetchStep,
-      @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow,
+      @Qualifier("collecctArticlesSplitFlow") Flow collecctArticlesSplitFlow,
       @Qualifier("localBackupArticlesStep") Step localBackupStep,
       @Qualifier("uploadS3ArticleDtosStep") Step s3BackupStep,
-      @Qualifier("naverArticleHandlerStep") Step naverArticleHandlerStep,
+      @Qualifier("articleHandlerStep") Step articleHandlerStep,
       @Qualifier("interestContainerCleanupListener") JobExecutionListener interestContainerCleanupListener) {
 
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
         .start(interestsAndUrlsFetchStep)
-        .on(COMPLETED.getExitCode())
-        .to(naverArticleCollectFlow)// 1. Article 자료 수집
-        //.split(taskExecutor()).add(null) // 여기에 추가 API 호출 되는 Flow 복붙하면 완성
+          .on(COMPLETED.getExitCode())
+          .to(collecctArticlesSplitFlow)
         .next(localBackupStep)
         .next(s3BackupStep)
-        .next(naverArticleHandlerStep)
+        .next(articleHandlerStep)
         .end()
         .listener(interestContainerCleanupListener)
         .build();
   }
 
+  @Bean
+  public Flow collecctArticlesSplitFlow(
+      @Qualifier("naverArticleCollectFlow") Flow naverArticleCollectFlow,
+      @Qualifier("chosunArticleCollectFlow") Flow chosunArticleCollectFlow,
+      @Qualifier("hankyungArticleCollectFlow") Flow hankyungArticleCollectFlow) {
+    return new FlowBuilder<Flow>("collectArticlesSplitFlow")
+        .start(naverArticleCollectFlow)
+        .split(taskExecutor()).add(chosunArticleCollectFlow, hankyungArticleCollectFlow)
+        .build();
+  }
+
   @Bean(name = "interestsAndUrlsFetchStep")
-  @JobScope
   public Step interestsAndUrlsFetchStep(InterestRepository interestRepository,
       InterestContainer interestContainer, ArticleRepository articleRepository) {
 
@@ -87,10 +98,9 @@ public class ArticleCollectBatch {
 
 
   /**
-   * Article API Collect Flow
+   * Article API Collect Flows
    */
-  @Bean(name = "naverArticleCollectFlow")
-  @JobScope
+  @Bean
   public Flow naverArticleCollectFlow(
       @Qualifier("naverApiCallTasklet") Tasklet naverApiCallTasklet,
       @Qualifier("naverPromotionListener") ExecutionContextPromotionListener promotionListener) {
@@ -106,21 +116,55 @@ public class ArticleCollectBatch {
         .build();
   }
 
+  @Bean
+  public Flow chosunArticleCollectFlow(
+      @Qualifier("chosunApiCallTasklet") Tasklet chosunApiCallTasklet,
+      @Qualifier("chosunPromotionListener") ExecutionContextPromotionListener promotionListener) {
+
+    // 호출
+    TaskletStep naverArticleCollectStep = new StepBuilder("chosunArticleCollectStep", jobRepository)
+        .tasklet(chosunApiCallTasklet, transactionManager)
+        .listener(promotionListener)
+        .build();
+
+    return new FlowBuilder<Flow>("chosunCollectFlow")
+        .start(naverArticleCollectStep)
+        .build();
+  }
+
+
+  @Bean
+  public Flow hankyungArticleCollectFlow(
+      @Qualifier("hankyungApiCallTasklet") Tasklet hankyungApiCallTasklet,
+      @Qualifier("hankyungPromotionListener") ExecutionContextPromotionListener promotionListener) {
+
+    // 호출
+    TaskletStep naverArticleCollectStep = new StepBuilder("hankyungArticleCollectStep", jobRepository)
+        .tasklet(hankyungApiCallTasklet, transactionManager)
+        .listener(promotionListener)
+        .build();
+
+    return new FlowBuilder<Flow>("hankyungCollectFlow")
+        .start(naverArticleCollectStep)
+        .build();
+  }
+
+
 
   /**
    * Article 모두 처리
    */
   @Bean
   @JobScope
-  public Step naverArticleHandlerStep(
-      @Qualifier("naverArticleCollectReader") ItemReader<ArticleApiDto> naverArticleCollectReader,
-      @Qualifier("articleCollectProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor,
+  public Step articleHandlerStep(
+      @Qualifier("articleCollectionsReader") ItemReader<ArticleApiDto> articleApiDtoItemReader,
+      @Qualifier("collectArticleProcessor") ItemProcessor<ArticleApiDto, ArticleWithInterestList> naverArticleCollectProcessor,
       @Qualifier("articleWithInterestsJdbcItemWriter") ItemWriter<ArticleWithInterestList> articleJdbcItemWriter,
       @Qualifier("naverContextCleanupListener") StepExecutionListener naverContextCleanupListener) {
 
     return new StepBuilder("articleHandlerStep", jobRepository)
         .<ArticleApiDto, ArticleWithInterestList>chunk(200, transactionManager)
-        .reader(naverArticleCollectReader)
+        .reader(articleApiDtoItemReader)
         .processor(naverArticleCollectProcessor)
         .writer(articleJdbcItemWriter)
         .faultTolerant()

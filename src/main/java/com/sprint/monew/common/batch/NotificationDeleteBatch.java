@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -27,7 +28,6 @@ public class NotificationDeleteBatch {
   private final PlatformTransactionManager transactionManager;
   private final JobRepository jobRepository;
 
-  @Primary
   @Bean(name = "notificationDeleteJob")
   public Job notificationDeleteJob(
       @Qualifier("notificationChunkDeleteStep") Step notificationDeleteStep) {
@@ -35,8 +35,9 @@ public class NotificationDeleteBatch {
         .start(notificationDeleteStep)
         .build();
   }
-  // 옵션 2. 재시도 옵션 사용 시 Chunk를 사용
+
   @Bean(name = "notificationChunkDeleteStep")
+  @JobScope
   public Step notificationChunkDeleteStep(
       @Qualifier("notificationDeleteReader") ListItemReader<Instant> reader) {
     return new StepBuilder("notificationChunkDeleteStep", jobRepository)
@@ -62,22 +63,4 @@ public class NotificationDeleteBatch {
   private void doDelete(Instant updatedAt) {
     notificationRepository.deleteConfirmedNotificationsOlderThan(updatedAt);
   }
-
-  //  //
-//  // 옵션1. 간단한 테스크를 사용할 경우에 쓸 메서드
-//  @Bean
-//  public Tasklet notificationDeleteTasklet() {
-//    return (contribution, chunkContext) -> {
-//      Instant sevenDaysAgo = Instant.now().minusSeconds(7 * 24 * 60 * 60); // 1주일 전
-//      doDelete(sevenDaysAgo);
-//      return RepeatStatus.FINISHED;
-//    };
-//  }
-//
-//  @Bean
-//  public Step notificationDeleteStep() {
-//    return new StepBuilder("notificationDeleteStep", jobRepository)
-//        .tasklet(notificationDeleteTasklet(), transactionManager)
-//        .build();
-//  }
 }

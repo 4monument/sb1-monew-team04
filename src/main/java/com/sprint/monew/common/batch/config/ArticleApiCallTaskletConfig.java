@@ -7,6 +7,8 @@ import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.N
 import com.sprint.monew.common.batch.support.InterestContainer;
 import com.sprint.monew.domain.article.api.ArticleApiClient;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
+import com.sprint.monew.domain.article.api.chosun.ChosunArticleClient.ChosunCategory;
+import com.sprint.monew.domain.article.api.hankyung.HankyungArticleClient.HankyungCategory;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +48,7 @@ public class ArticleApiCallTaskletConfig {
   @StepScope
   public Tasklet chosunApiCallTasklet() {
     return (contribution, chunkContext) -> {
-      List<ArticleApiDto> articleApiDtos = articleApiClient.getNaverArticle();
+      List<ArticleApiDto> articleApiDtos = articleApiClient.getChosunArticle(ChosunCategory.ALL);
       List<ArticleApiDto> filteredApiDtos = filteringArticles(articleApiDtos);
 
       ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();
@@ -59,7 +61,7 @@ public class ArticleApiCallTaskletConfig {
   @StepScope
   public Tasklet hankyungApiCallTasklet() {
     return (contribution, chunkContext) -> {
-      List<ArticleApiDto> articleApiDtos = articleApiClient.getNaverArticle();
+      List<ArticleApiDto> articleApiDtos = articleApiClient.getHankyungArticle(HankyungCategory.ALL);
       List<ArticleApiDto> filteredApiDtos = filteringArticles(articleApiDtos);
 
       ExecutionContext stepContext = contribution.getStepExecution().getExecutionContext();

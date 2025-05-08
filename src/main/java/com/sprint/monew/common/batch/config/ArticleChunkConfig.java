@@ -7,7 +7,6 @@ import com.sprint.monew.common.batch.support.ArticleWithInterestList;
 import com.sprint.monew.common.batch.support.InterestContainer;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
-import jakarta.persistence.EntityManagerFactory;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,15 +40,28 @@ public class ArticleChunkConfig {
   /**
    * Reader
    */
-  @Bean(name = "naverArticleCollectReader")
+  @Bean
   @StepScope
-  public ItemReader<ArticleApiDto> naverArticleCollectReader(
-      @Value("#{JobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> naverArticleDtos) {
+  public ItemReader<ArticleApiDto> articleCollectionsReader(
+      @Value("#{JobExecutionContext['naverArticleDtos']}") List<ArticleApiDto> naver,
+      @Value("#{JobExecutionContext['chosunArticleDtos']}") List<ArticleApiDto> chosun,
+      @Value("#{JobExecutionContext['hankyungArticleDtos']}") List<ArticleApiDto> hankyung) {
 
     List<ArticleApiDto> articleApiDtos = new ArrayList<>();
-    articleApiDtos.addAll(naverArticleDtos);
-    //articleApiDtos.addAll(chosunArticleDtos);
-//    articleApiDtos.addAll(hankyungArticleDtos);
+
+    if (naver != null) {
+      articleApiDtos.addAll(naver);
+    }
+
+    if (chosun != null) {
+      articleApiDtos.addAll(chosun);
+    }
+
+    if (hankyung != null) {
+      articleApiDtos.addAll(hankyung);
+    }
+    log.info("[백업 후] Collect Chunk Reader Start : context에 저장된 articleDto 개수 = {}", articleApiDtos.size());
+
     return new ListItemReader<>(articleApiDtos);
   }
 
@@ -58,7 +70,7 @@ public class ArticleChunkConfig {
    */
   @Bean
   @StepScope
-  public ItemProcessor<ArticleApiDto, ArticleWithInterestList> articleCollectProcessor(
+  public ItemProcessor<ArticleApiDto, ArticleWithInterestList> collectArticleProcessor(
       InterestContainer interests) {
     return interests::toArticleWithRelevantInterests;
   }
@@ -73,7 +85,6 @@ public class ArticleChunkConfig {
   /**
    * Writer
    */
-
   @Bean
   @StepScope
   public ItemWriter<ArticleWithInterestList> articleWithInterestsJdbcItemWriter(
@@ -106,16 +117,13 @@ public class ArticleChunkConfig {
 
       stepContext.put(ARTICLE_IDS.getKey(), articleIdList);
 
-      log.info("articleIdList : {}", articleIdList);
-      log.info("articleInterestJdbc : {}", articleInterestsJdbc);
+      log.info("저장 될 Article size : {}", articlesWithId.size());
+      log.info("저장 될 Article Interest size : {}", articleInterestsJdbc.size());
 
       Chunk<Article> chunkArticles = new Chunk<>();
       chunkArticles.addAll(articlesWithId);
       Chunk<ArticleInterestJdbc> chunkArticleInterests = new Chunk<>();
       chunkArticleInterests.addAll(articleInterestsJdbc);
-
-      log.info("저장 될 Article size : {}", articlesWithId.size());
-      log.info("저장 될 Article Interest size : {}", articleInterestsJdbc.size());
 
       articleJdbcItemWriter.write(chunkArticles);
       articleInterestJdbcItemWriter.write(chunkArticleInterests);

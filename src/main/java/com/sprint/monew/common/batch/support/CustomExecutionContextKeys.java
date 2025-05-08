@@ -7,8 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum CustomExecutionContextKeys {
   NAVER_ARTICLE_DTOS("naverArticleDtos"),
-  CHOSUN_ARTICLE_DTOS("choshunArticleDtos"),
-  HANKYUNG_ARTICLE_DTOS("hanyungArticleDtos"),
+  CHOSUN_ARTICLE_DTOS("chosunArticleDtos"),
+  HANKYUNG_ARTICLE_DTOS("hankyungArticleDtos"),
   DB_SOURCEURS("dbSourceUrls"),
   ARTICLE_IDS("articleIds");
 

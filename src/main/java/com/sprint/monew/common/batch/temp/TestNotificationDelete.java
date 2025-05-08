@@ -1,4 +1,4 @@
-package com.sprint.monew.common.scheduler;
+package com.sprint.monew.common.batch.temp;
 
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -11,28 +11,26 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
-public class  NotificationDeleteScheduler {
-
-  private final JobLauncher jobLauncher;
+public class TestNotificationDelete {
 
   @Resource(name = "notificationDeleteJob")
   private Job job;
 
-  @Scheduled(cron = "0 0 4 * * ?", zone = "Asia/Seoul")
-  public void deleteConfirmedNotification()
-      throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+  private final JobLauncher jobLauncher;
 
+  //@PostConstruct
+  public void init()
+      throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+    log.info("[Test] NotificationDelete start");
     JobParameters jobParameters = new JobParametersBuilder()
         .addLong("time", System.currentTimeMillis())
         .toJobParameters();
 
-    log.info("Delete ConfirmedNotification");
     jobLauncher.run(job, jobParameters);
   }
 }
