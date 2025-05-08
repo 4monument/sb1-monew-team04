@@ -1,13 +1,13 @@
 package com.sprint.monew.common.batch;
 
-import static org.springframework.batch.core.ExitStatus.*;
+import static org.springframework.batch.core.ExitStatus.COMPLETED;
 
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
 import com.sprint.monew.common.batch.support.InterestContainer;
 import com.sprint.monew.domain.article.api.ArticleApiDto;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
 import com.sprint.monew.domain.interest.Interest;
-import com.sprint.monew.domain.interest.InterestRepository;
+import com.sprint.monew.domain.interest.repository.InterestRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,8 +58,8 @@ public class ArticleCollectBatch {
     return new JobBuilder("articleCollectJob", jobRepository)
         .incrementer(new RunIdIncrementer())
         .start(interestsAndUrlsFetchStep)
-          .on(COMPLETED.getExitCode())
-          .to(collecctArticlesSplitFlow)
+        .on(COMPLETED.getExitCode())
+        .to(collecctArticlesSplitFlow)
         .next(localBackupStep)
         .next(s3BackupStep)
         .next(articleHandlerStep)
@@ -139,7 +139,8 @@ public class ArticleCollectBatch {
       @Qualifier("hankyungPromotionListener") ExecutionContextPromotionListener promotionListener) {
 
     // 호출
-    TaskletStep naverArticleCollectStep = new StepBuilder("hankyungArticleCollectStep", jobRepository)
+    TaskletStep naverArticleCollectStep = new StepBuilder("hankyungArticleCollectStep",
+        jobRepository)
         .tasklet(hankyungApiCallTasklet, transactionManager)
         .listener(promotionListener)
         .build();
@@ -148,7 +149,6 @@ public class ArticleCollectBatch {
         .start(naverArticleCollectStep)
         .build();
   }
-
 
 
   /**

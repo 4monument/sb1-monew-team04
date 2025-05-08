@@ -22,6 +22,7 @@ import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
 import com.sprint.monew.domain.interest.exception.EmptyKeywordsException;
 import com.sprint.monew.domain.interest.exception.InterestAlreadyExistsException;
 import com.sprint.monew.domain.interest.exception.InterestNotFoundException;
+import com.sprint.monew.domain.interest.repository.InterestRepository;
 import com.sprint.monew.domain.interest.subscription.Subscription;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
 import com.sprint.monew.domain.interest.subscription.SubscriptionRepository;

@@ -5,6 +5,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import com.sprint.monew.PostgresContainer;
 import com.sprint.monew.common.config.TestQuerydslConfig;
 import com.sprint.monew.domain.interest.dto.InterestSubscriptionInfoDto;
+import com.sprint.monew.domain.interest.repository.CustomInterestRepositoryImpl;
+import com.sprint.monew.domain.interest.repository.InterestRepository;
 import com.sprint.monew.domain.interest.subscription.Subscription;
 import com.sprint.monew.domain.user.User;
 import jakarta.persistence.EntityManager;
