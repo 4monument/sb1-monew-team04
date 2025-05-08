@@ -1,6 +1,5 @@
 package com.sprint.monew.common.batch.temp;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
