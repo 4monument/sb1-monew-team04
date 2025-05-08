@@ -16,6 +16,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
@@ -79,7 +81,7 @@ public interface InterestApi {
       ) @RequestParam String direction,
       @Parameter(description = "커서 값") UUID cursor,
       @Parameter(description = "보조 커서 값") @RequestParam Instant after,
-      @Parameter(description = "커서 페이지 크기", example = "50") @RequestParam Integer limit);
+      @Parameter(description = "커서 페이지 크기", example = "50") @RequestParam @Min(1) @Max(100) Integer limit);
 
   //관심사 등록
   @Operation(summary = "관심사 등록", description = "새로운 관심사를 등록합니다.")

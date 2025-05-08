@@ -8,8 +8,6 @@ import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +40,7 @@ public class InterestController implements InterestApi {
       @RequestParam String direction,
       @RequestParam(required = false) UUID cursor,
       @RequestParam(required = false) Instant after,
-      @RequestParam(required = false, defaultValue = "50") @Min(1) @Max(100) Integer limit) {
+      @RequestParam(required = false, defaultValue = "50") Integer limit) {
     InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
         direction, cursor, after, limit);
 

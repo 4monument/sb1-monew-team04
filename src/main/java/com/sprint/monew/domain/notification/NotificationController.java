@@ -3,8 +3,6 @@ package com.sprint.monew.domain.notification;
 import com.sprint.monew.common.config.api.NotificationApi;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.notification.dto.NotificationSearchRequest;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +29,7 @@ public class NotificationController implements NotificationApi {
   public ResponseEntity<CursorPageResponseDto> getNotifications(
       @RequestParam(required = false) UUID cursor,
       @RequestParam(required = false) Instant after,
-      @RequestParam @Min(1) @Max(100) Integer limit,
+      @RequestParam Integer limit,
       @RequestHeader("Monew-Request-User-ID") UUID userId) {
     NotificationSearchRequest request = new NotificationSearchRequest(cursor, after, limit);
     return ResponseEntity.ok(notificationService.getAllNotifications(request, userId));

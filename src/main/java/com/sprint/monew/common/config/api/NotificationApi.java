@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
@@ -65,7 +67,7 @@ public interface NotificationApi {
   ResponseEntity<CursorPageResponseDto> getNotifications(
       @Parameter(description = "커서 값") UUID cursor,
       @Parameter(description = "보조 커서(createdAt) 값") @RequestParam Instant after,
-      @Parameter(description = "커서 페이지 크기", example = "50") @RequestParam Integer limit,
+      @Parameter(description = "커서 페이지 크기", example = "50") @RequestParam @Min(1) @Max(100) Integer limit,
       @Parameter(description = "요청자 ID") @RequestHeader("Monew-Request-User-ID") UUID userId);
 
   // 전체 알림 확인
