@@ -4,7 +4,7 @@ import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.article.dto.ArticleDto;
 import com.sprint.monew.domain.article.dto.ArticleRestoreResultDto;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
-import com.sprint.monew.domain.article.dto.request.ArticleRequest;
+import com.sprint.monew.domain.article.dto.ArticleCondition;
 import com.sprint.monew.global.error.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -116,7 +116,7 @@ public interface ArticleApi {
           )
       )})
   ResponseEntity<CursorPageResponseDto<ArticleDto>> getArticles(
-      @ModelAttribute ArticleRequest articleRequest,
+      @ModelAttribute ArticleCondition articleCondition,
       @RequestParam String orderBy,
       @RequestParam String direction,
       @RequestParam int limit,

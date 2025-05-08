@@ -5,7 +5,7 @@ import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.article.dto.ArticleDto;
 import com.sprint.monew.domain.article.dto.ArticleRestoreResultDto;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
-import com.sprint.monew.domain.article.dto.request.ArticleRequest;
+import com.sprint.monew.domain.article.dto.ArticleCondition;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -47,14 +47,14 @@ public class ArticleController implements ArticleApi {
 
   @GetMapping
   public ResponseEntity<CursorPageResponseDto<ArticleDto>> getArticles(
-      @ModelAttribute ArticleRequest articleRequest,
+      @ModelAttribute ArticleCondition articleCondition,
       @RequestParam String orderBy,
       @RequestParam String direction,
       @RequestParam int limit,
       @RequestHeader("Monew-Request-User-ID") UUID userId
   ) {
     PageRequest pageRequest = PageRequest.of(0, limit, Direction.fromString(direction), orderBy);
-    CursorPageResponseDto<ArticleDto> response = articleService.getArticles(articleRequest,
+    CursorPageResponseDto<ArticleDto> response = articleService.getArticles(articleCondition,
         pageRequest, userId);
     return ResponseEntity.ok(response);
   }

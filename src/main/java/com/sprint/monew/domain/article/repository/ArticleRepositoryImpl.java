@@ -13,7 +13,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sprint.monew.domain.article.articleview.QArticleView;
 import com.sprint.monew.domain.article.dto.ArticleDto;
-import com.sprint.monew.domain.article.dto.request.ArticleRequest;
+import com.sprint.monew.domain.article.dto.ArticleCondition;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public Slice<ArticleDto> getArticles(ArticleRequest condition, UUID userId, Pageable pageable) {
+  public Slice<ArticleDto> getArticles(ArticleCondition condition, UUID userId, Pageable pageable) {
     QArticleView viewAll = new QArticleView("viewAll");
     QArticleView viewMe = new QArticleView("viewMe");
     List<ArticleDto> result = queryFactory
@@ -80,7 +80,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
         .fetch();
   }
 
-  public Long getArticleCount(ArticleRequest condition) {
+  public Long getArticleCount(ArticleCondition condition) {
     return queryFactory
         .select(article.id.countDistinct())
         .from(article)
