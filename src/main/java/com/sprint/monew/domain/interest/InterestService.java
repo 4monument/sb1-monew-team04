@@ -23,10 +23,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InterestService {
@@ -40,11 +42,14 @@ public class InterestService {
   public CursorPageResponseDto<InterestDto> getInterestsWithSubscriberInfo(
       InterestSearchRequest request, UUID requestUserId) {
 
+    log.info("관심사 목록 조회 시작. 요청자 ID = {}", requestUserId);
     PageRequest pageRequest = PageRequest.of(0, request.limit() + 1);
 
     List<InterestSubscriptionInfoDto> result = interestRepository.getByNameOrKeywordsContaining(
         request.keyword(), request.cursor(),
         request.after(), request.direction(), request.orderBy(), pageRequest);
+
+    log.debug("검색 및 정렬 조건 반영한 조회 결과 수= {}", result.size());
 
     boolean hasNext = result.size() > request.limit();
     if (hasNext) {
@@ -70,6 +75,8 @@ public class InterestService {
                 i.getInterest().getId())))
         .toList();
 
+    log.info("관심사 목록 조회 완료.");
+
     return new CursorPageResponseDto<>(
         interestDtos,
         nextCursor,
@@ -83,6 +90,8 @@ public class InterestService {
   //관심사 등록
   @Transactional
   public InterestDto createInterest(InterestCreateRequest request) {
+
+    log.info("관심사 등록 시작. 관심사 이름 = {}, 키워드 = {} ", request.name(), request.keywords());
 
     boolean existsSimilarName = interestRepository.existsByName(request.name());
 
@@ -106,12 +115,17 @@ public class InterestService {
 
     Interest savedInterest = interestRepository.save(interest);
 
+    log.info("관심사 등록 완료. 관심사 ID = {}, 생성 시각 = {} ", savedInterest.getId(),
+        savedInterest.getCreatedAt());
+
     return InterestDto.from(savedInterest, 0, false);
   }
 
   //관심사 구독
   @Transactional
   public SubscriptionDto subscribeToInterest(UUID interestId, UUID userId) {
+    log.info("관심사 구독 시작. 요청자 ID = {} 관심사 ID = {}", userId, interestId);
+
     Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> InterestNotFoundException.withId(interestId));
     User user = userRepository.findById(userId)
@@ -119,6 +133,8 @@ public class InterestService {
 
     Subscription subscribe = new Subscription(user, interest);
     subscriptionRepository.save(subscribe);
+
+    log.info("관심사 구독 완료. 구독 ID = {}, 생성 시각 = {} ", subscribe.getId(), subscribe.getCreatedAt());
 
     return SubscriptionDto.from(subscribe,
         subscriptionRepository.countDistinctByInterestId(interestId));
@@ -128,6 +144,9 @@ public class InterestService {
   //관심사 구독 취소
   @Transactional
   public boolean unsubscribeFromInterest(UUID interestId, UUID userId) {
+
+    log.info("관심사 구독 취소 시작. 요청자 ID = {} 관심사 ID = {}", userId, interestId);
+
     Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> InterestNotFoundException.withId(interestId));
     User user = userRepository.findById(userId)
@@ -136,7 +155,11 @@ public class InterestService {
     Subscription subscribe = subscriptionRepository.findByUserAndInterest(user, interest)
         .orElseThrow(SubscriptionNotFound::notFound);
 
+    log.debug("찾은 구독 ID = {}", subscribe.getId());
+
     subscriptionRepository.delete(subscribe);
+
+    log.info("관심사 구독 취소 완료.");
 
     return true;
   }
@@ -145,11 +168,14 @@ public class InterestService {
   @Transactional
   public boolean deleteInterest(UUID interestId) {
 
+    log.info("관심사 물리 삭제. 관심사 ID = {}", interestId);
+
     Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> InterestNotFoundException.withId(interestId));
 
     interestRepository.delete(interest);
 
+    log.info("관심사 물리 삭제 완료");
     return true;
   }
 
@@ -157,6 +183,8 @@ public class InterestService {
   @Transactional
   public InterestDto updateInterest(UUID requestUserId, UUID interestId,
       InterestUpdateRequest request) {
+
+    log.info("관심사 정보 수정 시작. 요청자 ID = {} 관심사 ID = {}", requestUserId, interestId);
 
     if (request.keywords() == null || request.keywords().isEmpty()) {
       throw EmptyKeywordsException.emptyKeywords();
@@ -170,9 +198,13 @@ public class InterestService {
     Interest interest = interestRepository.findById(interestId)
         .orElseThrow(() -> InterestNotFoundException.withId(interestId));
 
+    log.debug("조회된 관심사 ID = {}", interest.getId());
+
     interest.updateKeywords(request.keywords());
 
     interestRepository.save(interest);
+
+    log.info("관심사 정보 수정 완료. 수정 완료 시각 = {}", Instant.now());
 
     return InterestDto.from(
         interest,
