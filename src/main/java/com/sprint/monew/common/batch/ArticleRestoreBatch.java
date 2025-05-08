@@ -8,13 +8,10 @@ import com.sprint.monew.domain.article.repository.ArticleRepository;
 import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.InterestRepository;
 import com.sprint.monew.global.config.S3ConfigProperties;
-import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -94,7 +91,7 @@ public class ArticleRestoreBatch {
   복구 요청 범위에서 -> 논리삭제 기사의 deleted 필드 변경
    **/
   @Bean
-  @StepScope
+  @JobScope
   public Step changeArticleIsDeletedStep(
       @Value("#{jobParameters['from']}") String fromStr,
       @Value("#{jobParameters['to']}") String toStr) {
@@ -164,6 +161,7 @@ public class ArticleRestoreBatch {
     return new FlatFileItemReaderBuilder<ArticleApiDto>()
         .delimited()
         .delimiter(",")
+        .quoteCharacter('\"')
         .names(fieldNames)
         .fieldSetMapper(fs -> {
               Source source = Source.valueOf(fs.readString("source"));

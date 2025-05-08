@@ -79,8 +79,6 @@ public class ArticleCollectBatch {
         .build();
   }
 
-
-
   @Bean(name = "interestsAndUrlsFetchStep")
   public Step interestsAndUrlsFetchStep(InterestRepository interestRepository,
       InterestContainer interestContainer, ArticleRepository articleRepository) {

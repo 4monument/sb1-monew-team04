@@ -91,6 +91,7 @@ public class ArticleBackupConfig {
         .resource(new FileSystemResource(getNowLocalPath()))
         .delimited()                          // , 로 구분
         .delimiter(",")
+        .quoteCharacter("\"")
         .names(header)
         .headerCallback(w ->
             w.write("\uFEFFsource,sourceUrl,title,publishDate,summary"))
