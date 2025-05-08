@@ -48,7 +48,7 @@ public class CustomInterestRepositoryImpl implements CustomInterestRepository {
     return queryFactory
         .select(Projections.constructor(InterestSubscriptionInfoDto.class,
             interest,
-            subscription.user.countDistinct()))
+            subscription.countDistinct()))
         .from(interest)
         .leftJoin(subscription).on(subscription.interest.eq(interest))
         .where(whereClause)
