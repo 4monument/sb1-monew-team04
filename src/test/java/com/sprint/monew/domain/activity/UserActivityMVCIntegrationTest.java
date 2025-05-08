@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.sprint.monew.MongoContainer;
 import com.sprint.monew.PostgresContainer;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
-import com.sprint.monew.domain.interest.InterestRepository;
+import com.sprint.monew.domain.interest.repository.InterestRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import java.time.Instant;
@@ -41,6 +41,7 @@ class UserActivityMVCIntegrationTest {
     MongoContainer.getInstance().start();
     PostgresContainer.getInstance().start();
   }
+
   @Autowired
   private MockMvc mockMvc;
 

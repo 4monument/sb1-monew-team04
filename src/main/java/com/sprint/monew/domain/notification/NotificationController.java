@@ -29,7 +29,7 @@ public class NotificationController implements NotificationApi {
   public ResponseEntity<CursorPageResponseDto> getNotifications(
       @RequestParam(required = false) UUID cursor,
       @RequestParam(required = false) Instant after,
-      @RequestParam Integer limit,
+      @RequestParam(required = false, defaultValue = "50") Integer limit,
       @RequestHeader("Monew-Request-User-ID") UUID userId) {
     NotificationSearchRequest request = new NotificationSearchRequest(cursor, after, limit);
     return ResponseEntity.ok(notificationService.getAllNotifications(request, userId));

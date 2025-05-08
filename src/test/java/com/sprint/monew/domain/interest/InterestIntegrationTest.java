@@ -147,7 +147,7 @@ public class InterestIntegrationTest {
   @DisplayName("관심사 구독")
   class interestSubscribe {
 
-    //@Test
+    @Test
     @DisplayName("성공")
     void success() throws Exception {
       //given
@@ -228,7 +228,7 @@ public class InterestIntegrationTest {
           .andExpect(status().isNotFound());
     }
 
-    //@Test
+    @Test
     @DisplayName("실패: 해당 ID의 관심사가 존재하지 않음")
     void failureSinceInterestId() throws Exception {
       //given
@@ -263,7 +263,7 @@ public class InterestIntegrationTest {
   @DisplayName("관심사 구독 취소")
   class interestUnsubscribe {
 
-    //@Test
+    @Test
     @DisplayName("성공")
     void success() throws Exception {
       //given
@@ -320,7 +320,7 @@ public class InterestIntegrationTest {
           .andExpect(status().isOk());
     }
 
-    //@Test
+    @Test
     @DisplayName("실패: 해당 ID의 사용자가 존재하지 않음")
     void failureSinceUserId() throws Exception {
       //given
@@ -379,8 +379,8 @@ public class InterestIntegrationTest {
               .header("Monew-Request-User-ID", randomUUID))
           .andExpect(status().isNotFound());
     }
-    
-    //@Test
+
+    @Test
     @DisplayName("실패: 해당 ID의 관심사가 존재하지 않음")
     void failureSinceInterestId() throws Exception {
       //given
@@ -581,7 +581,7 @@ public class InterestIntegrationTest {
 
       String userId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
       InterestSearchRequest getRequest = InterestSearchRequest.of(
-          "술", "name", null, null, null, -1
+          "술", "name", null, null, null, 30
       );
 
       //when & then
@@ -605,6 +605,32 @@ public class InterestIntegrationTest {
           .andExpect(jsonPath("$.hasNext").isBoolean())
           .andDo(print())
           .andReturn();
+    }
+
+    @Test
+    @DisplayName("실패: limit가 0보다 크고 100보다 작거나 같아야함")
+    void failedByValue() throws Exception {
+      //given
+      addData();
+
+      String userId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+      InterestSearchRequest getRequest = InterestSearchRequest.of(
+          "술", "name", null, null, null, -1
+      );
+
+      //when & then
+      mockMvc.perform(get("/api/interests")
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("Monew-Request-User-ID", userId)
+              .param("keyword", getRequest.keyword())
+              .param("orderBy", getRequest.orderBy())
+              .param("direction", getRequest.direction())
+              .param("cursorId",
+                  getRequest.cursor() != null ? getRequest.cursor().toString() : null)
+              .param("afterAt",
+                  getRequest.after() != null ? getRequest.after().toString() : null)
+              .param("limit", String.valueOf(getRequest.limit())))
+          .andExpect(status().isBadRequest());
     }
 
     //todo - 스웨거 상으로는 userId 필수 필드
