@@ -1,24 +1,17 @@
 package com.sprint.monew.domain.article;
 
+import com.sprint.monew.common.config.api.ArticleApi;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.article.dto.ArticleDto;
 import com.sprint.monew.domain.article.dto.ArticleRestoreResultDto;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
 import com.sprint.monew.domain.article.dto.request.ArticleRequest;
-import jakarta.annotation.Resource;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
@@ -39,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/articles")
 @RequiredArgsConstructor
-public class ArticleController {
+public class ArticleController implements ArticleApi {
 
   private final ArticleService articleService;
 
@@ -89,4 +82,6 @@ public class ArticleController {
     articleService.hardDeleteArticle(id);
     return ResponseEntity.noContent().build();
   }
+
+  //todo - 출처 목록 조회
 }

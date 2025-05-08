@@ -1,5 +1,6 @@
 package com.sprint.monew.domain.activity;
 
+import com.sprint.monew.common.config.api.UserActivityApi;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/user-activities")
 @RequiredArgsConstructor
-public class UserActivityController {
+public class UserActivityController implements UserActivityApi {
 
   private final UserActivityService userActivityService;
 
