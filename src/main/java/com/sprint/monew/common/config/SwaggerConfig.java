@@ -13,7 +13,7 @@ public class SwaggerConfig {
     return new OpenAPI()
         .info(new Info()
             .title("Monew API 문서")
-            .description("4monument(team4)의 Monew 프로젝트 Swagger API 문서입니다.")
+            .description("MomewMonet(team04)의 Monew 프로젝트 Swagger API 문서입니다.")
         );
   }
 }
