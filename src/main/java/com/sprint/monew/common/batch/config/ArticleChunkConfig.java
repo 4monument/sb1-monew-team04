@@ -117,9 +117,6 @@ public class ArticleChunkConfig {
 
       stepContext.put(ARTICLE_IDS.getKey(), articleIdList);
 
-      log.info("articleIdList : {}", articleIdList);
-      log.info("articleInterestJdbc : {}", articleInterestsJdbc);
-
       log.info("저장 될 Article size : {}", articlesWithId.size());
       log.info("저장 될 Article Interest size : {}", articleInterestsJdbc.size());
 
