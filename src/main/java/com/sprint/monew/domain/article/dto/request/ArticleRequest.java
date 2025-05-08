@@ -11,7 +11,7 @@ public record ArticleRequest(
     Instant publishDateFrom,
     Instant publishDateTo,
     String cursor,
-    String after
+    Instant after
 ) {
 
 }

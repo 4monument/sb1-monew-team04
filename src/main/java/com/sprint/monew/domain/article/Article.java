@@ -6,6 +6,7 @@ import com.sprint.monew.domain.interest.Interest;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -22,17 +23,24 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @EqualsAndHashCode(of = "id")
 @Entity
 @Table(name = "articles")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class Article {
 
   @Id
   @GeneratedValue
   private UUID id;
+
+  @CreatedDate
+  @Column(nullable = false, updatable = false)
+  private Instant createdAt;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -69,6 +77,7 @@ public class Article {
     this.publishDate = publishDate;
     this.summary = summary;
     this.deleted = false;
+    this.createdAt = Instant.now();
   }
 
   private Article(UUID id, Source source, String sourceUrl, String title, Instant publishDate,
@@ -80,6 +89,7 @@ public class Article {
     this.publishDate = publishDate;
     this.summary = summary;
     this.deleted = false;
+    this.createdAt = Instant.now();
   }
 
   public static Article create(Source source, String sourceUrl, String title, Instant publishDate,
