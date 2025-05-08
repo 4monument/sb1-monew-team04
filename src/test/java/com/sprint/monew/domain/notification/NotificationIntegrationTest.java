@@ -67,8 +67,8 @@ public class NotificationIntegrationTest {
     @Test
     @DisplayName("성공")
     void getNotificationsSuccess() throws Exception {
-      mockMvc.perform(get("/api/notifications", activeUserId.toString())
-              .header("Monew-Request-User-ID", activeUserId.toString()))
+      mockMvc.perform(get("/api/notifications", activeUserId)
+              .header("Monew-Request-User-ID", activeUserId))
           .andExpect(status().isOk());
     }
 
@@ -76,8 +76,8 @@ public class NotificationIntegrationTest {
     @DisplayName("실패: 해당ID를 가진 사용자가 없음")
     void getNotificationsFailure() throws Exception {
       UUID testUserId = UUID.randomUUID();
-      mockMvc.perform(get("/api/notifications", testUserId.toString())
-              .header("Monew-Request-User-ID", testUserId.toString()))
+      mockMvc.perform(get("/api/notifications", testUserId)
+              .header("Monew-Request-User-ID", testUserId))
           .andExpect(status().isNotFound());
     }
   }
@@ -113,7 +113,7 @@ public class NotificationIntegrationTest {
     void checkNotificationSuccess() throws Exception {
       mockMvc.perform(
               patch("/api/notifications/" + notificationForActiveUserId)
-                  .header("Monew-Request-User-ID", activeUserId.toString()))
+                  .header("Monew-Request-User-ID", activeUserId))
           .andExpect(status().isOk());
 
     }
