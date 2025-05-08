@@ -2,9 +2,11 @@ package com.sprint.monew.domain.notification;
 
 import com.sprint.monew.common.batch.support.NotificationJdbc;
 import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.notification.dto.NotificationDto;
 import com.sprint.monew.domain.notification.dto.NotificationSearchRequest;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.notification.exception.NotificationNotFoundException;
+import com.sprint.monew.domain.notification.repository.NotificationRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.domain.user.exception.UserNotFoundException;

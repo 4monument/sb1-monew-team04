@@ -3,18 +3,27 @@ package com.sprint.monew.domain.activity;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
 import com.sprint.monew.domain.comment.dto.CommentDto;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 public record UserActivityDto(
+    @Schema(description = "사용자 활동 내역 ID")
     UUID id,
+    @Schema(description = "사용자 email")
     String email,
+    @Schema(description = "사용자 닉네임")
     String nickname,
+    @Schema(description = "활동 내역 생성일")
     Instant createdAt,
+    @Schema(description = "구독 중인 관심사")
     List<SubscriptionDto> subscriptions,
+    @Schema(description = "작성한 댓글 목록")
     List<CommentDto> comments,
+    @Schema(description = "좋아요한 댓글 목록")
     List<CommentDto> commentLikes,
+    @Schema(description = "조회한 기사 목록")
     List<ArticleViewDto> articleViews
 ) {
 

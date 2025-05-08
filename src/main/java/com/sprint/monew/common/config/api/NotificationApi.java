@@ -1,7 +1,7 @@
 package com.sprint.monew.common.config.api;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
-import com.sprint.monew.domain.interest.dto.InterestDto;
+import com.sprint.monew.domain.notification.dto.NotificationDto;
 import com.sprint.monew.global.error.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,7 +25,7 @@ public interface NotificationApi {
   @Operation(summary = "알림 목록 조회", description = "알림 목록을 조회합니다.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "조회 성공",
-          content = @Content(schema = @Schema(implementation = InterestDto.class))),
+          content = @Content(schema = @Schema(implementation = NotificationDto.class))),
       @ApiResponse(responseCode = "400", description = "잘못된 요청 (정렬 기준 오류, 페이지네이션 파라미터 오류 등)",
           content = @Content(mediaType = "*/*",
               schema = @Schema(implementation = ErrorResponse.class),

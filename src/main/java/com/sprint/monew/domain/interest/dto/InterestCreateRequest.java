@@ -1,11 +1,17 @@
 package com.sprint.monew.domain.interest.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public record InterestCreateRequest(
+    @Schema(description = "관심사 이름")
+    @Size(min = 1, max = 50)
     String name,
+
+    @Schema(description = "관련 키워드 목록")
+    @Size(min = 1, max = 10)
     List<String> keywords
 ) {
 
-  // 나중에 컴팩트 생성자로 KEYWORD 대/소문자 어떻게 통일시킬지 결정하기
 }

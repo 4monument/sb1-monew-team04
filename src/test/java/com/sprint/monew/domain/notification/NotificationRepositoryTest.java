@@ -10,6 +10,8 @@ import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.article.articleinterest.ArticleInterest;
 import com.sprint.monew.domain.interest.Interest;
 import com.sprint.monew.domain.interest.subscription.Subscription;
+import com.sprint.monew.domain.notification.repository.NotificationRepository;
+import com.sprint.monew.domain.notification.repository.NotificationRepositoryCustomImpl;
 import com.sprint.monew.domain.user.User;
 import jakarta.persistence.EntityManager;
 import java.time.Duration;
