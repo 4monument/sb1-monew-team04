@@ -131,6 +131,6 @@ public class ArticleBackupConfig {
    */
   private String getNowLocalPath() {
     LocalDateTime now = LocalDateTime.now();
-    return String.format("%s-%s.csv", now.toLocalDate(), now.getHour());
+    return String.format("/temp/%s-%s.csv", now.toLocalDate(), now.getHour());
   }
 }
