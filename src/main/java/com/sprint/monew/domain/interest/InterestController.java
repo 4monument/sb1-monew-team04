@@ -42,7 +42,7 @@ public class InterestController implements InterestApi {
       @RequestParam(required = false) Instant after,
       @RequestParam(required = false, defaultValue = "50") Integer limit) {
     InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
-        direction, cursor, after, limit);
+        direction, cursor, after, limit == 0 ? 50 : limit);
 
     return ResponseEntity.ok(
         interestService.getInterestsWithSubscriberInfo(interestSearchRequest, userId));

@@ -18,7 +18,7 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public List<Notification> getUnconfirmedWithCursor(UUID userId, UUID cursorId, Instant afterAt,
+  public List<Notification> getUnconfirmedWithCursor(UUID userId, Instant cursor, Instant afterAt,
       Pageable pageable) {
 
     QNotification notification = QNotification.notification;
@@ -27,9 +27,9 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
 
     whereClause.and(notification.user.id.eq(userId)).and(notification.confirmed.isFalse());
 
-    if (cursorId != null && afterAt != null) {
-      whereClause.and(notification.createdAt.lt(afterAt)
-          .or(notification.createdAt.lt(afterAt).and(notification.id.lt(cursorId))));
+    if (cursor != null && afterAt != null) {
+      whereClause.and(notification.createdAt.lt(cursor)
+          .or(notification.createdAt.lt(afterAt).and(notification.createdAt.lt(cursor))));
     }
 
     return queryFactory.select(notification)

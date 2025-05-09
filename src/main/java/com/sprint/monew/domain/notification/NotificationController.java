@@ -27,7 +27,7 @@ public class NotificationController implements NotificationApi {
   // 알림 목록 조회
   @GetMapping
   public ResponseEntity<CursorPageResponseDto> getNotifications(
-      @RequestParam(required = false) UUID cursor,
+      @RequestParam(required = false) Instant cursor,
       @RequestParam(required = false) Instant after,
       @RequestParam(required = false, defaultValue = "50") Integer limit,
       @RequestHeader("Monew-Request-User-ID") UUID userId) {

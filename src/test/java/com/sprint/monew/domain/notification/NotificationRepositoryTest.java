@@ -177,7 +177,7 @@ public class NotificationRepositoryTest {
     em.persist(olderNotification);
     em.flush();
 
-    UUID cursorId = olderNotification.getId();
+    Instant cursorId = olderNotification.getCreatedAt();
     Instant afterAt = olderNotification.getCreatedAt();
 
     int limit = 10;
