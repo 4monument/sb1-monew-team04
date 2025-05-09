@@ -67,7 +67,7 @@ public class ArticleService {
     ArticleView articleView = ArticleView.create(user, article);
     articleViewRepository.save(articleView);
 
-    userActivityService.updateUserActivity(userId);
+    userActivityService.synchronizeUserActivityToMongo(userId);
 
     long commentCount = commentRepository.countByArticleAndDeletedFalse(article);
     long viewCount = articleViewRepository.countByArticle(article);

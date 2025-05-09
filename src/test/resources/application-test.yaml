@@ -26,6 +26,10 @@ spring:
     jdbc:
       initialize-schema: never
 
+  autoconfigure:
+    exclude:
+      - io.awspring.cloud.autoconfigure.s3.S3AutoConfiguration
+
 logging:
   level:
     com.sprint.mission.discodeit: debug

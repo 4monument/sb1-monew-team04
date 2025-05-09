@@ -15,7 +15,7 @@ spring:
     type: caffeine
     cache-names: userActivities
     caffeine:
-      spec: maximumSize=10000,expireAfterAccess=10m
+      spec: maximumSize=10000,expireAfterAccess=1m
 
   jpa:
     hibernate:
