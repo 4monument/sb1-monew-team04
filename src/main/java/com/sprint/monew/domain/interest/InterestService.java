@@ -3,6 +3,7 @@ package com.sprint.monew.domain.interest;
 import static com.sprint.monew.domain.interest.util.SimilarityCalculator.calculateSimilarity;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.activity.UserActivityService;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
@@ -36,6 +37,7 @@ public class InterestService {
   private final InterestRepository interestRepository;
   private final UserRepository userRepository;
   private final SubscriptionRepository subscriptionRepository;
+  private final UserActivityService userActivityService;
 
   //관심사 목록 조회 - queryDsl 사용
   @Transactional(readOnly = true)
@@ -142,6 +144,8 @@ public class InterestService {
     Subscription subscribe = new Subscription(user, interest);
     subscriptionRepository.save(subscribe);
 
+    userActivityService.synchronizeUserActivityToMongo(userId);
+
     log.info("관심사 구독 완료. 구독 ID = {}, 생성 시각 = {} ", subscribe.getId(), subscribe.getCreatedAt());
 
     return SubscriptionDto.from(subscribe,
@@ -166,6 +170,8 @@ public class InterestService {
     log.debug("찾은 구독 ID = {}", subscribe.getId());
 
     subscriptionRepository.delete(subscribe);
+
+    userActivityService.synchronizeUserActivityToMongo(userId);
 
     log.info("관심사 구독 취소 완료.");
 

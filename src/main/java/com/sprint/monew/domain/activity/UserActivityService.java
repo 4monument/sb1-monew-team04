@@ -3,6 +3,8 @@ package com.sprint.monew.domain.activity;
 import com.sprint.monew.domain.activity.exception.UserActivityNotFoundException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,10 +15,12 @@ public class UserActivityService {
   private final UserActivityQueryRepository userActivityQueryRepository;
   private final UserActivityMongoRepository userActivityMongoRepository;
 
+  @CachePut(value = "userActivities", key = "#userId")
   public UserActivityDto getUserActivity(UUID userId) {
     return userActivityQueryRepository.findUserActivity(userId);
   }
 
+  @Cacheable(value = "userActivities", key = "#userId")
   public UserActivityDto getUserActivityFromMongo(UUID userId) {
     UserActivityDocument document = userActivityMongoRepository.findById(userId)
         .orElseThrow(() -> UserActivityNotFoundException.withId(userId));
@@ -24,6 +28,7 @@ public class UserActivityService {
   }
 
   @Transactional
+  @CachePut(value = "userActivities", key = "#userId")
   public UserActivityDto synchronizeUserActivityToMongo(UUID userId) {
     UserActivityDto dto = userActivityQueryRepository.findUserActivity(userId);
     UserActivityDocument document = UserActivityDto.toDocument(dto);
