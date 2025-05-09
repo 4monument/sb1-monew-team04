@@ -14,7 +14,6 @@ import com.sprint.monew.domain.notification.repository.NotificationRepository;
 import com.sprint.monew.domain.notification.repository.NotificationRepositoryCustomImpl;
 import com.sprint.monew.domain.user.User;
 import jakarta.persistence.EntityManager;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +25,7 @@ import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataM
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -36,6 +36,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 @ActiveProfiles("test")
 @AutoConfigureDataMongo
+@EnableJpaAuditing
 public class NotificationRepositoryTest {
 
   static final PostgresContainer postgresContainer = PostgresContainer.getInstance();
@@ -135,7 +136,7 @@ public class NotificationRepositoryTest {
   @DisplayName("알림 읽음으로 수정 후 조회")
   void updateUnconfirmedNotifications() {
     //given
-    notification.confirm(Instant.now());
+    notification.confirm();
     em.flush();
 
     //when
@@ -151,7 +152,7 @@ public class NotificationRepositoryTest {
   @DisplayName("확인 시간으로부터 일주일 된 알림 삭제")
   void deleteUnconfirmedNotification() {
     //given - 알림 읽은 시각 7일 +1초 전으로 업데이트 변경
-    notification.confirm(Instant.now().minus(Duration.ofDays(7).plusSeconds(1)));
+    notification.confirm();
     em.flush();
 
     //when
@@ -162,4 +163,32 @@ public class NotificationRepositoryTest {
     assertTrue(notificationRepository.findById(notification.getId()).isEmpty());
   }
 
+
+  @Test
+  @DisplayName("커서와 시간 조건이 있는 미확인 알림 조회")
+  void getUnconfirmedNotificationsWithCursorAndAfterAt() {
+    // given
+    Notification olderNotification = notificationRepository.save(new Notification(
+        user,
+        interest.getId(),
+        ResourceType.INTEREST,
+        "새로운 기사가 등록되었습니다."
+    ));
+    em.persist(olderNotification);
+    em.flush();
+
+    UUID cursorId = olderNotification.getId();
+    Instant afterAt = olderNotification.getCreatedAt();
+
+    int limit = 10;
+    PageRequest pageRequest = PageRequest.of(0, limit + 1);
+
+    // when
+    List<Notification> result = notificationRepository.getUnconfirmedWithCursor(
+        user.getId(), cursorId, afterAt, pageRequest);
+
+    // then
+    assertEquals(1, result.size());
+    assertEquals(notification.getId(), result.get(0).getId());
+  }
 }

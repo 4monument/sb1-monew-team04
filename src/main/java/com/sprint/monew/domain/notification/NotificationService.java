@@ -44,13 +44,10 @@ public class NotificationService {
         .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     List<Notification> notifications = notificationRepository.findByUser(user);
-    Instant updatedAt = Instant.now();
 
     log.debug("미확인 알림 수 = {}", notifications.size());
 
-    notifications.forEach(n -> {
-      n.confirm(updatedAt);
-    });
+    notifications.forEach(Notification::confirm);
 
     notificationRepository.saveAll(notifications);
 
@@ -71,7 +68,7 @@ public class NotificationService {
 
     log.debug("확인 여부 = {}", notification.isConfirmed());
 
-    notification.confirm(Instant.now());
+    notification.confirm();
     notificationRepository.save(notification);
 
     log.info("알림 수정-단일 알림 확인 완료. 확인 여부 = {}, 확인 시각 = {}", notification.isConfirmed(),
@@ -88,7 +85,7 @@ public class NotificationService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> UserNotFoundException.withId(userId));
 
-    int limit = (request.limit() == null || request.limit() <= 0) ? 30 : request.limit();
+    int limit = request.limit();
     UUID cursor = request.cursor();
     Instant after = request.after();
 
