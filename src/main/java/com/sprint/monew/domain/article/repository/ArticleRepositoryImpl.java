@@ -39,7 +39,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
             article.publishDate, article.summary, comment.countDistinct(), viewAll.countDistinct(), viewMe.id.isNotNull())
         )
         .from(article)
-        .leftJoin(comment).on(comment.article.eq(article))
+        .leftJoin(comment).on(comment.article.eq(article).and(comment.deleted.isFalse()))
         .leftJoin(article.articleViews, viewAll)
         .leftJoin(article.articleViews, viewMe).on(viewMe.user.id.eq(userId))
         .leftJoin(article.articleInterests, articleInterest)
