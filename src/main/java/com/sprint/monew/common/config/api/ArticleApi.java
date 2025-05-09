@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.batch.core.JobParametersInvalidException;
@@ -118,8 +119,8 @@ public interface ArticleApi {
       @RequestParam(required = false) String keyword,
       @RequestParam(required = false) UUID interestId,
       @RequestParam(required = false) List<String> sourceIn,
-      @RequestParam(required = false) Instant publishDateFrom,
-      @RequestParam(required = false) Instant publishDateTo,
+      @RequestParam(required = false) LocalDateTime publishDateFrom,
+      @RequestParam(required = false) LocalDateTime publishDateTo,
       @RequestParam(required = false) String cursor,
       @RequestParam(required = false) Instant after,
       @RequestParam String orderBy,

@@ -8,6 +8,7 @@ import com.sprint.monew.domain.article.dto.ArticleRestoreResultDto;
 import com.sprint.monew.domain.article.dto.ArticleSortDirection;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -50,8 +51,8 @@ public class ArticleController implements ArticleApi {
       @RequestParam(required = false) String keyword,
       @RequestParam(required = false) UUID interestId,
       @RequestParam(required = false) List<String> sourceIn,
-      @RequestParam(required = false) Instant publishDateFrom,
-      @RequestParam(required = false) Instant publishDateTo,
+      @RequestParam(required = false) LocalDateTime publishDateFrom,
+      @RequestParam(required = false) LocalDateTime publishDateTo,
       @RequestParam(required = false) String cursor,
       @RequestParam(required = false) Instant after,
       @RequestParam String orderBy,
@@ -59,7 +60,7 @@ public class ArticleController implements ArticleApi {
       @RequestParam int limit,
       @RequestHeader("Monew-Request-User-ID") UUID userId
   ) {
-    ArticleCondition articleCondition = new ArticleCondition(
+    ArticleCondition articleCondition = ArticleCondition.create(
         keyword, interestId, sourceIn, publishDateFrom, publishDateTo, cursor, after);
     PageRequest pageRequest = PageRequest.of(0, limit, Direction.fromString(direction.name()), orderBy);
     CursorPageResponseDto<ArticleDto> response = articleService.getArticles(articleCondition,
