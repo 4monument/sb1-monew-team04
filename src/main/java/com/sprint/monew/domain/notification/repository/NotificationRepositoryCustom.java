@@ -8,6 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface NotificationRepositoryCustom {
 
-  List<Notification> getUnconfirmedWithCursor(UUID userId, UUID cursorId,
+  List<Notification> getUnconfirmedWithCursor(UUID userId, Instant cursorId,
       Instant afterAt, Pageable pageable);
 }

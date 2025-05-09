@@ -86,7 +86,7 @@ public class NotificationService {
         .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     int limit = request.limit();
-    UUID cursor = request.cursor();
+    Instant cursor = request.cursor();
     Instant after = request.after();
 
     PageRequest pagerequest = PageRequest.of(0, limit + 1);
@@ -115,7 +115,7 @@ public class NotificationService {
       );
     }
 
-    UUID nextCursor = notifications.get(notifications.size() - 1).getId();
+    Instant nextCursor = notifications.get(notifications.size() - 1).getCreatedAt();
 
     Instant nextAfter = notifications.get(notifications.size() - 1).getCreatedAt();
 
