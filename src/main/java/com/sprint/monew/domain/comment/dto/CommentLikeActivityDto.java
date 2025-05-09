@@ -14,6 +14,8 @@ public record CommentLikeActivityDto (
   UUID commentId,
   @Schema(description = "기사 ID")
   UUID articleId,
+  @Schema(description = "기사 제목")
+  String articleTitle,
   @Schema(description = "댓글 작성자 ID")
   UUID commentUserId,
   @Schema(description = "댓글 작성자 닉네임")
@@ -31,6 +33,7 @@ public record CommentLikeActivityDto (
         like.getCreatedAt(),
         like.getComment().getId(),
         like.getComment().getArticle().getId(),
+        like.getComment().getArticle().getTitle(),
         like.getComment().getUser().getId(),
         like.getComment().getUser().getNickname(),
         like.getComment().getContent(),
