@@ -1,13 +1,17 @@
 package com.sprint.monew.domain.article.repository;
 
-import com.sprint.monew.domain.article.Article;
+import com.sprint.monew.domain.article.dto.ArticleDto;
+import com.sprint.monew.domain.article.dto.ArticleCondition;
 import java.util.List;
-import org.springframework.data.domain.Page;
+import java.util.UUID;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
 public interface ArticleRepositoryCustom {
 
-  Page<Article> findArticles(Pageable pageable);
+  Slice<ArticleDto> getArticles(ArticleCondition condition, UUID userId, Pageable pageable);
 
   List<String> findAllSourceUrl();
+
+  Long getArticleCount(ArticleCondition condition);
 }

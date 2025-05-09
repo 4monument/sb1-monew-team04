@@ -2,9 +2,11 @@ package com.sprint.monew.domain.notification;
 
 import com.sprint.monew.common.batch.support.NotificationJdbc;
 import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.notification.dto.NotificationDto;
 import com.sprint.monew.domain.notification.dto.NotificationSearchRequest;
 import com.sprint.monew.domain.notification.dto.UnreadInterestArticleCount;
 import com.sprint.monew.domain.notification.exception.NotificationNotFoundException;
+import com.sprint.monew.domain.notification.repository.NotificationRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.domain.user.exception.UserNotFoundException;
@@ -36,22 +38,27 @@ public class NotificationService {
   @Transactional
   public void checkAllNotifications(UUID userId) {
 
+    log.info("알림 수정-전체 알림 확인. 요청자 ID = {}", userId);
+
     User user = userRepository.findById(userId)
         .orElseThrow(() -> UserNotFoundException.withId(userId));
 
     List<Notification> notifications = notificationRepository.findByUser(user);
-    Instant updatedAt = Instant.now();
 
-    notifications.forEach(n -> {
-      n.confirm(updatedAt);
-    });
+    log.debug("미확인 알림 수 = {}", notifications.size());
+
+    notifications.forEach(Notification::confirm);
 
     notificationRepository.saveAll(notifications);
+
+    log.info("알림 수정-전체 알림 확인 완료. 확인된 알림 수 = {}, 확인 시각 = {}", notifications.size(), Instant.now());
   }
 
   //알림 수정 - 알림 확인(단일)
   @Transactional
   public void checkNotification(UUID notificationId, UUID userId) {
+
+    log.info("알림 수정-단일 알림 확인. 요청자 ID = {}, 알림 ID = {}", userId, notificationId);
 
     User user = userRepository.findById(userId)
         .orElseThrow(() -> UserNotFoundException.withId(userId));
@@ -59,18 +66,26 @@ public class NotificationService {
     Notification notification = notificationRepository.findById(notificationId)
         .orElseThrow(() -> NotificationNotFoundException.notFound(notificationId));
 
-    notification.confirm(Instant.now());
+    log.debug("확인 여부 = {}", notification.isConfirmed());
+
+    notification.confirm();
     notificationRepository.save(notification);
+
+    log.info("알림 수정-단일 알림 확인 완료. 확인 여부 = {}, 확인 시각 = {}", notification.isConfirmed(),
+        Instant.now());
   }
 
   //알림 목록 조회
   @Transactional(readOnly = true)
   public CursorPageResponseDto<NotificationDto> getAllNotifications(
       NotificationSearchRequest request, UUID userId) {
+
+    log.info("알림 조회 시작. 요청자 ID = {}", userId);
+
     User user = userRepository.findById(userId)
         .orElseThrow(() -> UserNotFoundException.withId(userId));
 
-    int limit = request.limit() == null ? 30 : request.limit();
+    int limit = request.limit();
     UUID cursor = request.cursor();
     Instant after = request.after();
 
@@ -79,6 +94,8 @@ public class NotificationService {
     List<Notification> notifications
         = notificationRepository.getUnconfirmedWithCursor(userId, cursor, after,
         pagerequest);
+
+    log.debug("검색 및 정렬 조건 만족하는 검색 결과 수 = {}", notifications.size());
 
     boolean hasNext = notifications.size() > limit;
 
@@ -109,6 +126,8 @@ public class NotificationService {
     List<NotificationDto> notificationDtos = notifications.stream()
         .map(NotificationDto::from)
         .toList();
+
+    log.info("알림 조회 완료");
 
     return new CursorPageResponseDto<>(
         notificationDtos,

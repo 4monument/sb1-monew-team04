@@ -28,35 +28,36 @@ public class InterestContainer {
     this.sourceUrlFilterSet.addAll(sourceUrls);
   }
 
-  public ArticleApiDto filter(ArticleApiDto articleApiDto){
-    if (isContainKeywords(articleApiDto) && isNewUrl(articleApiDto)) {
+  public ArticleApiDto filter(ArticleApiDto articleApiDto) {
+    if (isContainKeywords(articleApiDto.summary()) && isNewUrl(articleApiDto.sourceUrl())
+        && !isPhoto(articleApiDto.sourceUrl())) {
       return articleApiDto;
     }
     return null;
   }
 
-//  public Optional<ArticleApiDto> filter(ArticleApiDto articleApiDto){
-//    if (isContainKeywords(articleApiDto) && !isDuplicateUrl(articleApiDto)) {
-//      return Optional.of(articleApiDto);
-//    }
-//    return Optional.empty();
-//  }
-  public boolean isNewUrl(ArticleApiDto articleApiDto) {
-    return sourceUrlFilterSet.add(articleApiDto.sourceUrl());
+  private boolean isPhoto(String sourceUrl) {
+    return sourceUrl.contains("photos");
   }
 
-  private boolean isContainKeywords(ArticleApiDto articleApiDto) {
-    String lowerCaseSummary = articleApiDto.summary().toLowerCase();
+  private boolean isNewUrl(String sourceUrl) {
+    return sourceUrlFilterSet.add(sourceUrl);
+  }
+
+  private boolean isContainKeywords(String summary) {
+    String lowerCaseSummary = toLowerCaseAndTrim(summary);
     return keywords.stream()
         .anyMatch(lowerCaseSummary::contains);
   }
 
   public ArticleWithInterestList toArticleWithRelevantInterests(ArticleApiDto articleApiDto) {
-    String summary = articleApiDto.summary();
+    String lowerCaseSummary = toLowerCaseAndTrim(articleApiDto.summary());
     List<Interest> interestList = interests.stream()
         .filter(interest ->
             interest.getKeywords().stream()
-                .anyMatch(summary::contains))
+                .anyMatch(keyword ->
+                    lowerCaseSummary.contains(keyword.toLowerCase().trim()))
+        )
         .toList();
 
     if (interestList.isEmpty()) {
@@ -72,9 +73,17 @@ public class InterestContainer {
         interestList
     );
   }
+
   public void clearBean() {
     this.interests.clear();
     this.keywords.clear();
     this.sourceUrlFilterSet.clear();
+  }
+
+  private String toLowerCaseAndTrim(String str) {
+    if (str == null) {
+      return null;
+    }
+    return str.toLowerCase().trim();
   }
 }

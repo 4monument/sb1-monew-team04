@@ -132,7 +132,6 @@ public class UserActivityIntegrationTest {
             nonActiveUserId))
         .andExpect(status().isOk());
 
-
     String activityResponseBefore = mockMvc.perform(get(
             "/api/user-activities/{id}",
             nonActiveUserId))

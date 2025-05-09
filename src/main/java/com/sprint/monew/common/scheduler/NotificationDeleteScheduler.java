@@ -24,7 +24,6 @@ public class  NotificationDeleteScheduler {
   @Resource(name = "notificationDeleteJob")
   private Job job;
 
-  // 확인한 알림 중 1주일이 경과된 알림은 자동으로 삭제됩니다.
   @Scheduled(cron = "0 0 4 * * ?", zone = "Asia/Seoul")
   public void deleteConfirmedNotification()
       throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {

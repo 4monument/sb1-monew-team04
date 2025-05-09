@@ -11,6 +11,7 @@ CREATE TABLE "users"
 CREATE TABLE "articles"
 (
     "id"           UUID PRIMARY KEY,
+    "created_at"   TIMESTAMPTZ   NOT NULL DEFAULT now(),
     "source"       VARCHAR(255)  NOT NULL,
     "source_url"   VARCHAR(2048) NOT NULL UNIQUE,
     "title"        VARCHAR(255)  NOT NULL,

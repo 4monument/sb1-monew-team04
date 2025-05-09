@@ -1,11 +1,14 @@
 package com.sprint.monew.domain.interest;
 
+import com.sprint.monew.common.config.api.InterestApi;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
 import com.sprint.monew.domain.interest.dto.InterestUpdateRequest;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
+import jakarta.validation.Valid;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,27 +21,37 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/interests")
 @RequiredArgsConstructor
-public class InterestController {
+public class InterestController implements InterestApi {
 
   private final InterestService interestService;
 
   //관심사 목록 조회
   @GetMapping
   public ResponseEntity<CursorPageResponseDto> getInterests(
-      @RequestHeader("Monew-Request-User-ID") UUID userId, InterestSearchRequest request) {
+      @RequestHeader("Monew-Request-User-ID") UUID userId,
+      @RequestParam(required = false) String keyword,
+      @RequestParam String orderBy,
+      @RequestParam String direction,
+      @RequestParam(required = false) UUID cursor,
+      @RequestParam(required = false) Instant after,
+      @RequestParam(required = false, defaultValue = "50") Integer limit) {
+    InterestSearchRequest interestSearchRequest = InterestSearchRequest.of(keyword, orderBy,
+        direction, cursor, after, limit);
+
     return ResponseEntity.ok(
-        interestService.getInterestsWithSubscriberInfo(request, userId));
+        interestService.getInterestsWithSubscriberInfo(interestSearchRequest, userId));
   }
 
   //관심사 등록
   @PostMapping
   public ResponseEntity<InterestDto> addInterest(
-      @RequestBody InterestCreateRequest interestCreateRequest) {
+      @RequestBody @Valid InterestCreateRequest interestCreateRequest) {
     InterestDto interestDto = interestService.createInterest(interestCreateRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(interestDto);
   }

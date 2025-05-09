@@ -1,5 +1,6 @@
-package com.sprint.monew.domain.interest;
+package com.sprint.monew.domain.interest.repository;
 
+import com.sprint.monew.domain.interest.Interest;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

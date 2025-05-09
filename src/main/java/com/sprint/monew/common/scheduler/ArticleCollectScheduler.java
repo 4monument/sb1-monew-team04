@@ -1,9 +1,12 @@
 package com.sprint.monew.common.scheduler;
 
+import static com.sprint.monew.common.batch.support.CustomExecutionContextKeys.ARTICLE_IDS;
+
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
@@ -20,7 +23,7 @@ import org.springframework.stereotype.Component;
 public class ArticleCollectScheduler {
 
   @Resource(name = "articleCollectJob")
-  private Job articleCoolectJob;
+  private Job articleCollectJob;
 
   @Resource(name = "notificationCreateJob")
   private Job notificationCreateJob;
@@ -36,7 +39,8 @@ public class ArticleCollectScheduler {
         .toJobParameters();
 
     log.info("Article collection start");
-    jobLauncher.run(articleCoolectJob, jobParameters);
+    JobExecution jobExecution = jobLauncher.run(articleCollectJob, jobParameters);
+    jobExecution.getExecutionContext().remove(ARTICLE_IDS.getKey());
 
     log.info("Notification create start");
     jobLauncher.run(notificationCreateJob, jobParameters);

@@ -1,11 +1,13 @@
 package com.sprint.monew.domain.comment;
 
+import com.sprint.monew.common.config.api.CommentApi;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.comment.dto.CommentDto;
 import com.sprint.monew.domain.comment.dto.CommentLikeDto;
 import com.sprint.monew.domain.comment.dto.request.CommentRegisterRequest;
-import com.sprint.monew.domain.comment.dto.request.CommentRequest;
+import com.sprint.monew.domain.comment.dto.CommentCondition;
 import com.sprint.monew.domain.comment.dto.request.CommentUpdateRequest;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +15,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,13 +27,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/comments")
 @RequiredArgsConstructor
-public class CommentController {
+public class CommentController implements CommentApi {
 
   private final CommentService commentService;
 
   @GetMapping
   public ResponseEntity<CursorPageResponseDto<CommentDto>> getComments(
-      @ModelAttribute CommentRequest commentRequest,
+      @RequestParam(required = false) UUID articleId,
+      @RequestParam(required = false) String cursor,
+      @RequestParam(required = false) Instant after,
       @RequestParam String orderBy,
       @RequestParam String direction,
       @RequestParam int limit,
@@ -40,7 +43,8 @@ public class CommentController {
   ) {
     PageRequest pageRequest = PageRequest
         .of(0, limit, Direction.fromString(direction), orderBy);
-    return ResponseEntity.ok(commentService.getComments(commentRequest, userId, pageRequest));
+    CommentCondition commentCondition = new CommentCondition(articleId, cursor, after);
+    return ResponseEntity.ok(commentService.getComments(commentCondition, userId, pageRequest));
   }
 
   @PostMapping

@@ -1,11 +1,12 @@
-package com.sprint.monew.domain.comment.dto.request;
+package com.sprint.monew.domain.comment.dto;
 
 import java.time.Instant;
 import java.util.UUID;
 
-public record CommentRequest(
+public record CommentCondition(
     UUID articleId,
     String cursor,
     Instant after
 ) {
+
 }

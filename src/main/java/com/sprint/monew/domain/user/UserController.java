@@ -1,5 +1,7 @@
 package com.sprint.monew.domain.user;
 
+import com.sprint.monew.common.config.api.UserApi;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,23 +17,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
-public class UserController {
+public class UserController implements UserApi {
 
   private final UserService userService;
 
   @PostMapping
-  public ResponseEntity<UserDto> register(@RequestBody UserRegisterRequest request) {
+  public ResponseEntity<UserDto> register(@RequestBody @Valid UserRegisterRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED).body(userService.register(request));
   }
 
   @PostMapping("/login")
-  public ResponseEntity<UserDto> login(@RequestBody UserLoginRequest request) {
+  public ResponseEntity<UserDto> login(@RequestBody @Valid UserLoginRequest request) {
     return ResponseEntity.ok(userService.login(request));
   }
 
   @PatchMapping("/{userId}")
   public ResponseEntity<UserDto> updateNickname(@PathVariable UUID userId,
-      @RequestBody UserUpdateRequest request) {
+      @RequestBody @Valid UserUpdateRequest request) {
     return ResponseEntity.ok(userService.updateNickname(userId, request));
   }
 
