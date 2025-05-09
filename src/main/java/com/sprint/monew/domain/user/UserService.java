@@ -31,7 +31,7 @@ public class UserService {
 
     User savedUser = userRepository.save(user);
 
-    userActivityService.saveUserActivityToMongo(savedUser.getId());
+    userActivityService.synchronizeUserActivityToMongo(savedUser.getId());
 
     return UserDto.from(savedUser);
   }
@@ -51,6 +51,7 @@ public class UserService {
     User user = userRepository.findByIdAndDeletedFalse(userId)
         .orElseThrow(() -> UserNotFoundException.withId(userId));
     user.updateNickname(request.nickname());
+    userActivityService.synchronizeUserActivityToMongo(user.getId());
     return UserDto.from(user);
   }
 
