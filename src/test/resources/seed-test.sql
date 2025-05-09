@@ -82,8 +82,8 @@ WITH c1 AS (SELECT id AS comment_id FROM comments WHERE content = '정말 흥미
      u2 AS (SELECT id AS user_id FROM users WHERE email = 'hoyeon@example.com')
 
 INSERT
-INTO "likes" ("id", "comment_id", "user_id")
-SELECT gen_random_uuid(), c1.comment_id, u2.user_id
+INTO "likes" ("id", "comment_id", "user_id", "created_at")
+SELECT gen_random_uuid(), c1.comment_id, u2.user_id, now()
 FROM c1,
      u2;
 
