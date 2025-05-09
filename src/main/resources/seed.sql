@@ -211,9 +211,9 @@ SELECT gen_random_uuid(), u3.user_id, i1.interest_id, now() FROM u3, i1
 UNION
 SELECT gen_random_uuid(), u4.user_id, i2.interest_id, now() FROM u4, i2;
 
-INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date")
-VALUES (gen_random_uuid(), 'NAVER', 'https://site.com/future-tech', '미래 기술 트렌드', '다가오는 10년을 이끌 기술들', now()),
-       (gen_random_uuid(), 'NAVER', 'https://site.com/fitness-life', '운동이 삶에 미치는 영향', '규칙적인 운동이 신체와 정신에 끼치는 긍정적 영향', now());
+INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date", "created_at")
+VALUES (gen_random_uuid(), 'NAVER', 'https://site.com/future-tech', '미래 기술 트렌드', '다가오는 10년을 이끌 기술들', now(), now()),
+       (gen_random_uuid(), 'NAVER', 'https://site.com/fitness-life', '운동이 삶에 미치는 영향', '규칙적인 운동이 신체와 정신에 끼치는 긍정적 영향', now(), now());
 
 WITH a6 AS (SELECT id AS article_id FROM articles WHERE title = '미래 기술 트렌드'),
      a7 AS (SELECT id AS article_id FROM articles WHERE title = '운동이 삶에 미치는 영향'),
