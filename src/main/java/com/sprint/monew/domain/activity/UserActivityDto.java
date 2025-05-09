@@ -1,7 +1,8 @@
 package com.sprint.monew.domain.activity;
 
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
-import com.sprint.monew.domain.comment.dto.CommentDto;
+import com.sprint.monew.domain.comment.dto.CommentActivityDto;
+import com.sprint.monew.domain.comment.dto.CommentLikeActivityDto;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
@@ -20,9 +21,9 @@ public record UserActivityDto(
     @Schema(description = "구독 중인 관심사")
     List<SubscriptionDto> subscriptions,
     @Schema(description = "작성한 댓글 목록")
-    List<CommentDto> comments,
+    List<CommentActivityDto> comments,
     @Schema(description = "좋아요한 댓글 목록")
-    List<CommentDto> commentLikes,
+    List<CommentLikeActivityDto> commentLikes,
     @Schema(description = "조회한 기사 목록")
     List<ArticleViewDto> articleViews
 ) {

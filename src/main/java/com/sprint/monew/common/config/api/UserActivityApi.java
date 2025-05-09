@@ -98,10 +98,4 @@ public interface UserActivityApi {
       @PathVariable UUID userId,
       @RequestHeader(name = "Monew-Request-User-ID", required = false) UUID headerUserId
   );
-
-  ResponseEntity<Void> updateUserActivityToMongo(
-      @Parameter(description = "사용자 ID")
-      @PathVariable UUID userId,
-      @RequestHeader(name = "Monew-Request-User-ID", required = false) UUID headerUserId
-  );
 }
