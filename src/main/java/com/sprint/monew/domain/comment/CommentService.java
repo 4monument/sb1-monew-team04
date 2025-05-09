@@ -90,7 +90,7 @@ public class CommentService {
     commentRepository.save(comment);
 
     // 활동 내역 저장
-    userActivityService.updateUserActivity(userId);
+    userActivityService.synchronizeUserActivityToMongo(userId);
 
     return CommentDto.from(comment, false);
   }
@@ -121,7 +121,7 @@ public class CommentService {
     notificationRepository.save(notification);
 
     //활동 내역 저장
-    userActivityService.updateUserActivity(userId);
+    userActivityService.synchronizeUserActivityToMongo(userId);
 
     long commentLikeCount = likeRepository.countByComment(comment);
     return CommentLikeDto.from(like, commentLikeCount);
