@@ -35,11 +35,11 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
     QArticleView viewMe = new QArticleView("viewMe");
     List<ArticleDto> result = queryFactory
         .select(Projections.constructor(
-            ArticleDto.class, article.id, article.createdAt, article.source, article.sourceUrl, article.title,
+            ArticleDto.class, article.id, article.createdAt, article.source.stringValue(), article.sourceUrl, article.title,
             article.publishDate, article.summary, comment.countDistinct(), viewAll.countDistinct(), viewMe.id.isNotNull())
         )
         .from(article)
-        .leftJoin(article).on(comment.article.eq(article))
+        .leftJoin(comment).on(comment.article.eq(article))
         .leftJoin(article.articleViews, viewAll)
         .leftJoin(article.articleViews, viewMe).on(viewMe.user.id.eq(userId))
         .leftJoin(article.articleInterests, articleInterest)
@@ -55,7 +55,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
         )
         .groupBy(
             article.id, article.createdAt, article.source, article.sourceUrl,
-            article.title, article.publishDate, article.summary
+            article.title, article.publishDate, article.summary, viewMe.id
         )
         .having(
             commentCountCursor(condition.cursor(), condition.after(), pageable.getSort()),
@@ -84,7 +84,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
     return queryFactory
         .select(article.id.countDistinct())
         .from(article)
-        .leftJoin(article, articleInterest.article)
+        .leftJoin(article.articleInterests, articleInterest)
         .leftJoin(articleInterest.interest, interest)
         .where(
             article.deleted.isFalse(),
