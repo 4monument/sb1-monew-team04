@@ -65,7 +65,7 @@ class UserServiceTest {
     when(userRepository.save(any(User.class))).thenReturn(
         new User(savedUserId, request.email(), request.nickname(), request.password(), now, false)
     );
-    when(userActivityService.saveUserActivityToMongo(any(UUID.class)))
+    when(userActivityService.synchronizeUserActivityToMongo(any(UUID.class)))
         .thenReturn(mock(UserActivityDto.class));
 
     UserDto result = userService.register(request);
@@ -77,7 +77,7 @@ class UserServiceTest {
 
     verify(userRepository).existsByEmail(request.email());
     verify(userRepository).save(any(User.class));
-    verify(userActivityService).saveUserActivityToMongo(savedUserId);
+    verify(userActivityService).synchronizeUserActivityToMongo(savedUserId);
   }
 
   @Test

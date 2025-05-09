@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.activity.UserActivityService;
 import com.sprint.monew.domain.interest.dto.InterestCreateRequest;
 import com.sprint.monew.domain.interest.dto.InterestDto;
 import com.sprint.monew.domain.interest.dto.InterestSearchRequest;
@@ -56,6 +57,9 @@ class InterestServiceTest {
 
   @Mock
   private UserRepository userRepository;
+
+  @Mock
+  private UserActivityService userActivityService;
 
   @Mock
   private SubscriptionRepository subscriptionRepository;
