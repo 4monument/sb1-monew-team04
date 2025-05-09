@@ -90,7 +90,7 @@ public class CommentService {
     commentRepository.save(comment);
 
     // 활동 내역 저장
-    userActivityService.updateUserActivity(userId);
+    userActivityService.synchronizeUserActivityToMongo(userId);
 
     return CommentDto.from(comment, false);
   }
@@ -121,7 +121,7 @@ public class CommentService {
     notificationRepository.save(notification);
 
     //활동 내역 저장
-    userActivityService.updateUserActivity(userId);
+    userActivityService.synchronizeUserActivityToMongo(userId);
 
     long commentLikeCount = likeRepository.countByComment(comment);
     return CommentLikeDto.from(like, commentLikeCount);
@@ -130,6 +130,7 @@ public class CommentService {
   //좋아요 취소 메서드
   public void unlikeComment(UUID commentId, UUID userId) {
     likeRepository.findByComment_IdAndUser_Id(commentId, userId).ifPresent(likeRepository::delete);
+    userActivityService.synchronizeUserActivityToMongo(userId);
   }
 
   //댓글 내용 수정 메서드
