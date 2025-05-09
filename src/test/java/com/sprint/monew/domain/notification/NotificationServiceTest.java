@@ -412,14 +412,14 @@ class NotificationServiceTest {
       notification2.setCreatedAt(Instant.now());
       notification2.setUpdatedAt(Instant.now());
 
+      setField(notification1, "id", notificationId1);
+      setField(notification2, "id", notificationId2);
+
       UUID cursor = notification2.getId();
       Instant afterAt = notification2.getCreatedAt();
 
       NotificationSearchRequest request = new NotificationSearchRequest(cursor, afterAt, 1);
       PageRequest pageRequest = PageRequest.of(0, request.limit() + 1);
-
-      setField(notification1, "id", notificationId1);
-      setField(notification2, "id", notificationId2);
 
       expectNotifications.add(notification1);
       expectNotifications.add(notification2);
