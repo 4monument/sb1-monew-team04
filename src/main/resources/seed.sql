@@ -199,3 +199,85 @@ INTO "users_interests" ("id", "user_id", "interest_id", "created_at")
 SELECT gen_random_uuid(), u_hoyeon.user_id, i_tech.interest_id, now()
 FROM u_hoyeon,
      i_tech;
+
+INSERT INTO "users" ("id", "email", "nickname", "password")
+VALUES ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'jiyoon@example.com', '지윤', 'hashed_pw3'),
+       ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'hyunwoo@example.com', '현우', 'hashed_pw4');
+
+WITH u3 AS (SELECT id AS user_id FROM users WHERE email = 'jiyoon@example.com'),
+     u4 AS (SELECT id AS user_id FROM users WHERE email = 'hyunwoo@example.com'),
+     i1 AS (SELECT id AS interest_id FROM interests WHERE name = '기술'),
+     i2 AS (SELECT id AS interest_id FROM interests WHERE name = '건강')
+
+INSERT INTO "users_interests" ("id", "user_id", "interest_id", "created_at")
+SELECT gen_random_uuid(), u3.user_id, i1.interest_id, now() FROM u3, i1
+UNION
+SELECT gen_random_uuid(), u4.user_id, i2.interest_id, now() FROM u4, i2;
+
+INSERT INTO "articles" ("id", "source", "source_url", "title", "summary", "publish_date", "created_at")
+VALUES (gen_random_uuid(), 'NAVER', 'https://site.com/future-tech', '미래 기술 트렌드', '다가오는 10년을 이끌 기술들', now(), now()),
+       (gen_random_uuid(), 'NAVER', 'https://site.com/fitness-life', '운동이 삶에 미치는 영향', '규칙적인 운동이 신체와 정신에 끼치는 긍정적 영향', now(), now());
+
+WITH a6 AS (SELECT id AS article_id FROM articles WHERE title = '미래 기술 트렌드'),
+     a7 AS (SELECT id AS article_id FROM articles WHERE title = '운동이 삶에 미치는 영향'),
+     i1 AS (SELECT id AS interest_id FROM interests WHERE name = '기술'),
+     i2 AS (SELECT id AS interest_id FROM interests WHERE name = '건강')
+
+INSERT INTO "articles_interests" ("id", "article_id", "interest_id", "created_at")
+SELECT gen_random_uuid(), a6.article_id, i1.interest_id, now() FROM a6, i1
+UNION
+SELECT gen_random_uuid(), a7.article_id, i2.interest_id, now() FROM a7, i2;
+
+INSERT INTO "users" ("id", "email", "nickname", "password")
+VALUES
+    ('00000000-0000-0000-0000-000000000001', 'user01@example.com', '유저01', 'hashed_pw01'),
+    ('00000000-0000-0000-0000-000000000002', 'user02@example.com', '유저02', 'hashed_pw02'),
+    ('00000000-0000-0000-0000-000000000003', 'user03@example.com', '유저03', 'hashed_pw03'),
+    ('00000000-0000-0000-0000-000000000004', 'user04@example.com', '유저04', 'hashed_pw04'),
+    ('00000000-0000-0000-0000-000000000005', 'user05@example.com', '유저05', 'hashed_pw05'),
+    ('00000000-0000-0000-0000-000000000006', 'user06@example.com', '유저06', 'hashed_pw06'),
+    ('00000000-0000-0000-0000-000000000007', 'user07@example.com', '유저07', 'hashed_pw07'),
+    ('00000000-0000-0000-0000-000000000008', 'user08@example.com', '유저08', 'hashed_pw08'),
+    ('00000000-0000-0000-0000-000000000009', 'user09@example.com', '유저09', 'hashed_pw09'),
+    ('00000000-0000-0000-0000-000000000010', 'user10@example.com', '유저10', 'hashed_pw10'),
+    ('00000000-0000-0000-0000-000000000011', 'user11@example.com', '유저11', 'hashed_pw11'),
+    ('00000000-0000-0000-0000-000000000012', 'user12@example.com', '유저12', 'hashed_pw12'),
+    ('00000000-0000-0000-0000-000000000013', 'user13@example.com', '유저13', 'hashed_pw13'),
+    ('00000000-0000-0000-0000-000000000014', 'user14@example.com', '유저14', 'hashed_pw14'),
+    ('00000000-0000-0000-0000-000000000015', 'user15@example.com', '유저15', 'hashed_pw15'),
+    ('00000000-0000-0000-0000-000000000016', 'user16@example.com', '유저16', 'hashed_pw16'),
+    ('00000000-0000-0000-0000-000000000017', 'user17@example.com', '유저17', 'hashed_pw17'),
+    ('00000000-0000-0000-0000-000000000018', 'user18@example.com', '유저18', 'hashed_pw18'),
+    ('00000000-0000-0000-0000-000000000019', 'user19@example.com', '유저19', 'hashed_pw19'),
+    ('00000000-0000-0000-0000-000000000020', 'user20@example.com', '유저20', 'hashed_pw20'),
+    ('00000000-0000-0000-0000-000000000021', 'user21@example.com', '유저21', 'hashed_pw21'),
+    ('00000000-0000-0000-0000-000000000022', 'user22@example.com', '유저22', 'hashed_pw22'),
+    ('00000000-0000-0000-0000-000000000023', 'user23@example.com', '유저23', 'hashed_pw23'),
+    ('00000000-0000-0000-0000-000000000024', 'user24@example.com', '유저24', 'hashed_pw24'),
+    ('00000000-0000-0000-0000-000000000025', 'user25@example.com', '유저25', 'hashed_pw25'),
+    ('00000000-0000-0000-0000-000000000026', 'user26@example.com', '유저26', 'hashed_pw26'),
+    ('00000000-0000-0000-0000-000000000027', 'user27@example.com', '유저27', 'hashed_pw27'),
+    ('00000000-0000-0000-0000-000000000028', 'user28@example.com', '유저28', 'hashed_pw28'),
+    ('00000000-0000-0000-0000-000000000029', 'user29@example.com', '유저29', 'hashed_pw29'),
+    ('00000000-0000-0000-0000-000000000030', 'user30@example.com', '유저30', 'hashed_pw30'),
+    ('00000000-0000-0000-0000-000000000031', 'user31@example.com', '유저31', 'hashed_pw31'),
+    ('00000000-0000-0000-0000-000000000032', 'user32@example.com', '유저32', 'hashed_pw32'),
+    ('00000000-0000-0000-0000-000000000033', 'user33@example.com', '유저33', 'hashed_pw33'),
+    ('00000000-0000-0000-0000-000000000034', 'user34@example.com', '유저34', 'hashed_pw34'),
+    ('00000000-0000-0000-0000-000000000035', 'user35@example.com', '유저35', 'hashed_pw35'),
+    ('00000000-0000-0000-0000-000000000036', 'user36@example.com', '유저36', 'hashed_pw36'),
+    ('00000000-0000-0000-0000-000000000037', 'user37@example.com', '유저37', 'hashed_pw37'),
+    ('00000000-0000-0000-0000-000000000038', 'user38@example.com', '유저38', 'hashed_pw38'),
+    ('00000000-0000-0000-0000-000000000039', 'user39@example.com', '유저39', 'hashed_pw39'),
+    ('00000000-0000-0000-0000-000000000040', 'user40@example.com', '유저40', 'hashed_pw40'),
+    ('00000000-0000-0000-0000-000000000041', 'user41@example.com', '유저41', 'hashed_pw41'),
+    ('00000000-0000-0000-0000-000000000042', 'user42@example.com', '유저42', 'hashed_pw42'),
+    ('00000000-0000-0000-0000-000000000043', 'user43@example.com', '유저43', 'hashed_pw43'),
+    ('00000000-0000-0000-0000-000000000044', 'user44@example.com', '유저44', 'hashed_pw44'),
+    ('00000000-0000-0000-0000-000000000045', 'user45@example.com', '유저45', 'hashed_pw45'),
+    ('00000000-0000-0000-0000-000000000046', 'user46@example.com', '유저46', 'hashed_pw46'),
+    ('00000000-0000-0000-0000-000000000047', 'user47@example.com', '유저47', 'hashed_pw47'),
+    ('00000000-0000-0000-0000-000000000048', 'user48@example.com', '유저48', 'hashed_pw48'),
+    ('00000000-0000-0000-0000-000000000049', 'user49@example.com', '유저49', 'hashed_pw49'),
+    ('00000000-0000-0000-0000-000000000050', 'user50@example.com', '유저50', 'hashed_pw50');
+

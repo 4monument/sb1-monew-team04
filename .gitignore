@@ -240,3 +240,5 @@ gradle-app.setting
 
 # QueryDSL generated sources
 /src/main/generated/
+
+docker
