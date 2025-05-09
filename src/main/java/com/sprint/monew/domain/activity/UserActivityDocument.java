@@ -2,7 +2,7 @@ package com.sprint.monew.domain.activity;
 
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
 import com.sprint.monew.domain.comment.dto.CommentActivityDto;
-import com.sprint.monew.domain.comment.dto.CommentLikeDto;
+import com.sprint.monew.domain.comment.dto.CommentLikeActivityDto;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
 import jakarta.persistence.Id;
 import java.time.Instant;
@@ -40,7 +40,7 @@ public class UserActivityDocument {
   private List<CommentActivityDto> comments = new ArrayList<>();
 
   @Builder.Default
-  private List<CommentLikeDto> commentLikes = new ArrayList<>();
+  private List<CommentLikeActivityDto> commentLikes = new ArrayList<>();
 
   @Builder.Default
   private List<ArticleViewDto> articleViews = new ArrayList<>();

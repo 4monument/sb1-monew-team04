@@ -8,7 +8,7 @@ import com.sprint.monew.domain.article.articleview.QArticleView;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
 import com.sprint.monew.domain.comment.QComment;
 import com.sprint.monew.domain.comment.dto.CommentActivityDto;
-import com.sprint.monew.domain.comment.dto.CommentLikeDto;
+import com.sprint.monew.domain.comment.dto.CommentLikeActivityDto;
 import com.sprint.monew.domain.interest.QInterest;
 import com.sprint.monew.domain.interest.subscription.QSubscription;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
@@ -81,16 +81,16 @@ public class UserActivityQueryRepository {
         .fetch();
 
     // 4. 좋아요한 댓글
-    List<CommentLikeDto> likedComments = queryFactory.select(Projections.constructor(
-            CommentLikeDto.class,
+    List<CommentLikeActivityDto> likedComments = queryFactory.select(Projections.constructor(
+            CommentLikeActivityDto.class,
             likeSub.id,
-            likeSub.user.id,
             likeSub.createdAt,
             likeSub.comment.id,
             likeSub.comment.article.id,
+            likeSub.comment.user.id,
             likeSub.comment.user.nickname,
             likeSub.comment.content,
-            likeSub.comment.likes.size(),
+            likeSub.comment.likes.size().longValue(),
             likeSub.comment.createdAt))
         .from(likeSub)
         .where(likeSub.user.id.eq(userId))
