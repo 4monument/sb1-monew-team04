@@ -87,6 +87,7 @@ public class UserActivityQueryRepository {
             likeSub.createdAt,
             likeSub.comment.id,
             likeSub.comment.article.id,
+            likeSub.comment.article.title,
             likeSub.comment.user.id,
             likeSub.comment.user.nickname,
             likeSub.comment.content,
