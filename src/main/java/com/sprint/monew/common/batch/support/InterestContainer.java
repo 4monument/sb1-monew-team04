@@ -29,10 +29,15 @@ public class InterestContainer {
   }
 
   public ArticleApiDto filter(ArticleApiDto articleApiDto) {
-    if (isContainKeywords(articleApiDto.summary()) && isNewUrl(articleApiDto.sourceUrl())) {
+    if (isContainKeywords(articleApiDto.summary()) && isNewUrl(articleApiDto.sourceUrl())
+        && !isPhoto(articleApiDto.sourceUrl())) {
       return articleApiDto;
     }
     return null;
+  }
+
+  private boolean isPhoto(String sourceUrl) {
+    return sourceUrl.contains("photos");
   }
 
   private boolean isNewUrl(String sourceUrl) {
