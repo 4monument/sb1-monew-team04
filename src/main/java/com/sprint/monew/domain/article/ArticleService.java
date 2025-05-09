@@ -9,7 +9,7 @@ import com.sprint.monew.domain.article.articleview.ArticleViewRepository;
 import com.sprint.monew.domain.article.dto.ArticleDto;
 import com.sprint.monew.domain.article.dto.ArticleRestoreResultDto;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
-import com.sprint.monew.domain.article.dto.request.ArticleRequest;
+import com.sprint.monew.domain.article.dto.ArticleCondition;
 import com.sprint.monew.domain.article.exception.ArticleViewAlreadyExistException;
 import com.sprint.monew.domain.article.repository.ArticleRepository;
 import com.sprint.monew.domain.comment.repository.CommentRepository;
@@ -77,9 +77,9 @@ public class ArticleService {
 
   @Transactional(readOnly = true)
   public CursorPageResponseDto<ArticleDto> getArticles(
-      ArticleRequest articleRequest, Pageable pageable, UUID userId) {
-    Slice<ArticleDto> page = articleRepository.getArticles(articleRequest, userId, pageable);
-    Long totalElements = articleRepository.getArticleCount(articleRequest);
+      ArticleCondition articleCondition, Pageable pageable, UUID userId) {
+    Slice<ArticleDto> page = articleRepository.getArticles(articleCondition, userId, pageable);
+    Long totalElements = articleRepository.getArticleCount(articleCondition);
 
     List<ArticleDto> content = page.getContent();
     Sort sort = page.getSort();

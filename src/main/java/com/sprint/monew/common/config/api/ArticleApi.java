@@ -3,8 +3,8 @@ package com.sprint.monew.common.config.api;
 import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.article.dto.ArticleDto;
 import com.sprint.monew.domain.article.dto.ArticleRestoreResultDto;
+import com.sprint.monew.domain.article.dto.ArticleSortDirection;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
-import com.sprint.monew.domain.article.dto.request.ArticleRequest;
 import com.sprint.monew.global.error.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,7 +22,6 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -116,9 +115,15 @@ public interface ArticleApi {
           )
       )})
   ResponseEntity<CursorPageResponseDto<ArticleDto>> getArticles(
-      @ModelAttribute ArticleRequest articleRequest,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false) UUID interestId,
+      @RequestParam(required = false) List<String> sourceIn,
+      @RequestParam(required = false) Instant publishDateFrom,
+      @RequestParam(required = false) Instant publishDateTo,
+      @RequestParam(required = false) String cursor,
+      @RequestParam(required = false) Instant after,
       @RequestParam String orderBy,
-      @RequestParam String direction,
+      @RequestParam ArticleSortDirection direction,
       @RequestParam int limit,
       @RequestHeader("Monew-Request-User-ID") UUID userId
   );

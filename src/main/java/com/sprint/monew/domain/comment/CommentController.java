@@ -5,7 +5,7 @@ import com.sprint.monew.common.util.CursorPageResponseDto;
 import com.sprint.monew.domain.comment.dto.CommentDto;
 import com.sprint.monew.domain.comment.dto.CommentLikeDto;
 import com.sprint.monew.domain.comment.dto.request.CommentRegisterRequest;
-import com.sprint.monew.domain.comment.dto.request.CommentRequest;
+import com.sprint.monew.domain.comment.dto.CommentCondition;
 import com.sprint.monew.domain.comment.dto.request.CommentUpdateRequest;
 import java.time.Instant;
 import java.util.UUID;
@@ -43,8 +43,8 @@ public class CommentController implements CommentApi {
   ) {
     PageRequest pageRequest = PageRequest
         .of(0, limit, Direction.fromString(direction), orderBy);
-    CommentRequest commentRequest = new CommentRequest(articleId, cursor, after);
-    return ResponseEntity.ok(commentService.getComments(commentRequest, userId, pageRequest));
+    CommentCondition commentCondition = new CommentCondition(articleId, cursor, after);
+    return ResponseEntity.ok(commentService.getComments(commentCondition, userId, pageRequest));
   }
 
   @PostMapping

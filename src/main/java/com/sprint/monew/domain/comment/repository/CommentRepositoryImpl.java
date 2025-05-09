@@ -11,7 +11,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sprint.monew.domain.comment.dto.CommentDto;
-import com.sprint.monew.domain.comment.dto.request.CommentRequest;
+import com.sprint.monew.domain.comment.dto.CommentCondition;
 import com.sprint.monew.domain.comment.like.QLike;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
   private final JPAQueryFactory jpaQueryFactory;
 
   @Override
-  public Slice<CommentDto> getComments(CommentRequest condition, UUID userId, Pageable pageable) {
+  public Slice<CommentDto> getComments(CommentCondition condition, UUID userId, Pageable pageable) {
     QLike likeAll = new QLike("likeAll");
     QLike likeMe = new QLike("likeMe");
 
@@ -71,7 +71,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
   }
 
   private BooleanExpression articleIdEq(UUID articleId) {
-    return article.id.eq(articleId);
+    return articleId == null ? null : article.id.eq(articleId);
   }
 
   private BooleanExpression createdAtCursor(String cursor, Sort sort) {
