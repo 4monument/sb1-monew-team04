@@ -2,7 +2,9 @@ package com.sprint.monew.domain.comment.like;
 
 import com.sprint.monew.domain.comment.Comment;
 import com.sprint.monew.domain.user.User;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,11 +18,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @Setter
 @Table(name = "likes")
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 public class Like {
 
@@ -37,7 +41,7 @@ public class Like {
   private Comment comment;
 
   @CreatedDate
-  @JoinColumn(name = "created_at", nullable = false, updatable = false)
+  @Column(nullable = false, updatable = false)
   private Instant createdAt;
 
   public Like(User user, Comment comment) {

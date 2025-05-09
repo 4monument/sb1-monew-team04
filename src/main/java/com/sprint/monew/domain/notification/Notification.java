@@ -67,6 +67,8 @@ public class Notification {
     this.resourceType = resourceType;
     this.content = content;
     this.confirmed = false;
+    this.createdAt = Instant.now();
+    this.updatedAt = this.createdAt;
   }
 
   public void confirm() {

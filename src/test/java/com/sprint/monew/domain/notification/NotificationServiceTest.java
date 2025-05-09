@@ -24,6 +24,7 @@ import com.sprint.monew.domain.notification.repository.NotificationRepository;
 import com.sprint.monew.domain.user.User;
 import com.sprint.monew.domain.user.UserRepository;
 import com.sprint.monew.domain.user.exception.UserNotFoundException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -358,10 +359,10 @@ class NotificationServiceTest {
           ResourceType.INTEREST, interests.get(1).getName() + "와/과 관련된 기사가 " + 1 + "건 등록되었습니다.");
 
       notification1.setCreatedAt(Instant.now());
-      notification1.setUpdatedAt(Instant.now());
+      notification1.setUpdatedAt(notification1.getCreatedAt());
 
-      notification2.setCreatedAt(Instant.now());
-      notification2.setUpdatedAt(Instant.now());
+      notification2.setCreatedAt(Instant.now().plus(Duration.ofSeconds(1)));
+      notification2.setUpdatedAt(notification2.getCreatedAt());
 
       UUID notificationId1 = UUID.randomUUID();
       UUID notificationId2 = UUID.randomUUID();
@@ -407,19 +408,19 @@ class NotificationServiceTest {
       UUID notificationId2 = UUID.randomUUID();
 
       notification1.setCreatedAt(Instant.now());
-      notification1.setUpdatedAt(Instant.now());
+      notification1.setUpdatedAt(notification1.getCreatedAt());
 
-      notification2.setCreatedAt(Instant.now());
-      notification2.setUpdatedAt(Instant.now());
+      notification2.setCreatedAt(Instant.now().plus(Duration.ofSeconds(1)));
+      notification2.setUpdatedAt(notification2.getCreatedAt());
+
+      setField(notification1, "id", notificationId1);
+      setField(notification2, "id", notificationId2);
 
       UUID cursor = notification2.getId();
       Instant afterAt = notification2.getCreatedAt();
 
       NotificationSearchRequest request = new NotificationSearchRequest(cursor, afterAt, 1);
       PageRequest pageRequest = PageRequest.of(0, request.limit() + 1);
-
-      setField(notification1, "id", notificationId1);
-      setField(notification2, "id", notificationId2);
 
       expectNotifications.add(notification1);
       expectNotifications.add(notification2);
