@@ -8,7 +8,7 @@ import com.sprint.monew.domain.article.repository.ArticleRepository;
 import com.sprint.monew.domain.comment.dto.CommentDto;
 import com.sprint.monew.domain.comment.dto.CommentLikeDto;
 import com.sprint.monew.domain.comment.dto.request.CommentRegisterRequest;
-import com.sprint.monew.domain.comment.dto.request.CommentRequest;
+import com.sprint.monew.domain.comment.dto.CommentCondition;
 import com.sprint.monew.domain.comment.dto.request.CommentUpdateRequest;
 import com.sprint.monew.domain.comment.exception.CommentNotFoundException;
 import com.sprint.monew.domain.comment.exception.CommentNotOwnedException;
@@ -47,8 +47,7 @@ public class CommentService {
   private final UserActivityService userActivityService;
 
   //댓글 조회 메서드
-  public CursorPageResponseDto<CommentDto> getComments(CommentRequest request, UUID userId,
-      Pageable pageable) {
+  public CursorPageResponseDto<CommentDto> getComments(CommentCondition request, UUID userId, Pageable pageable) {
     Slice<CommentDto> page = commentRepository.getComments(request, userId, pageable);
     long totalElement = commentRepository.countByArticle_Id(request.articleId());
 

@@ -7,7 +7,7 @@ import com.sprint.monew.common.config.TestQuerydslConfig;
 import com.sprint.monew.domain.article.Article;
 import com.sprint.monew.domain.article.Article.Source;
 import com.sprint.monew.domain.comment.dto.CommentDto;
-import com.sprint.monew.domain.comment.dto.request.CommentRequest;
+import com.sprint.monew.domain.comment.dto.CommentCondition;
 import com.sprint.monew.domain.comment.like.Like;
 import com.sprint.monew.domain.comment.repository.CommentRepository;
 import com.sprint.monew.domain.comment.repository.CommentRepositoryImpl;
@@ -111,7 +111,7 @@ public class CommentRepositoryTest {
   @Test
   @DisplayName("cursor가 null이고 createdAt으로 내림차순 정렬")
   void getComments_sortByCreatedAtDescWithoutCursor() {
-    CommentRequest request = new CommentRequest(articleId, null, null);
+    CommentCondition request = new CommentCondition(articleId, null, null);
     PageRequest pageRequest = PageRequest.of(0, 3, Direction.DESC, "createdAt");
 
     Slice<CommentDto> page = commentRepository.getComments(request, userId, pageRequest);
@@ -128,7 +128,7 @@ public class CommentRepositoryTest {
   @Test
   @DisplayName("cursor가 null이고 createdAt으로 오름차순 정렬")
   void getComments_sortByCreatedAtAscWithoutCursor() {
-    CommentRequest request = new CommentRequest(articleId, null, null);
+    CommentCondition request = new CommentCondition(articleId, null, null);
     PageRequest pageRequest = PageRequest.of(0, 3, Direction.ASC, "createdAt");
 
     Slice<CommentDto> page = commentRepository.getComments(request, userId, pageRequest);
@@ -145,7 +145,7 @@ public class CommentRepositoryTest {
   @Test
   @DisplayName("cursor가 null이고 likeCount로 내림차순 정렬")
   void getComments_sortByLikeCountDescWithoutCursor() {
-    CommentRequest request = new CommentRequest(articleId, null, null);
+    CommentCondition request = new CommentCondition(articleId, null, null);
     PageRequest pageRequest = PageRequest.of(0, 3, Direction.DESC, "likeCount");
 
     Slice<CommentDto> page = commentRepository.getComments(request, userId, pageRequest);
@@ -162,7 +162,7 @@ public class CommentRepositoryTest {
   @Test
   @DisplayName("cursor가 null이고 likeCount로 오름차순 정렬")
   void getComments_sortByLikeCountAscWithoutCursor() {
-    CommentRequest request = new CommentRequest(articleId, null, null);
+    CommentCondition request = new CommentCondition(articleId, null, null);
     PageRequest pageRequest = PageRequest.of(0, 3, Direction.ASC, "likeCount");
 
     Slice<CommentDto> page = commentRepository.getComments(request, userId, pageRequest);
@@ -179,7 +179,7 @@ public class CommentRepositoryTest {
   @Test
   @DisplayName("cursor가 createdAt이고 내림차순 정렬")
   void getComments_sortByCreatedAtDesc() {
-    CommentRequest request = new CommentRequest(articleId, createdAtCursorComment2.toString(),
+    CommentCondition request = new CommentCondition(articleId, createdAtCursorComment2.toString(),
         createdAtCursorComment2);
     PageRequest pageRequest = PageRequest.of(0, 3, Direction.DESC, "createdAt");
 
@@ -197,7 +197,7 @@ public class CommentRepositoryTest {
   @Test
   @DisplayName("cursor가 createdAt이고 오름차순 정렬")
   void getComments_sortByCreatedAtAsc() {
-    CommentRequest request = new CommentRequest(articleId, createdAtCursorComment2.toString(),
+    CommentCondition request = new CommentCondition(articleId, createdAtCursorComment2.toString(),
         createdAtCursorComment2);
     PageRequest pageRequest = PageRequest.of(0, 3, Direction.ASC, "createdAt");
 
@@ -215,7 +215,7 @@ public class CommentRepositoryTest {
   @Test
   @DisplayName("cursor가 likeCount이고 내림차순 정렬")
   void getComments_sortByLikeCountDesc() {
-    CommentRequest request = new CommentRequest(articleId, String.valueOf(likeCountCursor),
+    CommentCondition request = new CommentCondition(articleId, String.valueOf(likeCountCursor),
         createdAtCursorComment2.plusSeconds(2000));
     PageRequest pageRequest = PageRequest.of(0, 3, Direction.DESC, "likeCount");
 
@@ -233,7 +233,7 @@ public class CommentRepositoryTest {
   @Test
   @DisplayName("cursor가 likeCount이고 오름차순 정렬")
   void getComments_sortByLikeCountAsc() {
-    CommentRequest request = new CommentRequest(articleId, String.valueOf(1L), createdAtCursorComment2.plusSeconds(2000));
+    CommentCondition request = new CommentCondition(articleId, String.valueOf(1L), createdAtCursorComment2.plusSeconds(2000));
     PageRequest pageRequest = PageRequest.of(0, 3, Direction.ASC, "likeCount");
 
     Slice<CommentDto> page = commentRepository.getComments(request, userId, pageRequest);

@@ -2,10 +2,11 @@ package com.sprint.monew.domain.article;
 
 import com.sprint.monew.common.config.api.ArticleApi;
 import com.sprint.monew.common.util.CursorPageResponseDto;
+import com.sprint.monew.domain.article.dto.ArticleCondition;
 import com.sprint.monew.domain.article.dto.ArticleDto;
 import com.sprint.monew.domain.article.dto.ArticleRestoreResultDto;
+import com.sprint.monew.domain.article.dto.ArticleSortDirection;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
-import com.sprint.monew.domain.article.dto.request.ArticleRequest;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -20,7 +21,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -47,14 +47,22 @@ public class ArticleController implements ArticleApi {
 
   @GetMapping
   public ResponseEntity<CursorPageResponseDto<ArticleDto>> getArticles(
-      @ModelAttribute ArticleRequest articleRequest,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false) UUID interestId,
+      @RequestParam(required = false) List<String> sourceIn,
+      @RequestParam(required = false) Instant publishDateFrom,
+      @RequestParam(required = false) Instant publishDateTo,
+      @RequestParam(required = false) String cursor,
+      @RequestParam(required = false) Instant after,
       @RequestParam String orderBy,
-      @RequestParam String direction,
+      @RequestParam ArticleSortDirection direction,
       @RequestParam int limit,
       @RequestHeader("Monew-Request-User-ID") UUID userId
   ) {
-    PageRequest pageRequest = PageRequest.of(0, limit, Direction.fromString(direction), orderBy);
-    CursorPageResponseDto<ArticleDto> response = articleService.getArticles(articleRequest,
+    ArticleCondition articleCondition = new ArticleCondition(
+        keyword, interestId, sourceIn, publishDateFrom, publishDateTo, cursor, after);
+    PageRequest pageRequest = PageRequest.of(0, limit, Direction.fromString(direction.name()), orderBy);
+    CursorPageResponseDto<ArticleDto> response = articleService.getArticles(articleCondition,
         pageRequest, userId);
     return ResponseEntity.ok(response);
   }

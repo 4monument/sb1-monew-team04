@@ -4,6 +4,7 @@ package com.sprint.monew.domain.notification;
 import com.sprint.monew.domain.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -18,14 +19,16 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @Setter
 @Table(name = "notifications")
 @Entity
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class Notification {
 
   @Id
@@ -47,8 +50,8 @@ public class Notification {
   @Column(nullable = false)
   private String content;
 
-  @CreationTimestamp
-  @Column(nullable = false)
+  @CreatedDate
+  @Column(nullable = false, updatable = false)
   private Instant createdAt;
 
   @LastModifiedDate
@@ -63,13 +66,10 @@ public class Notification {
     this.resourceId = resourceId;
     this.resourceType = resourceType;
     this.content = content;
-    this.createdAt = Instant.now();
-    this.updatedAt = createdAt;
     this.confirmed = false;
   }
 
-  public void confirm(Instant updatedAt) {
+  public void confirm() {
     this.confirmed = true;
-    this.updatedAt = updatedAt;
   }
 }

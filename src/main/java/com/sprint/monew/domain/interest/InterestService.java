@@ -131,6 +131,14 @@ public class InterestService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> UserNotFoundException.withId(userId));
 
+    Subscription subscription = subscriptionRepository.findByUserAndInterest(user, interest)
+        .orElse(null);
+
+    if (subscription != null) {
+      return SubscriptionDto.from(subscription,
+          subscriptionRepository.countDistinctByInterestId(interestId));
+    }
+
     Subscription subscribe = new Subscription(user, interest);
     subscriptionRepository.save(subscribe);
 

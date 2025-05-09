@@ -13,7 +13,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sprint.monew.domain.article.articleview.QArticleView;
 import com.sprint.monew.domain.article.dto.ArticleDto;
-import com.sprint.monew.domain.article.dto.request.ArticleRequest;
+import com.sprint.monew.domain.article.dto.ArticleCondition;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,16 +30,16 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public Slice<ArticleDto> getArticles(ArticleRequest condition, UUID userId, Pageable pageable) {
+  public Slice<ArticleDto> getArticles(ArticleCondition condition, UUID userId, Pageable pageable) {
     QArticleView viewAll = new QArticleView("viewAll");
     QArticleView viewMe = new QArticleView("viewMe");
     List<ArticleDto> result = queryFactory
         .select(Projections.constructor(
-            ArticleDto.class, article.id, article.createdAt, article.source, article.sourceUrl, article.title,
+            ArticleDto.class, article.id, article.createdAt, article.source.stringValue(), article.sourceUrl, article.title,
             article.publishDate, article.summary, comment.countDistinct(), viewAll.countDistinct(), viewMe.id.isNotNull())
         )
         .from(article)
-        .leftJoin(article).on(comment.article.eq(article))
+        .leftJoin(comment).on(comment.article.eq(article))
         .leftJoin(article.articleViews, viewAll)
         .leftJoin(article.articleViews, viewMe).on(viewMe.user.id.eq(userId))
         .leftJoin(article.articleInterests, articleInterest)
@@ -55,7 +55,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
         )
         .groupBy(
             article.id, article.createdAt, article.source, article.sourceUrl,
-            article.title, article.publishDate, article.summary
+            article.title, article.publishDate, article.summary, viewMe.id
         )
         .having(
             commentCountCursor(condition.cursor(), condition.after(), pageable.getSort()),
@@ -80,11 +80,11 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
         .fetch();
   }
 
-  public Long getArticleCount(ArticleRequest condition) {
+  public Long getArticleCount(ArticleCondition condition) {
     return queryFactory
         .select(article.id.countDistinct())
         .from(article)
-        .leftJoin(article, articleInterest.article)
+        .leftJoin(article.articleInterests, articleInterest)
         .leftJoin(articleInterest.interest, interest)
         .where(
             article.deleted.isFalse(),

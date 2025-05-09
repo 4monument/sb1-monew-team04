@@ -14,7 +14,6 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +23,7 @@ import org.springframework.stereotype.Component;
 public class ArticleCollectScheduler {
 
   @Resource(name = "articleCollectJob")
-  private Job articleCoolectJob;
+  private Job articleCollectJob;
 
   @Resource(name = "notificationCreateJob")
   private Job notificationCreateJob;
@@ -40,7 +39,7 @@ public class ArticleCollectScheduler {
         .toJobParameters();
 
     log.info("Article collection start");
-    JobExecution jobExecution = jobLauncher.run(articleCoolectJob, jobParameters);
+    JobExecution jobExecution = jobLauncher.run(articleCollectJob, jobParameters);
     jobExecution.getExecutionContext().remove(ARTICLE_IDS.getKey());
 
     log.info("Notification create start");
