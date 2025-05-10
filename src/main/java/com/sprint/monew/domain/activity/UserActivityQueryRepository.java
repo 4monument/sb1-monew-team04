@@ -1,14 +1,14 @@
 package com.sprint.monew.domain.activity;
 
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sprint.monew.domain.article.QArticle;
 import com.sprint.monew.domain.article.articleview.QArticleView;
 import com.sprint.monew.domain.article.dto.ArticleViewDto;
 import com.sprint.monew.domain.comment.QComment;
-import com.sprint.monew.domain.comment.dto.CommentDto;
+import com.sprint.monew.domain.comment.dto.CommentActivityDto;
+import com.sprint.monew.domain.comment.dto.CommentLikeActivityDto;
 import com.sprint.monew.domain.interest.QInterest;
 import com.sprint.monew.domain.interest.subscription.QSubscription;
 import com.sprint.monew.domain.interest.subscription.SubscriptionDto;
@@ -64,19 +64,15 @@ public class UserActivityQueryRepository {
         .fetch();
 
     // 3. 작성한 댓글
-    List<CommentDto> comments = queryFactory.select(Projections.constructor(
-            CommentDto.class,
+    List<CommentActivityDto> comments = queryFactory.select(Projections.constructor(
+            CommentActivityDto.class,
             comment.id,
             comment.article.id,
+            comment.article.title,
             comment.user.id,
             comment.user.nickname,
             comment.content,
             comment.likes.size(),
-            JPAExpressions.selectOne()
-                .from(likeSub)
-                .where(likeSub.comment.id.eq(comment.id)
-                    .and(likeSub.user.id.eq(userId)))
-                .exists(),
             comment.createdAt))
         .from(comment)
         .where(comment.user.id.eq(userId))
@@ -85,17 +81,17 @@ public class UserActivityQueryRepository {
         .fetch();
 
     // 4. 좋아요한 댓글
-    List<CommentDto> likedComments = queryFactory.select(Projections.constructor(
-            CommentDto.class,
+    List<CommentLikeActivityDto> likedComments = queryFactory.select(Projections.constructor(
+            CommentLikeActivityDto.class,
+            likeSub.id,
+            likeSub.createdAt,
             likeSub.comment.id,
             likeSub.comment.article.id,
+            likeSub.comment.article.title,
             likeSub.comment.user.id,
             likeSub.comment.user.nickname,
             likeSub.comment.content,
-            likeSub.comment.likes.size(),
-            // 좋아요 수
-            Expressions.constant(true),
-            // likedByMe는 true 고정
+            likeSub.comment.likes.size().longValue(),
             likeSub.comment.createdAt))
         .from(likeSub)
         .where(likeSub.user.id.eq(userId))
