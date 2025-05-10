@@ -10,7 +10,6 @@ COPY gradlew ./gradlew
 COPY gradle/wrapper/gradle-wrapper.jar ./gradle/wrapper/gradle-wrapper.jar
 COPY gradle/wrapper/gradle-wrapper.properties ./gradle/wrapper/gradle-wrapper.properties
 
-
 RUN dos2unix ./gradlew && chmod +x ./gradlew
 
 # build 설정 복사
@@ -34,6 +33,9 @@ WORKDIR /app
 ENV PROJECT_NAME=monew \
     PROJECT_VERSION=0.0.1-M1 \
     JVM_OPTS="-Xmx192m -Xms92m -XX:MaxMetaspaceSize=192m -XX:+UseSerialGC"
+
+# /tmp/backup 디렉토리 생성 및 권한 설정
+RUN mkdir -p /tmp/backup && chmod 777 /tmp/backup
 
 # 빌드된 JAR만 복사
 COPY --from=builder /app/build/libs/monew-0.0.1-SNAPSHOT.jar app.jar
