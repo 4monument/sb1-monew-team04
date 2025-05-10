@@ -131,6 +131,17 @@ public class ArticleBackupConfig {
    */
   private String getNowLocalPath() {
     LocalDateTime now = LocalDateTime.now();
-    return String.format("/tmp/backup/%s-%s.csv", now.toLocalDate(), now.getHour());
+    String dirPath = "backup";
+
+    File dir = new File(dirPath);
+    if (!dir.exists()) {
+      boolean created = dir.mkdirs();
+      if (!created) {
+        log.warn("backup 디렉토리 생성 실패");
+      }
+    }
+
+    return String.format("%s/%s-%s.csv", dirPath, now.toLocalDate(), now.getHour());
   }
+
 }
