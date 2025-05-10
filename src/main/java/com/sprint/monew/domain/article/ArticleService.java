@@ -37,6 +37,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -108,7 +109,7 @@ public class ArticleService {
     );
   }
 
-
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public List<ArticleRestoreResultDto> restoreArticle(Instant from, Instant to)
       throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
 
