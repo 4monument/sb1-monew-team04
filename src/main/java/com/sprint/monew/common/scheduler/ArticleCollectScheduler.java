@@ -30,7 +30,7 @@ public class ArticleCollectScheduler {
 
   private final JobLauncher jobLauncher;
 
-  @Scheduled(cron = "0 */5 * * * ?", zone = "Asia/Seoul")
+  @Scheduled(cron = "0 0 * * * ?", zone = "Asia/Seoul")
   public void collectArticles()
       throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
 
