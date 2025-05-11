@@ -17,9 +17,12 @@ spring:
     caffeine:
       spec: maximumSize=10000,expireAfterAccess=1m
 
+  flyway:
+    baseline-on-migrate: true
+
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     show-sql: true
     open-in-view: false
   #배치
