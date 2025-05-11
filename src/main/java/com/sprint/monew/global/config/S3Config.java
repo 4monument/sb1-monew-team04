@@ -25,13 +25,13 @@ public class S3Config {
   @Primary
   @Bean
   public S3Client s3Client() {
-    AwsBasicCredentials credentials = getAwsBasicCredentials();  // 업로드시 삭제
-    Region s3Region = Region.of(s3Properties.region()); // 업로드시 삭제
+//    AwsBasicCredentials credentials = getAwsBasicCredentials();  // 업로드시 삭제
+//    Region s3Region = Region.of(s3Properties.region()); // 업로드시 삭제
 
     return S3Client.builder()
-        .credentialsProvider(StaticCredentialsProvider.create(credentials)) //업로드시 삭제
-        .region(s3Region) // 업로드시 삭제
-//        .region(Region.of(s3Properties.region()))
+//        .credentialsProvider(StaticCredentialsProvider.create(credentials)) //업로드시 삭제
+//        .region(s3Region) // 업로드시 삭제
+        .region(Region.of(s3Properties.region()))
         .build();
   }
 
