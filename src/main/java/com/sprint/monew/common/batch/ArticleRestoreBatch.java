@@ -64,8 +64,6 @@ public class ArticleRestoreBatch {
   @jakarta.annotation.Resource(name =  "webApplicationContext")
   private final ResourceLoader resourceLoader;
   private final ArticleRepository articleRepository;
-    @Autowired
-    private ResourceResolver resourceResolver;
 
     @Bean
   public Job articleRestoreJob(
