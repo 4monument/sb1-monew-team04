@@ -79,7 +79,10 @@ public class ArticleChunkConfig {
   @StepScope
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor(
       InterestContainer interests) {
-    return interests::toArticleWithRelevantInterests;
+    return articleApiDto -> {
+      ArticleApiDto unEscapedArticleApiDto = ArticleApiDto.unEscapedArticleApiDto(articleApiDto);
+      return interests.toArticleWithRelevantInterests(unEscapedArticleApiDto);
+    };
   }
 
   /**
