@@ -9,7 +9,6 @@ public enum CustomExecutionContextKeys {
   NAVER_ARTICLE_DTOS("naverArticleDtos"),
   CHOSUN_ARTICLE_DTOS("chosunArticleDtos"),
   HANKYUNG_ARTICLE_DTOS("hankyungArticleDtos"),
-  DB_SOURCEURS("dbSourceUrls"),
   ARTICLE_IDS("articleIds");
 
   private final String key;

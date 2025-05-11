@@ -18,6 +18,8 @@ spring:
       uri: ${MONGODB_URI}
       database: ${MONGODB_DATABASE}
 
+batchsiz
+
 logging:
   level:
     com.sprint.monew: info

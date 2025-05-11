@@ -14,7 +14,6 @@ public record ArticleWithInterestList(
     String summary,
     List<Interest> interestList) {
 
-  // JDBC Writer 사용 시
   public Article toArticleWithId() {
     return Article.createWithId(
         source,
