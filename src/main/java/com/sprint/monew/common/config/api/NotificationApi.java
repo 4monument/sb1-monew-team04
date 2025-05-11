@@ -65,7 +65,7 @@ public interface NotificationApi {
           )
       )})
   ResponseEntity<CursorPageResponseDto> getNotifications(
-      @Parameter(description = "커서 값") UUID cursor,
+      @Parameter(description = "커서 값") Instant cursor,
       @Parameter(description = "보조 커서(createdAt) 값") @RequestParam Instant after,
       @Parameter(description = "커서 페이지 크기", example = "50") @RequestParam @Min(1) @Max(100) Integer limit,
       @Parameter(description = "요청자 ID") @RequestHeader("Monew-Request-User-ID") UUID userId);

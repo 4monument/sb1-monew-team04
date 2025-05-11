@@ -180,8 +180,8 @@ public class ArticleCollectBatch {
   @Bean
   public TaskExecutor taskExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    executor.setCorePoolSize(5);
-    executor.setMaxPoolSize(10);
+    executor.setCorePoolSize(3);
+    executor.setMaxPoolSize(5);
     executor.setThreadNamePrefix("article-async-thread-");
     return executor;
   }

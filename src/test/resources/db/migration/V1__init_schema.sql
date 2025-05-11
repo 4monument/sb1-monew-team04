@@ -73,7 +73,8 @@ CREATE TABLE "likes"
     "id"         UUID PRIMARY KEY,
     "comment_id" UUID        NOT NULL,
     "user_id"    UUID        NOT NULL,
-    "created_at" TIMESTAMPTZ NOT NULL DEFAULT now()
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (comment_id, user_id)
 );
 
 CREATE TABLE "articles_interests"

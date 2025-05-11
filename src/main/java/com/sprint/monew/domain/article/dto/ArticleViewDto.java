@@ -23,7 +23,7 @@ public record ArticleViewDto(
     @Schema(description = "기사 제목")
     String articleTitle,
     @Schema(description = "기사 발행일")
-    Instant articlePublishDate,
+    Instant articlePublishedDate,
     @Schema(description = "기사 요약")
     String articleSummary,
     @Schema(description = "기사 댓글 수")

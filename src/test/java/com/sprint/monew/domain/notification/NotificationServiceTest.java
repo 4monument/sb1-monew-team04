@@ -385,7 +385,7 @@ class NotificationServiceTest {
           request, userId);
 
       //then
-      assertEquals(notification2.getId(), allNotifications.nextCursor());
+      assertEquals(notification2.getCreatedAt(), allNotifications.nextCursor());
       assertEquals(notification2.getCreatedAt(), allNotifications.nextAfter());
       assertTrue(allNotifications.hasNext());
 
@@ -416,7 +416,7 @@ class NotificationServiceTest {
       setField(notification1, "id", notificationId1);
       setField(notification2, "id", notificationId2);
 
-      UUID cursor = notification2.getId();
+      Instant cursor = notification2.getCreatedAt();
       Instant afterAt = notification2.getCreatedAt();
 
       NotificationSearchRequest request = new NotificationSearchRequest(cursor, afterAt, 1);
@@ -437,7 +437,7 @@ class NotificationServiceTest {
           request, userId);
 
       //then
-      assertEquals(notification1.getId(), allNotifications.nextCursor());
+      assertEquals(notification1.getCreatedAt(), allNotifications.nextCursor());
       assertEquals(notification1.getCreatedAt(), allNotifications.nextAfter());
       assertFalse(allNotifications.hasNext());
 
