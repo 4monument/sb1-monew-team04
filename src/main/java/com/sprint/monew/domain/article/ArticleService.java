@@ -125,14 +125,13 @@ public class ArticleService {
     log.info("Article Restore End");
     ExecutionContext jobContext = jobExecution.getExecutionContext();
     List<UUID> articleIds = (List<UUID>) jobContext.get(ARTICLE_IDS.getKey());
-    if (articleIds == null) {
-      throw new RuntimeException("ExecutionContext로부터 Article Ids를 가져오는 데 실패했습니다.");
-    }
+
+    long restoredArticleSize = articleIds == null ? 0 : articleIds.size();
 
     ArticleRestoreResultDto resultDto = new ArticleRestoreResultDto(
         Instant.now(),
         articleIds,
-        (long) articleIds.size()
+        restoredArticleSize
     );
     List<ArticleRestoreResultDto> result = List.of(resultDto);
     jobContext.remove(ARTICLE_IDS.getKey());
