@@ -64,12 +64,14 @@ public class InterestContainer {
       return null;
     }
 
+    ArticleApiDto escapedArticleApiDto = ArticleApiDto.toEscapedArticleApiDto(articleApiDto);
+
     return new ArticleWithInterestList(
-        articleApiDto.source(),
-        articleApiDto.sourceUrl(),
-        articleApiDto.title(),
-        articleApiDto.publishDate(),
-        articleApiDto.summary(),
+        escapedArticleApiDto.source(),
+        escapedArticleApiDto.sourceUrl(),
+        escapedArticleApiDto.title(),
+        escapedArticleApiDto.publishDate(),
+        escapedArticleApiDto.summary(),
         interestList
     );
   }

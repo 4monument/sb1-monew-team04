@@ -17,4 +17,18 @@ public record ArticleApiDto(
     String summary
 ) implements Serializable {
   private static final long serialVersionUID = 1L;
+
+  public static ArticleApiDto toEscapedArticleApiDto(ArticleApiDto dto){
+    String title = dto.title;
+    String summary = dto.summary;
+    title = title.replaceAll("\"", "^");
+    summary = summary.replaceAll("\"", "^");
+    return new ArticleApiDto(
+        dto.source,
+        dto.sourceUrl,
+        title,
+        dto.publishDate,
+        summary
+    );
+  }
 }
