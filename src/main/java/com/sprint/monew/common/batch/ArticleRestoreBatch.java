@@ -1,5 +1,6 @@
 package com.sprint.monew.common.batch;
 
+import io.awspring.cloud.s3.S3Resource;
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
 import com.sprint.monew.common.batch.support.InterestContainer;
 import com.sprint.monew.domain.article.Article.Source;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -31,13 +33,16 @@ import org.springframework.batch.item.file.ResourceAwareItemReaderItemStream;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.builder.MultiResourceItemReaderBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.web.servlet.resource.ResourceResolver;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -55,9 +60,14 @@ public class ArticleRestoreBatch {
   private final PlatformTransactionManager transactionManager;
   private final S3Client s3Client;
   private final S3ConfigProperties s3Properties;
-  private final ArticleRepository articleRepository;
 
-  @Bean
+  @jakarta.annotation.Resource(name =  "webApplicationContext")
+  private final ResourceLoader resourceLoader;
+  private final ArticleRepository articleRepository;
+    @Autowired
+    private ResourceResolver resourceResolver;
+
+    @Bean
   public Job articleRestoreJob(
       @Qualifier("articleRestoreStep") Step articleRestoreStep,
       @Qualifier("interestsAndSourceUrlsFetchStep") Step interestsAndSourceUrlsFetchStep,
@@ -204,14 +214,8 @@ public class ArticleRestoreBatch {
   private List<Resource> getS3InputStreamResources(List<S3Object> s3Objects) {
     List<Resource> resources = new ArrayList<>();
     for (S3Object s3Object : s3Objects) {
-
-      GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-          .bucket(s3Properties.bucket())
-          .key(s3Object.key())
-          .build();
-
-      ResponseInputStream<GetObjectResponse> ri = s3Client.getObject(getObjectRequest); // 리소스 세는 곳
-      resources.add(new InputStreamResource(ri));
+      String location = "s3://" + s3Properties.bucket() + "/" + s3Object.key();
+      resources.add(resourceLoader.getResource(location));
     }
     return resources;
   }
