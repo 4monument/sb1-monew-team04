@@ -1,6 +1,5 @@
 package com.sprint.monew.common.batch;
 
-import io.awspring.cloud.s3.S3Resource;
 import com.sprint.monew.common.batch.support.ArticleWithInterestList;
 import com.sprint.monew.common.batch.support.InterestContainer;
 import com.sprint.monew.domain.article.Article.Source;
@@ -15,7 +14,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -35,10 +33,10 @@ import org.springframework.batch.item.file.builder.MultiResourceItemReaderBuilde
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.PlatformTransactionManager;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
@@ -55,8 +53,7 @@ public class ArticleRestoreBatch {
   private final S3Client s3Client;
   private final S3ConfigProperties s3Properties;
 
-  @jakarta.annotation.Resource(name =  "webApplicationContext")
-  private final ResourceLoader resourceLoader;
+  private final ApplicationContext resourceLoader;
   private final ArticleRepository articleRepository;
 
   @Bean
@@ -152,6 +149,7 @@ public class ArticleRestoreBatch {
 
     Resource[] resourcesArray = resources.toArray(Resource[]::new);
     return new MultiResourceItemReaderBuilder<ArticleApiDto>()
+        .name("articleRestoreS3ItemReader")
         .resources(resourcesArray)
         .delegate(csvReader)
         .build();
@@ -218,7 +216,6 @@ public class ArticleRestoreBatch {
       ListObjectsV2Request v2Request = ListObjectsV2Request.builder()
           .bucket(s3Properties.bucket())
           .prefix(localDate + "/")
-          .encodingType("UTF-8")
           .build();
 
       ListObjectsV2Response v2Response = s3Client.listObjectsV2(v2Request);
