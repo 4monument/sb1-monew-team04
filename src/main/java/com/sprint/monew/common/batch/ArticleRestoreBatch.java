@@ -33,20 +33,14 @@ import org.springframework.batch.item.file.ResourceAwareItemReaderItemStream;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.builder.MultiResourceItemReaderBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.web.servlet.resource.ResourceResolver;
-import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.S3Object;
@@ -65,7 +59,7 @@ public class ArticleRestoreBatch {
   private final ResourceLoader resourceLoader;
   private final ArticleRepository articleRepository;
 
-    @Bean
+  @Bean
   public Job articleRestoreJob(
       @Qualifier("articleRestoreStep") Step articleRestoreStep,
       @Qualifier("interestsAndSourceUrlsFetchStep") Step interestsAndSourceUrlsFetchStep,
@@ -84,7 +78,7 @@ public class ArticleRestoreBatch {
   public Step interestsAndSourceUrlsFetchStep(InterestRepository interestRepository,
       InterestContainer interestContainer) {
 
-    return new StepBuilder("interestsFetchStep", jobRepository)
+    return new StepBuilder("interestsFetchStepRestore", jobRepository)
         .tasklet((contribution, chunkContext) -> {
 
           List<Interest> interests = interestRepository.findAll();
