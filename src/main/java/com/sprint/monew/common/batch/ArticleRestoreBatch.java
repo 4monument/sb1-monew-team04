@@ -161,6 +161,7 @@ public class ArticleRestoreBatch {
     String[] fieldNames = new String[]{"source", "sourceUrl", "title", "publishDate", "summary"};
     return new FlatFileItemReaderBuilder<ArticleApiDto>()
         .name("csvReader")
+        .linesToSkip(1)
         .delimited()
         .delimiter(",")
         .quoteCharacter('\"')
