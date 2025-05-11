@@ -46,10 +46,12 @@ public class ArticleBackupConfig {
   @Bean
   public Step localBackupArticlesStep(
       @Qualifier("backupContextReader") ItemReader<ArticleApiDto> backupArticlesContextReader,
+      @Qualifier("backupArticleProcessor") ItemProcessor<ArticleApiDto, ArticleApiDto> backupArticlesProcessor,
       @Qualifier("backupLocalArticlesWriter") FlatFileItemWriter<ArticleApiDto> backupLocalArticlesWriter) {
     return new StepBuilder("backupArticlesStep", jobRepository)
         .<ArticleApiDto, ArticleApiDto>chunk(200, transactionManager)
         .reader(backupArticlesContextReader)
+        .processor(backupArticlesProcessor)
         .writer(backupLocalArticlesWriter)
         .build();
   }
