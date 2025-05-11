@@ -34,8 +34,8 @@ public record ArticleApiDto(
   }
 
   public static ArticleApiDto unEscapedArticleApiDto(ArticleApiDto dto) {
-    String replacedSummary = dto.summary.replaceAll("^", "\"");
-    String replacedTitle = dto.title.replaceAll("^", "\"");
+    String replacedSummary = dto.summary.replaceAll("\\^", "\"");
+    String replacedTitle = dto.title.replaceAll("\\^", "\"");
 
     return new ArticleApiDto(
         dto.source,
