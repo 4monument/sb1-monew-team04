@@ -81,7 +81,7 @@ public interface InterestApi {
       ) @RequestParam String direction,
       @Parameter(description = "커서 값") UUID cursor,
       @Parameter(description = "보조 커서 값") @RequestParam Instant after,
-      @Parameter(description = "커서 페이지 크기", example = "50") @RequestParam @Min(1) @Max(100) Integer limit);
+      @Parameter(description = "커서 페이지 크기", example = "50") @RequestParam @Min(0) @Max(100) Integer limit);
 
   //관심사 등록
   @Operation(summary = "관심사 등록", description = "새로운 관심사를 등록합니다.")
