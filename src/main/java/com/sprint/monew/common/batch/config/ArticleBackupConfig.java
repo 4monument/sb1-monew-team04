@@ -14,6 +14,7 @@ import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
@@ -45,10 +46,12 @@ public class ArticleBackupConfig {
   @Bean
   public Step localBackupArticlesStep(
       @Qualifier("backupContextReader") ItemReader<ArticleApiDto> backupArticlesContextReader,
+      @Qualifier("backupArticleProcessor") ItemProcessor<ArticleApiDto, ArticleApiDto> backupArticlesProcessor,
       @Qualifier("backupLocalArticlesWriter") FlatFileItemWriter<ArticleApiDto> backupLocalArticlesWriter) {
     return new StepBuilder("backupArticlesStep", jobRepository)
         .<ArticleApiDto, ArticleApiDto>chunk(200, transactionManager)
         .reader(backupArticlesContextReader)
+        .processor(backupArticlesProcessor)
         .writer(backupLocalArticlesWriter)
         .build();
   }
@@ -75,6 +78,12 @@ public class ArticleBackupConfig {
 
     log.info("backup read start : dto size = {}", allDtos.size());
     return new ListItemReader<>(allDtos);
+  }
+
+  @Bean
+  @StepScope
+  public ItemProcessor<ArticleApiDto, ArticleApiDto> backupArticleProcessor() {
+    return ArticleApiDto::toEscapedArticleApiDto;
   }
 
   @Bean

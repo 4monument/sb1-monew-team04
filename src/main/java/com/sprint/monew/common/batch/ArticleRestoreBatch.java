@@ -33,15 +33,12 @@ import org.springframework.batch.item.file.builder.MultiResourceItemReaderBuilde
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.transaction.PlatformTransactionManager;
-import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.S3Object;
@@ -55,6 +52,8 @@ public class ArticleRestoreBatch {
   private final PlatformTransactionManager transactionManager;
   private final S3Client s3Client;
   private final S3ConfigProperties s3Properties;
+
+  private final ApplicationContext resourceLoader;
   private final ArticleRepository articleRepository;
 
   @Bean
@@ -76,7 +75,7 @@ public class ArticleRestoreBatch {
   public Step interestsAndSourceUrlsFetchStep(InterestRepository interestRepository,
       InterestContainer interestContainer) {
 
-    return new StepBuilder("interestsFetchStep", jobRepository)
+    return new StepBuilder("interestsFetchStepRestore", jobRepository)
         .tasklet((contribution, chunkContext) -> {
 
           List<Interest> interests = interestRepository.findAll();
@@ -150,6 +149,7 @@ public class ArticleRestoreBatch {
 
     Resource[] resourcesArray = resources.toArray(Resource[]::new);
     return new MultiResourceItemReaderBuilder<ArticleApiDto>()
+        .name("articleRestoreS3ItemReader")
         .resources(resourcesArray)
         .delegate(csvReader)
         .build();
@@ -160,6 +160,8 @@ public class ArticleRestoreBatch {
   public ResourceAwareItemReaderItemStream<ArticleApiDto> csvReader() {
     String[] fieldNames = new String[]{"source", "sourceUrl", "title", "publishDate", "summary"};
     return new FlatFileItemReaderBuilder<ArticleApiDto>()
+        .name("csvReader")
+        .linesToSkip(1)
         .delimited()
         .delimiter(",")
         .quoteCharacter('\"')
@@ -204,14 +206,9 @@ public class ArticleRestoreBatch {
   private List<Resource> getS3InputStreamResources(List<S3Object> s3Objects) {
     List<Resource> resources = new ArrayList<>();
     for (S3Object s3Object : s3Objects) {
-
-      GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-          .bucket(s3Properties.bucket())
-          .key(s3Object.key())
-          .build();
-
-      ResponseInputStream<GetObjectResponse> ri = s3Client.getObject(getObjectRequest); // 리소스 세는 곳
-      resources.add(new InputStreamResource(ri));
+      String location = "s3://" + s3Properties.bucket() + "/" + s3Object.key();
+      Resource resource = resourceLoader.getResource(location);
+      resources.add(resource);
     }
     return resources;
   }
@@ -222,7 +219,6 @@ public class ArticleRestoreBatch {
       ListObjectsV2Request v2Request = ListObjectsV2Request.builder()
           .bucket(s3Properties.bucket())
           .prefix(localDate + "/")
-          .encodingType("UTF-8")
           .build();
 
       ListObjectsV2Response v2Response = s3Client.listObjectsV2(v2Request);
@@ -230,5 +226,5 @@ public class ArticleRestoreBatch {
     }
     return s3Objects;
   }
-
 }
+

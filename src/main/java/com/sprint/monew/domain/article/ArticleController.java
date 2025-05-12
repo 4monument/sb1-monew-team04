@@ -70,8 +70,8 @@ public class ArticleController implements ArticleApi {
 
   @GetMapping("/restore")
   public ResponseEntity<List<ArticleRestoreResultDto>> restoreArticles(
-      @RequestParam Instant from,
-      @RequestParam Instant to
+      @RequestParam("from") Instant from,
+      @RequestParam("to") Instant to
   )
       throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
 
