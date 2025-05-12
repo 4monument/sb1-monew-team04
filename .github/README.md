@@ -44,7 +44,7 @@
 | 이름      | 담당 영역             | 구현 내용                                                                                                                                           |
 |---------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
 | **박유진** | 관심사, 알림           | - 관심사 등록/수정/삭제/조회 로직 <br> - 키워드 기반 뉴스 필터링 <br> - 구독 기반 알림 생성 및 확인/삭제 기능 <br> - 커서 기반 페이지네이션                                                     |
-| **이요한** | 배치, 백업/복구, 알림     | - Spring Batch 기반 뉴스 기사 수집 및 알림 자동화  <br> - AWS S3를 통한 기사 백업 및 복구 프로세스 구현 <br>- 알림 자동 삭제 배치 및 Spring Actuator로 모니터링                             |
+| **이요한** | 배치, 백업/복구, 알림     | - Spring Batch 기반 뉴스 기사 수집 및 알림 자동화  <br> - AWS S3를 통한 기사 백업 및 복구 프로세스 구현 <br>- 알림 자동 삭제 배치                             |
 | **장태준** | DB 관리, 활동 내역      | - PostgreSQL 및 테스트 DB 초기 설정 <br> - 사용자 활동 내역 설계 및 MongoDB 연동 <br> - 역정규화 모델 저장/조회 최적화                                                           |
 | **전성삼** | CI/CD, 인프라, 사용자관리 | - AWS ECS, CodeDeploy, S3 등 AWS 구성  <br> - GitHub Actions 기반 CI/CD 파이프라인 설계 <br> - Dockerfile, docker-compose.yml 구성 <br> - 사용자 등록/수정/삭제/로그인 로직 |
 | **허원재** | 뉴스 기사, 댓글         | - 뉴스 API/RSS 연동 및 키워드 기반 필터링  <br> - 댓글 등록/수정/삭제, 좋아요 기능 구현  <br>- 기사 상세에 댓글 리스트 및 정렬 적용                                                        |
@@ -91,6 +91,257 @@
 ## **파일 구조**
 
 ```
+./src
+|-- main
+|   |-- java
+|   |   `-- com
+|   |       `-- sprint
+|   |           `-- monew
+|   |               |-- MonewApplication.java
+|   |               |-- common
+|   |               |   |-- batch
+|   |               |   |   |-- ArticleCollectBatch.java
+|   |               |   |   |-- ArticleRestoreBatch.java
+|   |               |   |   |-- NotificationCreateBatch.java
+|   |               |   |   |-- NotificationDeleteBatch.java
+|   |               |   |   |-- config
+|   |               |   |   |   |-- ArticleApiCallTaskletConfig.java
+|   |               |   |   |   |-- ArticleBackupConfig.java
+|   |               |   |   |   |-- ArticleChunkConfig.java
+|   |               |   |   |   |-- CleanupListenerConfig.java
+|   |               |   |   |   `-- PromotionListenerConfig.java
+|   |               |   |   |-- support
+|   |               |   |   |   |-- ArticleInterestJdbc.java
+|   |               |   |   |   |-- ArticleWithInterestList.java
+|   |               |   |   |   |-- CustomExecutionContextKeys.java
+|   |               |   |   |   |-- InterestContainer.java
+|   |               |   |   |   `-- NotificationJdbc.java
+|   |               |   |   `-- temp
+|   |               |   |       `-- tempArticleCollect.java
+|   |               |   |-- config
+|   |               |   |   |-- SwaggerConfig.java
+|   |               |   |   |-- WebConfig.java
+|   |               |   |   `-- api
+|   |               |   |       |-- ArticleApi.java
+|   |               |   |       |-- CommentApi.java
+|   |               |   |       |-- InterestApi.java
+|   |               |   |       |-- NotificationApi.java
+|   |               |   |       |-- UserActivityApi.java
+|   |               |   |       `-- UserApi.java
+|   |               |   |-- scheduler
+|   |               |   |   |-- ArticleCollectScheduler.java
+|   |               |   |   |-- LogUploadScheduler.java
+|   |               |   |   `-- NotificationDeleteScheduler.java
+|   |               |   `-- util
+|   |               |       |-- CursorPageResponseDto.java
+|   |               |       `-- S3Service.java
+|   |               |-- domain
+|   |               |   |-- activity
+|   |               |   |   |-- UserActivityController.java
+|   |               |   |   |-- UserActivityDocument.java
+|   |               |   |   |-- UserActivityDto.java
+|   |               |   |   |-- UserActivityMongoRepository.java
+|   |               |   |   |-- UserActivityQueryRepository.java
+|   |               |   |   |-- UserActivityService.java
+|   |               |   |   `-- exception
+|   |               |   |       `-- UserActivityNotFoundException.java
+|   |               |   |-- article
+|   |               |   |   |-- Article.java
+|   |               |   |   |-- ArticleController.java
+|   |               |   |   |-- ArticleService.java
+|   |               |   |   |-- api
+|   |               |   |   |   |-- ArticleApiClient.java
+|   |               |   |   |   |-- ArticleApiDto.java
+|   |               |   |   |   |-- chosun
+|   |               |   |   |   |   |-- ChosunArticleClient.java
+|   |               |   |   |   |   `-- ChosunArticleResponse.java
+|   |               |   |   |   |-- hankyung
+|   |               |   |   |   |   |-- HankyungArticleClient.java
+|   |               |   |   |   |   `-- HankyungArticleResponse.java
+|   |               |   |   |   `-- naver
+|   |               |   |   |       |-- NaverArticleClient.java
+|   |               |   |   |       `-- NaverArticleResponse.java
+|   |               |   |   |-- articleinterest
+|   |               |   |   |   |-- ArticleInterest.java
+|   |               |   |   |   `-- ArticleInterestRepository.java
+|   |               |   |   |-- articleview
+|   |               |   |   |   |-- ArticleView.java
+|   |               |   |   |   `-- ArticleViewRepository.java
+|   |               |   |   |-- dto
+|   |               |   |   |   |-- ArticleCondition.java
+|   |               |   |   |   |-- ArticleDto.java
+|   |               |   |   |   |-- ArticleRestoreResultDto.java
+|   |               |   |   |   |-- ArticleSortDirection.java
+|   |               |   |   |   `-- ArticleViewDto.java
+|   |               |   |   |-- exception
+|   |               |   |   |   |-- ArticleNotFoundException.java
+|   |               |   |   |   `-- ArticleViewAlreadyExistException.java
+|   |               |   |   `-- repository
+|   |               |   |       |-- ArticleRepository.java
+|   |               |   |       |-- ArticleRepositoryCustom.java
+|   |               |   |       `-- ArticleRepositoryImpl.java
+|   |               |   |-- comment
+|   |               |   |   |-- Comment.java
+|   |               |   |   |-- CommentController.java
+|   |               |   |   |-- CommentService.java
+|   |               |   |   |-- dto
+|   |               |   |   |   |-- CommentActivityDto.java
+|   |               |   |   |   |-- CommentCondition.java
+|   |               |   |   |   |-- CommentDto.java
+|   |               |   |   |   |-- CommentLikeActivityDto.java
+|   |               |   |   |   |-- CommentLikeDto.java
+|   |               |   |   |   `-- request
+|   |               |   |   |       |-- CommentRegisterRequest.java
+|   |               |   |   |       `-- CommentUpdateRequest.java
+|   |               |   |   |-- exception
+|   |               |   |   |   |-- CommentNotFoundException.java
+|   |               |   |   |   |-- CommentNotOwnedException.java
+|   |               |   |   |   `-- LikeAlreadyExistException.java
+|   |               |   |   |-- like
+|   |               |   |   |   |-- Like.java
+|   |               |   |   |   `-- LikeRepository.java
+|   |               |   |   `-- repository
+|   |               |   |       |-- CommentRepository.java
+|   |               |   |       |-- CommentRepositoryCustom.java
+|   |               |   |       `-- CommentRepositoryImpl.java
+|   |               |   |-- interest
+|   |               |   |   |-- Interest.java
+|   |               |   |   |-- InterestController.java
+|   |               |   |   |-- InterestService.java
+|   |               |   |   |-- dto
+|   |               |   |   |   |-- InterestCreateRequest.java
+|   |               |   |   |   |-- InterestDto.java
+|   |               |   |   |   |-- InterestSearchRequest.java
+|   |               |   |   |   |-- InterestSubscriptionInfoDto.java
+|   |               |   |   |   `-- InterestUpdateRequest.java
+|   |               |   |   |-- exception
+|   |               |   |   |   |-- EmptyKeywordsException.java
+|   |               |   |   |   |-- InterestAlreadyExistsException.java
+|   |               |   |   |   |-- InterestException.java
+|   |               |   |   |   |-- InterestNotFoundException.java
+|   |               |   |   |   `-- SubscriptionNotFound.java
+|   |               |   |   |-- repository
+|   |               |   |   |   |-- CustomInterestRepository.java
+|   |               |   |   |   |-- CustomInterestRepositoryImpl.java
+|   |               |   |   |   `-- InterestRepository.java
+|   |               |   |   |-- subscription
+|   |               |   |   |   |-- Subscription.java
+|   |               |   |   |   |-- SubscriptionDto.java
+|   |               |   |   |   `-- SubscriptionRepository.java
+|   |               |   |   `-- util
+|   |               |   |       `-- SimilarityCalculator.java
+|   |               |   |-- notification
+|   |               |   |   |-- Notification.java
+|   |               |   |   |-- NotificationController.java
+|   |               |   |   |-- NotificationService.java
+|   |               |   |   |-- ResourceType.java
+|   |               |   |   |-- dto
+|   |               |   |   |   |-- NotificationDto.java
+|   |               |   |   |   |-- NotificationSearchRequest.java
+|   |               |   |   |   `-- UnreadInterestArticleCount.java
+|   |               |   |   |-- exception
+|   |               |   |   |   |-- NotificationException.java
+|   |               |   |   |   `-- NotificationNotFoundException.java
+|   |               |   |   `-- repository
+|   |               |   |       |-- NotificationRepository.java
+|   |               |   |       |-- NotificationRepositoryCustom.java
+|   |               |   |       `-- NotificationRepositoryCustomImpl.java
+|   |               |   `-- user
+|   |               |       |-- User.java
+|   |               |       |-- UserController.java
+|   |               |       |-- UserDto.java
+|   |               |       |-- UserLoginRequest.java
+|   |               |       |-- UserRegisterRequest.java
+|   |               |       |-- UserRepository.java
+|   |               |       |-- UserService.java
+|   |               |       |-- UserUpdateRequest.java
+|   |               |       `-- exception
+|   |               |           |-- EmailAlreadyExistsException.java
+|   |               |           |-- InvalidCredentialsException.java
+|   |               |           |-- UserAlreadyDeletedException.java
+|   |               |           |-- UserException.java
+|   |               |           `-- UserNotFoundException.java
+|   |               `-- global
+|   |                   |-- config
+|   |                   |   |-- AppConfig.java
+|   |                   |   |-- QueryDSLConfig.java
+|   |                   |   |-- RestClientConfig.java
+|   |                   |   |-- S3Config.java
+|   |                   |   `-- S3ConfigProperties.java
+|   |                   `-- error
+|   |                       |-- ErrorCode.java
+|   |                       |-- ErrorResponse.java
+|   |                       |-- GlobalExceptionHandler.java
+|   |                       `-- MonewException.java
+|   `-- resources
+|       |-- application-dev.yaml
+|       |-- application-prod.yaml
+|       |-- application.yaml
+|       |-- logback-spring.xml
+|       |-- schema.sql
+|       |-- seed.sql
+|       `-- static
+|           |-- assets
+|           |   |-- index-D30UMZL2.css
+|           |   `-- index-DF13B-h9.js
+|           |-- favicon.ico
+|           `-- index.html
+`-- test
+    |-- java
+    |   `-- com
+    |       `-- sprint
+    |           `-- monew
+    |               |-- MonewApplicationTests.java
+    |               |-- MongoContainer.java
+    |               |-- PostgresContainer.java
+    |               |-- common
+    |               |   |-- batch
+    |               |   |   |-- InterestContainerTest.java
+    |               |   |   `-- config
+    |               |   |       `-- BatchTestConfig.java
+    |               |   |-- config
+    |               |   |   `-- TestQuerydslConfig.java
+    |               |   |-- scheduler
+    |               |   |   |-- ArticleCollectSchedulerTest.java
+    |               |   |   `-- LogUploadSchedulerTest.java
+    |               |   `-- util
+    |               |       `-- SimilarityCalculatorTest.java
+    |               |-- domain
+    |               |   |-- activity
+    |               |   |   |-- UserActivityMVCIntegrationTest.java
+    |               |   |   `-- UserActivityQueryRepositoryTest.java
+    |               |   |-- article
+    |               |   |   `-- ArticleIntegrationTest.java
+    |               |   |-- comment
+    |               |   |   `-- CommentRepositoryTest.java
+    |               |   |-- interest
+    |               |   |   |-- InterestIntegrationTest.java
+    |               |   |   |-- InterestRepositoryTest.java
+    |               |   |   `-- InterestServiceTest.java
+    |               |   |-- notification
+    |               |   |   |-- NotificationIntegrationTest.java
+    |               |   |   |-- NotificationRepositoryTest.java
+    |               |   |   |-- NotificationServiceTest.java
+    |               |   |   `-- TestUnreadInterestArticleCount.java
+    |               |   `-- user
+    |               |       |-- UserControllerTest.java
+    |               |       |-- UserRepositoryTest.java
+    |               |       `-- UserServiceTest.java
+    |               `-- integration
+    |                   |-- UserActivityIntegrationTest.java
+    |                   `-- UserIntegrationTest.java
+    `-- resources
+        |-- application-test.yaml
+        |-- db
+        |   `-- migration
+        |       `-- V1__init_schema.sql
+        |-- schema-batch-test.sql
+        `-- seed-test.sql
+
+80 directories, 184 files
+
+
+
 ```
 
 ---
@@ -98,4 +349,7 @@
 ---
 
 ## **프로젝트 회고록**
+
+### https://www.notion.so/1f1a788b97e080c8b731f1f890150a12?pvs=4 
+
 
