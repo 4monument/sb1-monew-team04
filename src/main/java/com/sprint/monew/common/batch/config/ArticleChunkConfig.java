@@ -80,7 +80,11 @@ public class ArticleChunkConfig {
   public ItemProcessor<ArticleApiDto, ArticleWithInterestList> restoreArticleProcessor(
       InterestContainer interests) {
     return articleApiDto -> {
-      ArticleApiDto unEscapedArticleApiDto = ArticleApiDto.unEscapedArticleApiDto(articleApiDto);
+      ArticleApiDto filteredDto = interests.filter(articleApiDto);
+      if (filteredDto == null) {
+        return null;
+      }
+      ArticleApiDto unEscapedArticleApiDto = ArticleApiDto.unEscapedArticleApiDto(filteredDto);
       return interests.toArticleWithRelevantInterests(unEscapedArticleApiDto);
     };
   }
