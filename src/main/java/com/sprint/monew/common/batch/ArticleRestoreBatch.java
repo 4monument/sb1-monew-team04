@@ -160,6 +160,8 @@ public class ArticleRestoreBatch {
   public ResourceAwareItemReaderItemStream<ArticleApiDto> csvReader() {
     String[] fieldNames = new String[]{"source", "sourceUrl", "title", "publishDate", "summary"};
     return new FlatFileItemReaderBuilder<ArticleApiDto>()
+        .name("csvReader")
+        .linesToSkip(1)
         .delimited()
         .delimiter(",")
         .quoteCharacter('\"')
@@ -205,7 +207,8 @@ public class ArticleRestoreBatch {
     List<Resource> resources = new ArrayList<>();
     for (S3Object s3Object : s3Objects) {
       String location = "s3://" + s3Properties.bucket() + "/" + s3Object.key();
-      resources.add(resourceLoader.getResource(location));
+      Resource resource = resourceLoader.getResource(location);
+      resources.add(resource);
     }
     return resources;
   }
@@ -223,5 +226,5 @@ public class ArticleRestoreBatch {
     }
     return s3Objects;
   }
-
 }
+

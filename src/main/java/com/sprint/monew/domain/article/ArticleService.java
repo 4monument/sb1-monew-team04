@@ -114,7 +114,7 @@ public class ArticleService {
       throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
 
     JobParameters jobParameters = new JobParametersBuilder()
-        .addLocalDate("backupDay", LocalDate.now())
+        .addLong("time", System.currentTimeMillis())
         .addString("from", from.toString())
         .addString("to", to.toString())
         .toJobParameters();
